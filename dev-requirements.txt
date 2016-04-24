@@ -1,0 +1,14 @@
+# Task running
+invoke
+
+# Testing
+pytest
+
+# Docs
+Sphinx>=1.2.2
+
+# Distribution
+twine
+
+# Linting
+flake8
