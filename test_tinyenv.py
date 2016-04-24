@@ -2,6 +2,7 @@ from decimal import Decimal
 import datetime as dt
 
 import pytest
+from marshmallow import fields
 
 import tinyenv
 
@@ -94,7 +95,58 @@ class TestCasting:
         set_env({'DTIME': dtime.isoformat()})
         assert env.datetime('DTIME') == dtime
 
-class CustomTypes:
+    def test_date_cast(self, set_env, env):
+        assert 0, 'todo'
 
-    def test_defining_simple_type(self):
-        pass
+class TestCustomTypes:
+
+    def test_parser_for(self, set_env, env):
+        @env.parser_for('url')
+        def url(value):
+            return 'https://' + value
+        set_env({'URL': 'test.test/'})
+        assert env.url('URL') == 'https://test.test/'
+
+        with pytest.raises(tinyenv.EnvError) as excinfo:
+            env.url('NOT_SET')
+        assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
+
+    def test_parser_for_field(self, set_env, env):
+        class MyURL(fields.Field):
+            def _deserialize(self, value, *args, **kwargs):
+                return 'https://' + value
+
+        env.parser_from_field('url', MyURL)
+
+        set_env({'URL': 'test.test/'})
+        assert env.url('URL') == 'https://test.test/'
+
+        with pytest.raises(tinyenv.EnvError) as excinfo:
+            env.url('NOT_SET')
+        assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
+
+class TestDumping:
+    def test_dump(self, set_env, env):
+        dtime = dt.datetime.utcnow()
+        set_env({'STR': 'foo', 'INT': '42', 'DTIME': dtime.isoformat()})
+
+        env.str('STR')
+        env.int('INT')
+        env.datetime('DTIME')
+
+        result = env.dump()
+        assert result['STR'] == 'foo'
+        assert result['INT'] == 42
+        assert 'DTIME' in result
+        assert type(result['DTIME']) is str
+
+    def test_env_with_custom_parser(self, set_env, env):
+        @env.parser_for('url')
+        def url(value):
+            return 'https://' + value
+
+        set_env({'URL': 'test.test'})
+
+        env.url('URL')
+
+        assert env.dump() == {'URL': 'https://test.test'}
