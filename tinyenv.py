@@ -11,7 +11,7 @@ __all__ = ['EnvError', 'Env']
 class EnvError(Exception):
     pass
 
-def field2parser(field_or_factory, name, preprocess=None):
+def _field2parser(field_or_factory, name, preprocess=None):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
         missing = kwargs.pop('missing', None) or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
@@ -35,7 +35,7 @@ def field2parser(field_or_factory, name, preprocess=None):
     method.__name__ = name
     return method
 
-def func2parser(func, name):
+def _func2parser(func, name):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
         raw_value = os.environ.get(name, default)
         if raw_value is ma.missing:
@@ -74,18 +74,19 @@ def _preprocess_json(value, **kwargs):
     return pyjson.loads(value)
 
 class Env(object):
+    """An environment variable reader."""
     __parser_map__ = dict(
-        get=field2parser(ma.fields.Field, 'get'),
-        str=field2parser(ma.fields.Str, 'str'),
-        int=field2parser(ma.fields.Int, 'int'),
-        float=field2parser(ma.fields.Float, 'float'),
-        bool=field2parser(ma.fields.Bool, 'bool'),
-        decimal=field2parser(ma.fields.Decimal, 'decimal'),
-        list=field2parser(_make_list_field, 'list', preprocess=_preprocess_list),
-        dict=field2parser(ma.fields.Dict, 'dict', preprocess=_preprocess_dict),
-        json=field2parser(ma.fields.Field, 'json', preprocess=_preprocess_json),
-        datetime=field2parser(ma.fields.DateTime, 'datetime'),
-        date=field2parser(ma.fields.DateTime, 'date'),
+        get=_field2parser(ma.fields.Field, 'get'),
+        str=_field2parser(ma.fields.Str, 'str'),
+        int=_field2parser(ma.fields.Int, 'int'),
+        float=_field2parser(ma.fields.Float, 'float'),
+        bool=_field2parser(ma.fields.Bool, 'bool'),
+        decimal=_field2parser(ma.fields.Decimal, 'decimal'),
+        list=_field2parser(_make_list_field, 'list', preprocess=_preprocess_list),
+        dict=_field2parser(ma.fields.Dict, 'dict', preprocess=_preprocess_dict),
+        json=_field2parser(ma.fields.Field, 'json', preprocess=_preprocess_json),
+        datetime=_field2parser(ma.fields.DateTime, 'datetime'),
+        date=_field2parser(ma.fields.DateTime, 'date'),
     )
     __call__ = __parser_map__['get']
 
@@ -112,13 +113,13 @@ class Env(object):
             env.url('MY_URL')
         """
         def decorator(func):
-            self.__parser_map__[name] = func2parser(func, name=name)
+            self.__parser_map__[name] = _func2parser(func, name=name)
             return func
         return decorator
 
     def parser_from_field(self, name, field_cls):
         """Decorator that registers a new parser function given a marshmallow ``Field``."""
-        self.__parser_map__[name] = field2parser(field_cls, name)
+        self.__parser_map__[name] = _field2parser(field_cls, name)
 
     def dump(self):
         """Dump parsed environment variables to a dictionary of simple data types (numbers
