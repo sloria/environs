@@ -4,7 +4,7 @@ import datetime as dt
 import pytest
 from marshmallow import fields
 
-import tinyenv
+import envargs
 
 @pytest.fixture
 def set_env(monkeypatch):
@@ -16,7 +16,7 @@ def set_env(monkeypatch):
 
 @pytest.fixture
 def env():
-    return tinyenv.Env()
+    return envargs.Env()
 
 
 class TestCasting:
@@ -45,7 +45,7 @@ class TestCasting:
 
     def test_invalid_int(self, set_env, env):
         set_env({'INT': 'invalid'})
-        with pytest.raises(tinyenv.EnvError) as excinfo:
+        with pytest.raises(envargs.EnvError) as excinfo:
             env.int('INT') == 42
         assert 'Environment variable "INT" invalid' in excinfo.value.args[0]
 
@@ -88,7 +88,7 @@ class TestCasting:
         assert env.decimal('DECIMAL') == Decimal('12.34')
 
     def test_missing_raises_error(self, env):
-        with pytest.raises(tinyenv.EnvError) as exc:
+        with pytest.raises(envargs.EnvError) as exc:
             env.str('FOO')
         assert exc.value.args[0] == 'Environment variable "FOO" not set'
 
@@ -121,7 +121,7 @@ class TestCustomTypes:
 
         env.add_parser('url', url)
         assert env.url('URL') == 'https://test.test/'
-        with pytest.raises(tinyenv.EnvError) as excinfo:
+        with pytest.raises(envargs.EnvError) as excinfo:
             env.url('NOT_SET')
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 
@@ -135,7 +135,7 @@ class TestCustomTypes:
             return 'https://' + value
         assert env.url('URL') == 'https://test.test/'
 
-        with pytest.raises(tinyenv.EnvError) as excinfo:
+        with pytest.raises(envargs.EnvError) as excinfo:
             env.url('NOT_SET')
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 
@@ -151,7 +151,7 @@ class TestCustomTypes:
         set_env({'URL': 'test.test/'})
         assert env.url('URL') == 'https://test.test/'
 
-        with pytest.raises(tinyenv.EnvError) as excinfo:
+        with pytest.raises(envargs.EnvError) as excinfo:
             env.url('NOT_SET')
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 

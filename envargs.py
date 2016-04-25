@@ -113,7 +113,8 @@ class Env(object):
 
     def __getattr__(self, name, **kwargs):
         try:
-            return functools.partial(self.__parser_map__[name], self)
+            partial = functools.partial(self.__parser_map__[name], self)
+            return partial
         except KeyError:
             raise AttributeError('{} has not attribute {}'.format(self, name))
 

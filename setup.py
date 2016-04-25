@@ -34,7 +34,7 @@ def find_version(fname):
         raise RuntimeError('Cannot find version information')
     return version
 
-__version__ = find_version('tinyenv.py')
+__version__ = find_version('envargs.py')
 
 
 def read(fname):
@@ -43,14 +43,14 @@ def read(fname):
     return content
 
 setup(
-    name='tinyenv',
+    name='envargs',
     version=__version__,
     description=('simplified environment variable parsing'),
     long_description=(read('README.rst') + '\n\n' +
                         read('CHANGELOG.rst')),
     author='Steven Loria',
     author_email='sloria1@gmail.com',
-    url='https://github.com/sloria/tinyenv',
+    url='https://github.com/sloria/envargs',
     install_requires=['marshmallow'],
     license='MIT',
     zip_safe=False,
@@ -68,7 +68,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    py_modules=['tinyenv'],
+    py_modules=['envargs'],
     tests_require=TESTS_REQUIRE,
     cmdclass={'test': PyTest}
 )
