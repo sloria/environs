@@ -166,6 +166,15 @@ class TestDumping:
 
         assert env.dump() == {'URL': 'https://test.test'}
 
+def test_repr(set_env, env):
+    set_env({'FOO': 'foo', 'BAR': 42})
+    env.str('FOO')
+    assert repr(env) == '<Env {}>'.format({'FOO': 'foo'})
+
+def test_str(set_env, env):
+    set_env({'FOO': 'foo', 'BAR': 42})
+    env.str('FOO')
+    assert str(env) == str({'FOO': 'foo'})
 
 class TestPrefix:
 
