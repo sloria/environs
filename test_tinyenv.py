@@ -165,3 +165,23 @@ class TestDumping:
         env.url('URL')
 
         assert env.dump() == {'URL': 'https://test.test'}
+
+
+class TestPrefix:
+
+    @pytest.fixture(autouse=True)
+    def default_environ(self, set_env):
+        set_env({'APP_STR': 'foo', 'APP_INT': '42'})
+
+    def test_prefixed(self, env):
+        with env.prefixed('APP_'):
+            assert env.str('STR') == 'foo'
+            assert env.int('INT') == 42
+            assert env('NOT_FOUND', 'mydefault') == 'mydefault'
+
+    def test_dump_with_prefixed(self, env):
+        with env.prefixed('APP_'):
+            env.str('STR') == 'foo'
+            env.int('INT') == 42
+            env('NOT_FOUND', 'mydefault') == 'mydefault'
+        assert env.dump() == {'APP_STR': 'foo', 'APP_INT': 42, 'APP_NOT_FOUND': 'mydefault'}

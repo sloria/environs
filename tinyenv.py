@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-import os
+import contextlib
 import functools
 import json as pyjson
+import os
 
 import marshmallow as ma
 
@@ -13,6 +14,7 @@ class EnvError(Exception):
 
 def _field2method(field_or_factory, method_name, preprocess=None):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
+        name = self._prefix + name if self._prefix else name
         missing = kwargs.pop('missing', None) or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
             field = field_or_factory(missing=missing, **kwargs)
@@ -37,6 +39,7 @@ def _field2method(field_or_factory, method_name, preprocess=None):
 
 def _func2method(func, method_name):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
+        name = self._prefix + name if self._prefix else name
         raw_value = os.environ.get(name, default)
         if raw_value is ma.missing:
             raise EnvError('Environment variable "{}" not set'.format(name))
@@ -47,7 +50,7 @@ def _func2method(func, method_name):
     method.__name__ = method_name
     return method
 
-def dict2schema(argmap, instance=False, **kwargs):
+def _dict2schema(argmap, instance=False, **kwargs):
     """Generate a `marshmallow.Schema` class given a dictionary of fields.
     """
     class Meta(object):
@@ -66,9 +69,9 @@ def _preprocess_list(value, **kwargs):
 
 def _preprocess_dict(value, **kwargs):
     subcast = kwargs.get('subcast')
-    return {k.strip(): subcast(v.strip()) if subcast else v.strip()
-                for k, v in (i.split('=')
-                for i in value.split(',') if value)}
+    return {key.strip(): subcast(val.strip()) if subcast else val.strip()
+            for key, val in (item.split('=')
+            for item in value.split(',') if value)}
 
 def _preprocess_json(value, **kwargs):
     return pyjson.loads(value)
@@ -93,6 +96,14 @@ class Env(object):
     def __init__(self):
         self._fields = {}
         self._values = {}
+        self._prefix = None
+
+    @contextlib.contextmanager
+    def prefixed(self, prefix):
+        """Context manager for parsing envvars with a common prefix."""
+        self._prefix = prefix
+        yield
+        self._prefix = None
 
     def __getattr__(self, name, **kwargs):
         try:
@@ -113,17 +124,17 @@ class Env(object):
             env.url('MY_URL')
         """
         def decorator(func):
-            self.__parser_map__[name] = _func2method(func, name=name)
+            self.__parser_map__[name] = _func2method(func, method_name=name)
             return func
         return decorator
 
     def parser_from_field(self, name, field_cls):
         """Decorator that registers a new parser function given a marshmallow ``Field``."""
-        self.__parser_map__[name] = _field2method(field_cls, name)
+        self.__parser_map__[name] = _field2method(field_cls, method_name=name)
 
     def dump(self):
         """Dump parsed environment variables to a dictionary of simple data types (numbers
         and strings).
         """
-        schema = dict2schema(self._fields, instance=True)
+        schema = _dict2schema(self._fields, instance=True)
         return schema.dump(self._values).data
