@@ -117,20 +117,19 @@ class Env(object):
         except KeyError:
             raise AttributeError('{} has not attribute {}'.format(self, name))
 
+    def add_parser(self, name, func):
+        """Register a new parser method with the name ``name``. ``func`` must
+        receive the input value for an environment variable.
+        """
+        self.__parser_map__[name] = _func2method(func, method_name=name)
+        return None
+
     def parser_for(self, name):
         """Decorator that registers a new parser method with the name ``name``.
         The decorated function must receive the input value for an environment variable.
-
-        Example: ::
-
-            @env.parser_for('url')
-            def url(value):
-                return urlparse.urlparse(value)
-
-            env.url('MY_URL')
         """
         def decorator(func):
-            self.__parser_map__[name] = _func2method(func, method_name=name)
+            self.add_parser(name, func)
             return func
         return decorator
 

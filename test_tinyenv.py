@@ -113,11 +113,26 @@ class TestCasting:
 
 class TestCustomTypes:
 
+    def test_add_parser(self, set_env, env):
+        set_env({'URL': 'test.test/'})
+
+        def url(value):
+            return 'https://' + value
+
+        env.add_parser('url', url)
+        assert env.url('URL') == 'https://test.test/'
+        with pytest.raises(tinyenv.EnvError) as excinfo:
+            env.url('NOT_SET')
+        assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
+
+        assert env.url('NOT_SET', 'default.test/') == 'https://default.test/'
+
     def test_parser_for(self, set_env, env):
+        set_env({'URL': 'test.test/'})
+
         @env.parser_for('url')
         def url(value):
             return 'https://' + value
-        set_env({'URL': 'test.test/'})
         assert env.url('URL') == 'https://test.test/'
 
         with pytest.raises(tinyenv.EnvError) as excinfo:
