@@ -3,6 +3,7 @@ invoke
 
 # Testing
 pytest
+tox
 
 # Docs
 Sphinx>=1.2.2
