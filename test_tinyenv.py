@@ -107,9 +107,9 @@ class TestCasting:
         assert env.datetime('DTIME') == dtime
 
     def test_date_cast(self, set_env, env):
-        date = dt.datetime.today()
+        date = dt.date.today()
         set_env({'DATE': date.isoformat()})
-        assert env.datetime('DATE') == date
+        assert env.date('DATE') == date
 
 class TestCustomTypes:
 

@@ -89,7 +89,7 @@ class Env(object):
         dict=_field2method(ma.fields.Dict, 'dict', preprocess=_preprocess_dict),
         json=_field2method(ma.fields.Field, 'json', preprocess=_preprocess_json),
         datetime=_field2method(ma.fields.DateTime, 'datetime'),
-        date=_field2method(ma.fields.DateTime, 'date'),
+        date=_field2method(ma.fields.Date, 'date'),
     )
     __call__ = __parser_map__['get']
 
