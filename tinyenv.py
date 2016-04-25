@@ -36,8 +36,8 @@ def field2parser(field_or_factory, name, preprocess=None):
     return method
 
 def func2parser(func, name):
-    def method(self, name, subcast=None, **kwargs):
-        raw_value = os.environ.get(name, ma.missing)
+    def method(self, name, default=ma.missing, subcast=None, **kwargs):
+        raw_value = os.environ.get(name, default)
         if raw_value is ma.missing:
             raise EnvError('Environment variable "{}" not set'.format(name))
         value = func(raw_value)

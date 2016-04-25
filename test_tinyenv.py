@@ -26,6 +26,10 @@ class TestCasting:
         assert env.get('STR') == 'foo'
         assert env.get('INT') == '42'
 
+    def test_get_with_default(self, env):
+        assert env.get('NOT_SET', default='mydefault') == 'mydefault'
+        assert env.get('NOT_SET', 'mydefault') == 'mydefault'
+
     def test_basic(self, set_env, env):
         set_env({'STR': 'foo'})
         assert env.str('STR') == 'foo'
@@ -50,7 +54,7 @@ class TestCasting:
 
     def test_list_with_subcast(self, set_env, env):
         set_env({'LIST': '1,2,3'})
-        assert env.list('LIST', int) == [1, 2, 3]
+        assert env.list('LIST', subcast=int) == [1, 2, 3]
         assert env.list('LIST', subcast=float) == [1.0, 2.0, 3.0]
 
     def test_bool(self, set_env, env):
@@ -64,7 +68,7 @@ class TestCasting:
 
     def test_list_with_spaces(self, set_env, env):
         set_env({'LIST': ' 1,  2,3'})
-        assert env.list('LIST', int) == [1, 2, 3]
+        assert env.list('LIST', subcast=int) == [1, 2, 3]
 
     def test_dict(self, set_env, env):
         set_env({'DICT': 'key1=1,key2=2'})
@@ -72,7 +76,7 @@ class TestCasting:
 
     def test_dict_with_subcast(self, set_env, env):
         set_env({'DICT': 'key1=1,key2=2'})
-        assert env.dict('DICT', int) == {'key1': 1, 'key2': 2}
+        assert env.dict('DICT', subcast=int) == {'key1': 1, 'key2': 2}
 
     def test_decimat_cast(self, set_env, env):
         set_env({'DECIMAL': '12.34'})
@@ -114,6 +118,8 @@ class TestCustomTypes:
         with pytest.raises(tinyenv.EnvError) as excinfo:
             env.url('NOT_SET')
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
+
+        assert env.url('NOT_SET', 'default.test/') == 'https://default.test/'
 
     def test_parser_for_field(self, set_env, env):
         class MyURL(fields.Field):
