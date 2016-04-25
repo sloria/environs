@@ -6,9 +6,10 @@ envargs: simplified environment variable parsing
 ..     :target: http://badge.fury.io/py/envargs
 ..     :alt: Latest version
 ..
-.. .. image:: https://travis-ci.org/sloria/envargs.svg?branch=master
-..     :target: https://travis-ci.org/sloria/envargs
-..     :alt: Travis-CI
+
+.. image:: https://travis-ci.org/sloria/envargs.svg?branch=master
+    :target: https://travis-ci.org/sloria/envargs
+    :alt: Travis-CI
 
 
 Envargs is a Python library for parsing environment variables.
