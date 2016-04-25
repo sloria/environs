@@ -12,11 +12,12 @@ class EnvError(Exception):
     pass
 
 def field2parser(field_or_factory, name, preprocess=None):
-    def method(self, name, subcast=None, **kwargs):
+    def method(self, name, default=ma.missing, subcast=None, **kwargs):
+        missing = kwargs.pop('missing', None) or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
-            field = field_or_factory(**kwargs)
+            field = field_or_factory(missing=missing, **kwargs)
         else:
-            field = field_or_factory(subcast=subcast, **kwargs)
+            field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
         self._fields[name] = field
         raw_value = os.environ.get(name, ma.missing)
         if raw_value is ma.missing and field.missing is ma.missing:

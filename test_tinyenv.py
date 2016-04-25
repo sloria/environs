@@ -85,6 +85,8 @@ class TestCasting:
 
     def test_default_set(self, env):
         assert env.str('FOO', missing='foo') == 'foo'
+        # Passed positionally
+        assert env.str('FOO', 'foo') == 'foo'
 
     def test_json_cast(self, set_env, env):
         set_env({'JSON': '{"foo": "bar", "baz": [1, 2, 3]}'})
