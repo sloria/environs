@@ -87,6 +87,7 @@ class Env(object):
         datetime=field2parser(ma.fields.DateTime, 'datetime'),
         date=field2parser(ma.fields.DateTime, 'date'),
     )
+    __call__ = __parser_map__['get']
 
     def __init__(self):
         self._fields = {}
@@ -120,5 +121,8 @@ class Env(object):
         self.__parser_map__[name] = field2parser(field_cls, name)
 
     def dump(self):
+        """Dump parsed environment variables to a dictionary of simple data types (numbers
+        and strings).
+        """
         schema = dict2schema(self._fields, instance=True)
         return schema.dump(self._values).data

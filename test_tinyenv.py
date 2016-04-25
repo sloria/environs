@@ -30,6 +30,11 @@ class TestCasting:
         assert env.get('NOT_SET', default='mydefault') == 'mydefault'
         assert env.get('NOT_SET', 'mydefault') == 'mydefault'
 
+    def test_call_is_same_as_get(self, set_env, env):
+        set_env({'STR': 'foo', 'INT': '42'})
+        assert env('STR') == 'foo'
+        assert env('NOT_SET', 'mydefault') == 'mydefault'
+
     def test_basic(self, set_env, env):
         set_env({'STR': 'foo'})
         assert env.str('STR') == 'foo'
