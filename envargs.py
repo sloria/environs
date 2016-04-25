@@ -34,7 +34,7 @@ def _field2method(field_or_factory, method_name, preprocess=None):
         else:
             self._values[name] = value
             return value
-    method.__name__ = method_name
+    method.__name__ = str(method_name)
     return method
 
 def _func2method(func, method_name):
@@ -47,7 +47,7 @@ def _func2method(func, method_name):
         self._fields[name] = ma.fields.Field(**kwargs)
         self._values[name] = value
         return value
-    method.__name__ = method_name
+    method.__name__ = str(method_name)
     return method
 
 def _dict2schema(argmap, instance=False, **kwargs):

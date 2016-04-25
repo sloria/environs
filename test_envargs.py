@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from decimal import Decimal
 import datetime as dt
 
@@ -104,7 +106,11 @@ class TestCasting:
     def test_datetime_cast(self, set_env, env):
         dtime = dt.datetime.utcnow()
         set_env({'DTIME': dtime.isoformat()})
-        assert env.datetime('DTIME') == dtime
+        result = env.datetime('DTIME')
+        assert type(result) is dt.datetime
+        assert result.year == dtime.year
+        assert result.month == dtime.month
+        assert result.day == dtime.day
 
     def test_date_cast(self, set_env, env):
         date = dt.date.today()

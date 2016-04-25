@@ -34,12 +34,15 @@ Basic usage
     env = Env()
     # reading an environment variable
     gh_user = env('GITHUB_USER')  # => 'sloria'
+
     # casting
     api_key = env.str('API_KEY')  # => '123abc'
     date = env.date('SHIP_DATE')  # => datetime.date(1984, 6, 25)
+
     # providing a default value
     enable_login = env.bool('ENABLE_LOGIN', False)  # => True
     enable_feature_x = env.bool('ENABLE_FEATURE_X', False)  # => False
+
     # parsing lists
     gh_repos = env.list('GITHUB_REPOS')  # => ['webargs', 'konch', 'ped']
     coords = env.list('COORDINATES', subcast=float)  # => [23.3, 50.0]
