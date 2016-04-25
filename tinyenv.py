@@ -84,6 +84,7 @@ class Env(object):
         dict=field2parser(ma.fields.Dict, 'dict', preprocess=_preprocess_dict),
         json=field2parser(ma.fields.Field, 'json', preprocess=_preprocess_json),
         datetime=field2parser(ma.fields.DateTime, 'datetime'),
+        date=field2parser(ma.fields.DateTime, 'date'),
     )
 
     def __init__(self):
