@@ -15,26 +15,6 @@ Environs is a Python library for parsing environment variables.
 
 Environs is inspired by `envparse <https://github.com/rconradharris/envparse>`_ and uses `marshmallow <https://github.com/marshmallow-code/marshmallow>`_ under the hood for validating, deserializing, and serializing values.
 
-Why envvars?
-------------
-
-See `The 12-factor App <http://12factor.net/config>`_ section on `configuration <http://12factor.net/config>`_.
-
-Why not ``os.environ``?
----------------------------
-
-While ``os.environ`` is enough for simple use cases, a typical application will need a way to manipulate and validate raw environment variables. Environs abstracts common tasks for handling environment variables.
-
-Environs will help you
-
-* cast envvars to the correct type
-* specify required envvars
-* define default values
-* validate envvars
-* parse strings into lists and dicts
-* parse dates, datetimes, and timedeltas
-* serialize your configuration to JSON, YAML, etc.
-
 Install
 -------
 ::
@@ -202,6 +182,40 @@ Marshmallow integration
 
     static_path = env.path('STATIC_PATH')  # => PosixPath('app/static')
     env.dump()['STATIC_PATH']  # => 'app/static'
+
+FAQ
+---
+
+Why envvars?
+++++++++++++
+
+See `The 12-factor App <http://12factor.net/config>`_ section on `configuration <http://12factor.net/config>`_.
+
+Why not ``os.environ``?
++++++++++++++++++++++++
+
+While ``os.environ`` is enough for simple use cases, a typical application will need a way to manipulate and validate raw environment variables. Environs abstracts common tasks for handling environment variables.
+
+Environs will help you
+
+* cast envvars to the correct type
+* specify required envvars
+* define default values
+* validate envvars
+* parse strings into lists and dicts
+* parse dates, datetimes, and timedeltas
+* serialize your configuration to JSON, YAML, etc.
+
+Why another library?
+++++++++++++++++++++
+
+There are many great Python libraries for parsing environment variables. In fact, most of the credit for environs' public API goes to the authors of `envparse <https://github.com/rconradharris/envparse>`_ and `django-environ <https://github.com/joke2k/django-environ>`_.
+
+environs aims to meet two additional goals:
+
+1. Make it easy to extend parsing behavior and develop plugins.
+2. Leverage the deserialization and validation functionality provided by a separate library (marshmallow).
+
 
 License
 -------
