@@ -2,7 +2,7 @@
 Changelog
 *********
 
-0.1.0 (2016-04-25)
+0.1.0 (unreleased)
 ------------------
 
 * First PyPI release.
