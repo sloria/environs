@@ -5,7 +5,7 @@ from decimal import Decimal
 import datetime as dt
 
 import pytest
-from marshmallow import fields
+from marshmallow import fields, validate
 
 import envargs
 
@@ -126,6 +126,39 @@ class TestCasting:
         uid = uuid.uuid1()
         set_env({'UUID': str(uid)})
         assert env.uuid('UUID') == uid
+
+
+def always_fail(value):
+    raise envargs.EnvError('something went wrong')
+
+class TestValidation:
+
+    def test_can_add_validator(self, set_env, env):
+        set_env({'NUM': 3})
+
+        with pytest.raises(envargs.EnvError) as excinfo:
+            env.int('NUM', validate=lambda n: n > 3)
+        assert 'Invalid value.' in excinfo.value.args[0]
+
+    def test_can_add_marshmallow_validator(self, set_env, env):
+        set_env({'NODE_ENV': 'invalid'})
+        with pytest.raises(envargs.EnvError) as excinfo:
+            env('NODE_ENV', validate=validate.OneOf(['development', 'production']))
+        assert 'Not a valid choice.' in excinfo.value.args[0]
+
+    def test_validator_can_raise_enverror(self, set_env, env):
+        with pytest.raises(envargs.EnvError) as excinfo:
+            env('NODE_ENV', 'development', validate=always_fail)
+        assert 'something went wrong' in excinfo.value.args[0]
+
+    def test_failed_vars_are_not_serialized(self, set_env, env):
+        set_env({'FOO': '42'})
+        try:
+            env('FOO', validate=always_fail)
+        except envargs.EnvError:
+            pass
+        assert 'FOO' not in env.dump()
+
 
 class TestCustomTypes:
 

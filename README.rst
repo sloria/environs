@@ -85,6 +85,35 @@ Handling prefixes
         host = env('HOST', 'localhost')  # => 'lolcathost'
         port = env.int('PORT', 5000)  # => 3000
 
+
+Validation
+----------
+
+.. code-block:: python
+
+    # export TTL=-2
+    # export NODE_ENV='invalid'
+    # export EMAIL='^_^'
+
+
+    # simple validator
+    env.int('TTL', validate=lambda n: n > 0)  # => 'sloria'
+    # => Environment variable "TTL" invalid: ['Invalid value.']
+
+    # using marshmallow validators
+    from marshmallow.validate import OneOf
+
+    env.str('NODE_ENV',
+            validate=OneOf(['production', 'development'],
+                        error='NODE_ENV must be one of: {choices}'))
+    # => Environment variable "NODE_ENV" invalid: ['NODE_ENV must be one of: production, development']
+
+    # multiple validators
+    from marshmallow.validate import Length, Email
+
+    env.str('EMAIL', validate=[Length(min=4), Email()])
+    # => Environment variable "EMAIL" invalid: ['Shorter than minimum length 4.', 'Not a valid email address.']
+
 Serialization
 -------------
 
