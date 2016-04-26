@@ -34,7 +34,7 @@ def find_version(fname):
         raise RuntimeError('Cannot find version information')
     return version
 
-__version__ = find_version('envargs.py')
+__version__ = find_version('environs.py')
 
 
 def read(fname):
@@ -43,14 +43,14 @@ def read(fname):
     return content
 
 setup(
-    name='envargs',
+    name='environs',
     version=__version__,
     description=('simplified environment variable parsing'),
     long_description=(read('README.rst') + '\n\n' +
                         read('CHANGELOG.rst')),
     author='Steven Loria',
     author_email='sloria1@gmail.com',
-    url='https://github.com/sloria/envargs',
+    url='https://github.com/sloria/environs',
     install_requires=['marshmallow'],
     license='MIT',
     zip_safe=False,
@@ -68,7 +68,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    py_modules=['envargs'],
+    py_modules=['environs'],
     tests_require=TESTS_REQUIRE,
     cmdclass={'test': PyTest}
 )

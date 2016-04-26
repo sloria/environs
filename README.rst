@@ -1,31 +1,31 @@
-************************************************
-envargs: simplified environment variable parsing
-************************************************
+*************************************************
+environs: simplified environment variable parsing
+*************************************************
 
-.. image:: https://badge.fury.io/py/envargs.png
-    :target: http://badge.fury.io/py/envargs
+.. image:: https://badge.fury.io/py/environs.png
+    :target: http://badge.fury.io/py/environs
     :alt: Latest version
 
-.. image:: https://travis-ci.org/sloria/envargs.svg?branch=master
-    :target: https://travis-ci.org/sloria/envargs
+.. image:: https://travis-ci.org/sloria/environs.svg?branch=master
+    :target: https://travis-ci.org/sloria/environs
     :alt: Travis-CI
 
 
-Envargs is a Python library for parsing environment variables.
+Environs is a Python library for parsing environment variables.
 
-Envargs is inspired by `envparse <https://github.com/rconradharris/envparse>`_ and uses `marshmallow <https://github.com/marshmallow-code/marshmallow>`_ under the hood for validating, deserializing, and serializing values.
+Environs is inspired by `envparse <https://github.com/rconradharris/envparse>`_ and uses `marshmallow <https://github.com/marshmallow-code/marshmallow>`_ under the hood for validating, deserializing, and serializing values.
 
-Why?
-----
+Why envvars?
+------------
 
 See `The 12-factor App <http://12factor.net/config>`_ section on `configuration <http://12factor.net/config>`_.
 
 Why not ``os.environ``?
 ---------------------------
 
-While ``os.environ`` is enough for simple use cases, a typical application will need a way to manipulate and validate raw environment variables. Envargs abstracts common tasks for handling environment variables.
+While ``os.environ`` is enough for simple use cases, a typical application will need a way to manipulate and validate raw environment variables. Environs abstracts common tasks for handling environment variables.
 
-Envargs will help you
+Environs will help you
 
 * cast envvars to the correct type
 * specify required envvars
@@ -39,7 +39,7 @@ Install
 -------
 ::
 
-    pip install envargs
+    pip install environs
 
 Basic usage
 -----------
@@ -53,7 +53,7 @@ Basic usage
     # export GITHUB_REPOS=webargs,konch,ped
     # export COORDINATES=23.3,50.0
 
-    from envargs import Env
+    from environs import Env
 
     env = Env()
     # reading an environment variable
@@ -172,7 +172,7 @@ Defining custom parser behavior
     @env.parser_for('enum')
     def enum_parser(value, choices):
         if value not in choices:
-            raise envargs.EnvError('Invalid!')
+            raise environs.EnvError('Invalid!')
         return value
 
     color = env.enum('COLOR', choices=['black'])  # => raises EnvError
@@ -206,4 +206,5 @@ Marshmallow integration
 License
 -------
 
-MIT licensed. See the `LICENSE <https://github.com/sloria/envargs/blob/master/LICENSE>`_ file for more details.
+MIT licensed. See the `LICENSE <https://github.com/sloria/environs/blob/master/LICENSE>`_ file for more details.
+

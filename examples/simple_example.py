@@ -1,7 +1,7 @@
 import os
 from pprint import pprint
 
-from envargs import Env
+from environs import Env
 
 
 os.environ['GITHUB_USER'] = 'sloria'

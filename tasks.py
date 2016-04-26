@@ -16,7 +16,7 @@ def flake():
 def clean():
     run("rm -rf build")
     run("rm -rf dist")
-    run("rm -rf envargs.egg-info")
+    run("rm -rf environs.egg-info")
     print("Cleaned up.")
 
 @task

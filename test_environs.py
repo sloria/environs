@@ -7,7 +7,7 @@ import datetime as dt
 import pytest
 from marshmallow import fields, validate
 
-import envargs
+import environs
 
 @pytest.fixture
 def set_env(monkeypatch):
@@ -19,7 +19,7 @@ def set_env(monkeypatch):
 
 @pytest.fixture
 def env():
-    return envargs.Env()
+    return environs.Env()
 
 
 class TestCasting:
@@ -48,7 +48,7 @@ class TestCasting:
 
     def test_invalid_int(self, set_env, env):
         set_env({'INT': 'invalid'})
-        with pytest.raises(envargs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError) as excinfo:
             env.int('INT') == 42
         assert 'Environment variable "INT" invalid' in excinfo.value.args[0]
 
@@ -91,7 +91,7 @@ class TestCasting:
         assert env.decimal('DECIMAL') == Decimal('12.34')
 
     def test_missing_raises_error(self, env):
-        with pytest.raises(envargs.EnvError) as exc:
+        with pytest.raises(environs.EnvError) as exc:
             env.str('FOO')
         assert exc.value.args[0] == 'Environment variable "FOO" not set'
 
@@ -129,25 +129,25 @@ class TestCasting:
 
 
 def always_fail(value):
-    raise envargs.EnvError('something went wrong')
+    raise environs.EnvError('something went wrong')
 
 class TestValidation:
 
     def test_can_add_validator(self, set_env, env):
         set_env({'NUM': 3})
 
-        with pytest.raises(envargs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError) as excinfo:
             env.int('NUM', validate=lambda n: n > 3)
         assert 'Invalid value.' in excinfo.value.args[0]
 
     def test_can_add_marshmallow_validator(self, set_env, env):
         set_env({'NODE_ENV': 'invalid'})
-        with pytest.raises(envargs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError) as excinfo:
             env('NODE_ENV', validate=validate.OneOf(['development', 'production']))
         assert 'Not a valid choice.' in excinfo.value.args[0]
 
     def test_validator_can_raise_enverror(self, set_env, env):
-        with pytest.raises(envargs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError) as excinfo:
             env('NODE_ENV', 'development', validate=always_fail)
         assert 'something went wrong' in excinfo.value.args[0]
 
@@ -155,7 +155,7 @@ class TestValidation:
         set_env({'FOO': '42'})
         try:
             env('FOO', validate=always_fail)
-        except envargs.EnvError:
+        except environs.EnvError:
             pass
         assert 'FOO' not in env.dump()
 
@@ -170,7 +170,7 @@ class TestCustomTypes:
 
         env.add_parser('url', url)
         assert env.url('URL') == 'https://test.test/'
-        with pytest.raises(envargs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError) as excinfo:
             env.url('NOT_SET')
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 
@@ -184,7 +184,7 @@ class TestCustomTypes:
             return 'https://' + value
         assert env.url('URL') == 'https://test.test/'
 
-        with pytest.raises(envargs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError) as excinfo:
             env.url('NOT_SET')
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 
@@ -196,13 +196,13 @@ class TestCustomTypes:
         @env.parser_for('enum')
         def enum_parser(value, choices):
             if value not in choices:
-                raise envargs.EnvError('Invalid!')
+                raise environs.EnvError('Invalid!')
             return value
 
         assert env.enum('ENV', choices=['dev', 'prod']) == 'dev'
 
         set_env({'ENV': 'invalid'})
-        with pytest.raises(envargs.EnvError):
+        with pytest.raises(environs.EnvError):
             env.enum('ENV', choices=['dev', 'prod'])
 
     def test_add_parser_from_field(self, set_env, env):
@@ -215,7 +215,7 @@ class TestCustomTypes:
         set_env({'URL': 'test.test/'})
         assert env.url('URL') == 'https://test.test/'
 
-        with pytest.raises(envargs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError) as excinfo:
             env.url('NOT_SET')
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 

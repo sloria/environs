@@ -1,6 +1,6 @@
 import os
 
-from envargs import Env
+from environs import Env
 
 # Prefixed envvars
 os.environ['CANTEEN_HOST'] = 'lolcathost'

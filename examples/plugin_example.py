@@ -6,7 +6,7 @@ except ImportError:
     import urlparse
 
 from furl import furl as Furl
-from envargs import Env
+from environs import Env
 
 ##### This is the beginning of the plugin code #####
 
@@ -22,7 +22,7 @@ def setup(env):
 
 ##### End of the plugin code #####
 
-os.environ['GITHUB_URL'] = 'https://github.com/sloria/envargs'
+os.environ['GITHUB_URL'] = 'https://github.com/sloria/environs'
 
 # Our application activates the plugin using the setup function
 

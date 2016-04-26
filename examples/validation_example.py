@@ -1,6 +1,6 @@
 import os
 
-from envargs import Env, EnvError
+from environs import Env, EnvError
 from marshmallow.validate import OneOf, Email, Length
 
 
