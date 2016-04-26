@@ -16,11 +16,31 @@ Envargs is a Python library for parsing environment variables.
 
 Envargs is inspired by `envparse <https://github.com/rconradharris/envparse>`_ and uses `marshmallow <https://github.com/marshmallow-code/marshmallow>`_ under the hood for validating, deserializing, and serializing values.
 
-.. Get it now
-.. ----------
-.. ::
-..
-..     pip install envargs
+Why?
+----
+
+See `The 12-factor App <http://12factor.net/config>`_ section on `configuration <http://12factor.net/config>`_.
+
+Why not ``os.environ``?
+---------------------------
+
+While ``os.environ`` is enough for simple use cases, a typical application will need a way to manipulate and validate raw environment variables. Envargs abstracts common tasks for handling environment variables.
+
+Envargs will help you
+
+* cast envvars to the correct type
+* specify required envvars
+* define default values
+* validate envvars
+* parse strings into lists and dicts
+* parse dates, datetimes, and timedeltas
+* serialize your configuration to JSON, YAML, etc.
+
+Install
+-------
+::
+
+    pip install envargs
 
 Basic usage
 -----------
@@ -59,18 +79,18 @@ Supported types
 
 The following are all type-casting methods of  ``Env``:
 
-* ``str``
-* ``bool``
-* ``int``
-* ``float``
-* ``decimal``
-* ``list`` (accepts optional ``subcast`` keyword argument)
-* ``dict`` (accepts optional ``subcast`` keyword argument)
-* ``json``
-* ``datetime``
-* ``date``
-* ``timedelta`` (assumes value is an integer in seconds)
-* ``uuid``
+* ``env.str``
+* ``env.bool``
+* ``env.int``
+* ``env.float``
+* ``env.decimal``
+* ``env.list`` (accepts optional ``subcast`` keyword argument)
+* ``env.dict`` (accepts optional ``subcast`` keyword argument)
+* ``env.json``
+* ``env.datetime``
+* ``env.date``
+* ``env.timedelta`` (assumes value is an integer in seconds)
+* ``env.uuid``
 
 
 Handling prefixes
@@ -97,7 +117,7 @@ Validation
 
 
     # simple validator
-    env.int('TTL', validate=lambda n: n > 0)  # => 'sloria'
+    env.int('TTL', validate=lambda n: n > 0)
     # => Environment variable "TTL" invalid: ['Invalid value.']
 
     # using marshmallow validators
@@ -105,7 +125,7 @@ Validation
 
     env.str('NODE_ENV',
             validate=OneOf(['production', 'development'],
-                        error='NODE_ENV must be one of: {choices}'))
+                            error='NODE_ENV must be one of: {choices}'))
     # => Environment variable "NODE_ENV" invalid: ['NODE_ENV must be one of: production, development']
 
     # multiple validators
@@ -187,4 +207,4 @@ Marshmallow integration
 License
 -------
 
-MIT licensed. See the `LICENSE <https://github.com/sloria/envargs/blob/dev/LICENSE>`_ file for more details.
+MIT licensed. See the `LICENSE <https://github.com/sloria/envargs/blob/master/LICENSE>`_ file for more details.
