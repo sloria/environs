@@ -190,6 +190,21 @@ class TestCustomTypes:
 
         assert env.url('NOT_SET', 'default.test/') == 'https://default.test/'
 
+    def test_parser_function_can_take_extra_arguments(self, set_env, env):
+        set_env({'ENV': 'dev'})
+
+        @env.parser_for('enum')
+        def enum_parser(value, choices):
+            if value not in choices:
+                raise envargs.EnvError('Invalid!')
+            return value
+
+        assert env.enum('ENV', choices=['dev', 'prod']) == 'dev'
+
+        set_env({'ENV': 'invalid'})
+        with pytest.raises(envargs.EnvError):
+            env.enum('ENV', choices=['dev', 'prod'])
+
     def test_parser_for_field(self, set_env, env):
         class MyURL(fields.Field):
             def _deserialize(self, value, *args, **kwargs):

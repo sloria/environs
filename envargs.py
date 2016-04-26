@@ -43,7 +43,7 @@ def _func2method(func, method_name):
         raw_value = os.environ.get(name, default)
         if raw_value is ma.missing:
             raise EnvError('Environment variable "{}" not set'.format(name))
-        value = func(raw_value)
+        value = func(raw_value, **kwargs)
         self._fields[name] = ma.fields.Field(**kwargs)
         self._values[name] = value
         return value
@@ -80,10 +80,10 @@ class Env(object):
     """An environment variable reader."""
     __parser_map__ = dict(
         get=_field2method(ma.fields.Field, 'get'),
+        bool=_field2method(ma.fields.Bool, 'bool'),
         str=_field2method(ma.fields.Str, 'str'),
         int=_field2method(ma.fields.Int, 'int'),
         float=_field2method(ma.fields.Float, 'float'),
-        bool=_field2method(ma.fields.Bool, 'bool'),
         decimal=_field2method(ma.fields.Decimal, 'decimal'),
         list=_field2method(_make_list_field, 'list', preprocess=_preprocess_list),
         dict=_field2method(ma.fields.Dict, 'dict', preprocess=_preprocess_dict),
