@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import uuid
 from decimal import Decimal
 import datetime as dt
 
@@ -116,6 +117,15 @@ class TestCasting:
         date = dt.date.today()
         set_env({'DATE': date.isoformat()})
         assert env.date('DATE') == date
+
+    def test_timedelta_cast(self, set_env, env):
+        set_env({'TIMEDELTA': '42'})
+        assert env.timedelta('TIMEDELTA') == dt.timedelta(seconds=42)
+
+    def test_uuid_cast(self, set_env, env):
+        uid = uuid.uuid1()
+        set_env({'UUID': str(uid)})
+        assert env.uuid('UUID') == uid
 
 class TestCustomTypes:
 

@@ -90,6 +90,8 @@ class Env(object):
         json=_field2method(ma.fields.Field, 'json', preprocess=_preprocess_json),
         datetime=_field2method(ma.fields.DateTime, 'datetime'),
         date=_field2method(ma.fields.Date, 'date'),
+        timedelta=_field2method(ma.fields.TimeDelta, 'timedelta'),
+        uuid=_field2method(ma.fields.UUID, 'uuid'),
     )
     __call__ = __parser_map__['get']
 

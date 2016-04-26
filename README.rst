@@ -14,10 +14,16 @@ envargs: simplified environment variable parsing
 
 Envargs is a Python library for parsing environment variables.
 
-Envargs is inspired by `envparse <https://github.com/rconradharris/envparse>`_ and uses `marshmallow <https://github.com/marshmallow-code/marshmallow>`_ under the hood for deserializing and serializing values.
+Envargs is inspired by `envparse <https://github.com/rconradharris/envparse>`_ and uses `marshmallow <https://github.com/marshmallow-code/marshmallow>`_ under the hood for validating, deserializing, and serializing values.
+
+.. Get it now
+.. ----------
+.. ::
+..
+..     pip install envargs
 
 Basic usage
-===========
+-----------
 
 .. code-block:: python
 
@@ -25,7 +31,6 @@ Basic usage
     # export API_KEY=123abc
     # export SHIP_DATE='1984-06-25'
     # export ENABLE_LOGIN=true
-    # export MAX_CONNECTIONS=42
     # export GITHUB_REPOS=webargs,konch,ped
     # export COORDINATES=23.3,50.0
 
@@ -34,6 +39,7 @@ Basic usage
     env = Env()
     # reading an environment variable
     gh_user = env('GITHUB_USER')  # => 'sloria'
+    secret = env('SECRET')  # => raises error if not set
 
     # casting
     api_key = env.str('API_KEY')  # => '123abc'
@@ -48,8 +54,27 @@ Basic usage
     coords = env.list('COORDINATES', subcast=float)  # => [23.3, 50.0]
 
 
+Supported types
+---------------
+
+The following are all type-casting methods of  ``Env``:
+
+* ``str``
+* ``bool``
+* ``int``
+* ``float``
+* ``decimal``
+* ``list`` (accepts optional ``subcast`` keyword argument)
+* ``dict`` (accepts optional ``subcast`` keyword argument)
+* ``json``
+* ``datetime``
+* ``date`` 
+* ``timedelta`` (assumes value is an integer in seconds)
+* ``uuid``
+
+
 Handling prefixes
-=================
+-----------------
 
 .. code-block:: python
 
@@ -61,7 +86,7 @@ Handling prefixes
         port = env.int('PORT', 5000)  # => 3000
 
 Serialization
-=============
+-------------
 
 .. code-block:: python
 
@@ -78,11 +103,13 @@ Serialization
     # 'SHIP_DATE': '1984-06-25'}
 
 Defining custom parser behavior
-===============================
+-------------------------------
 
 .. code-block:: python
 
     # export DOMAIN='http://myapp.com'
+    # export COLOR=invalid
+
     from furl import furl
 
     # Register a new parser method for paths
@@ -92,11 +119,20 @@ Defining custom parser behavior
 
     domain = env.furl('DOMAIN')  # => furl('https://myapp.com')
 
+
+    # Custom parsers can take extra keyword arguments
+    @env.parser_for('enum')
+    def enum_parser(value, choices):
+        if value not in choices:
+            raise envargs.EnvError('Invalid!')
+        return value
+
+    color = env.enum('COLOR', choices=['black'])  # => raises EnvError
+
 Note: Environment variables parsed with a custom parser function will be serialized by ``Env.dump`` without any modification. To define special serialization behavior, use ``Env.parser_from_field`` instead (see next section).
 
-
 Marshmallow integration
-=======================
+-----------------------
 
 .. code-block:: python
 
@@ -120,6 +156,6 @@ Marshmallow integration
     env.dump()['STATIC_PATH']  # => 'app/static'
 
 License
-=======
+-------
 
 MIT licensed. See the `LICENSE <https://github.com/sloria/envargs/blob/dev/LICENSE>`_ file for more details.
