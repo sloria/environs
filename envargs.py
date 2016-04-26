@@ -98,11 +98,10 @@ class Env(object):
         self._values = {}
         self._prefix = None
 
-    def __str__(self):
-        return str(self._values)
-
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self._values)
+
+    __str__ = __repr__
 
     @contextlib.contextmanager
     def prefixed(self, prefix):
