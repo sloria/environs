@@ -205,12 +205,12 @@ class TestCustomTypes:
         with pytest.raises(envargs.EnvError):
             env.enum('ENV', choices=['dev', 'prod'])
 
-    def test_parser_for_field(self, set_env, env):
+    def test_add_parser_from_field(self, set_env, env):
         class MyURL(fields.Field):
             def _deserialize(self, value, *args, **kwargs):
                 return 'https://' + value
 
-        env.parser_from_field('url', MyURL)
+        env.add_parser_from_field('url', MyURL)
 
         set_env({'URL': 'test.test/'})
         assert env.url('URL') == 'https://test.test/'

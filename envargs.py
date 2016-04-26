@@ -135,8 +135,8 @@ class Env(object):
             return func
         return decorator
 
-    def parser_from_field(self, name, field_cls):
-        """Decorator that registers a new parser function given a marshmallow ``Field``."""
+    def add_parser_from_field(self, name, field_cls):
+        """Register a new parser method with name ``name``, given a marshmallow ``Field``."""
         self.__parser_map__[name] = _field2method(field_cls, method_name=name)
 
     def dump(self):

@@ -68,7 +68,7 @@ The following are all type-casting methods of  ``Env``:
 * ``dict`` (accepts optional ``subcast`` keyword argument)
 * ``json``
 * ``datetime``
-* ``date`` 
+* ``date``
 * ``timedelta`` (assumes value is an integer in seconds)
 * ``uuid``
 
@@ -179,7 +179,7 @@ Marshmallow integration
         def _serialize(self, value, *args, **kwargs):
             return str(value)
 
-    env.parser_from_field('path', PathField)
+    env.add_parser_from_field('path', PathField)
 
     static_path = env.path('STATIC_PATH')  # => PosixPath('app/static')
     env.dump()['STATIC_PATH']  # => 'app/static'
