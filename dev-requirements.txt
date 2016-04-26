@@ -10,6 +10,7 @@ Sphinx>=1.2.2
 
 # Distribution
 twine
+wheel
 
 # Linting
 flake8
