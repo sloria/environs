@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+* Support for proxied variables (`#2 <https://github.com/sloria/environs/issues/2>`_).
 * *Backwards-incompatible*: Remove ``env.get`` method. Use ``env()`` instead.
 
 Support:
