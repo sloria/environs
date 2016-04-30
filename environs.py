@@ -3,6 +3,7 @@ import contextlib
 import functools
 import json as pyjson
 import os
+import re
 
 import marshmallow as ma
 
@@ -11,6 +12,17 @@ __all__ = ['EnvError', 'Env']
 
 class EnvError(Exception):
     pass
+
+_proxied_pattern = re.compile(r'\s*{{\s*(\S*)\s*}}\s*')
+def _get_value_from_environ(key, default):
+    """Access a value from os.environ. Handles proxed variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
+    """
+    value = os.environ.get(key, default)
+    if hasattr(value, 'strip'):
+        match = _proxied_pattern.match(value)
+        if match:  # Proxied variable
+            return _get_value_from_environ(match.groups()[0], default)
+    return value
 
 def _field2method(field_or_factory, method_name, preprocess=None):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
@@ -21,7 +33,7 @@ def _field2method(field_or_factory, method_name, preprocess=None):
         else:
             field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
         self._fields[name] = field
-        raw_value = os.environ.get(name, ma.missing)
+        raw_value = _get_value_from_environ(name, ma.missing)
         if raw_value is ma.missing and field.missing is ma.missing:
             raise EnvError('Environment variable "{}" not set'.format(name))
         value = raw_value or field.missing
@@ -34,20 +46,20 @@ def _field2method(field_or_factory, method_name, preprocess=None):
         else:
             self._values[name] = value
             return value
-    method.__name__ = str(method_name)
+    method.__name__ = str(method_name)  # cast to str for Py2 compat
     return method
 
 def _func2method(func, method_name):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
         name = self._prefix + name if self._prefix else name
-        raw_value = os.environ.get(name, default)
+        raw_value = _get_value_from_environ(name, default)
         if raw_value is ma.missing:
             raise EnvError('Environment variable "{}" not set'.format(name))
         value = func(raw_value, **kwargs)
         self._fields[name] = ma.fields.Field(**kwargs)
         self._values[name] = value
         return value
-    method.__name__ = str(method_name)
+    method.__name__ = str(method_name)  # cast to str for Py2 compat
     return method
 
 def _dict2schema(argmap, instance=False, **kwargs):
@@ -113,8 +125,7 @@ class Env(object):
 
     def __getattr__(self, name, **kwargs):
         try:
-            partial = functools.partial(self.__parser_map__[name], self)
-            return partial
+            return functools.partial(self.__parser_map__[name], self)
         except KeyError:
             raise AttributeError('{} has not attribute {}'.format(self, name))
 

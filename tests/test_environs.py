@@ -124,6 +124,28 @@ class TestCasting:
         assert env.uuid('UUID') == uid
 
 
+class TestProxiedVariables:
+
+    def test_reading_proxied_variable(self, set_env, env):
+        set_env({
+            'MAILGUN_SMTP_LOGIN': 'sloria',
+            'SMTP_LOGIN': '{{MAILGUN_SMTP_LOGIN}}',
+            'SMTP_LOGIN_LPADDED': '{{ MAILGUN_SMTP_LOGIN}}',
+            'SMTP_LOGIN_RPADDED': '{{MAILGUN_SMTP_LOGIN }}'
+        })
+        for key in ('MAILGUN_SMTP_LOGIN', 'SMTP_LOGIN', 'SMTP_LOGIN_LPADDED', 'SMTP_LOGIN_RPADDED'):
+            assert env(key) == 'sloria'
+            assert env.dump()[key] == 'sloria'
+
+    def test_reading_missing_proxied_variable(self, set_env, env):
+        set_env({
+            'SMTP_LOGIN': '{{MAILGUN_SMTP_LOGIN}}'
+        })
+        with pytest.raises(environs.EnvError):
+            env('SMTP_LOGIN')
+        assert env('SMTP_LOGIN', 'default') == 'default'
+
+
 class TestEnvFileReading:
 
     def test_read_env_integration(self, env):
