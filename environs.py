@@ -5,6 +5,7 @@ import json as pyjson
 import os
 
 import marshmallow as ma
+from read_env import read_env
 
 __version__ = '1.0.0.dev0'
 __all__ = ['EnvError', 'Env']
@@ -110,6 +111,10 @@ class Env(object):
         self._prefix = prefix
         yield self
         self._prefix = None
+
+    @staticmethod
+    def read_env(path=None):
+        return read_env(path)
 
     def __getattr__(self, name, **kwargs):
         try:

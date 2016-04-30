@@ -2,7 +2,7 @@
 environs: simplified environment variable parsing
 *************************************************
 
-.. image:: https://badge.fury.io/py/environs.png
+.. image:: https://badge.fury.io/py/environs.svg
     :target: http://badge.fury.io/py/environs
     :alt: Latest version
 
@@ -113,6 +113,7 @@ Validation
     env.str('EMAIL', validate=[Length(min=4), Email()])
     # => Environment variable "EMAIL" invalid: ['Shorter than minimum length 4.', 'Not a valid email address.']
 
+
 Serialization
 -------------
 
@@ -182,6 +183,32 @@ Marshmallow integration
 
     static_path = env.path('STATIC_PATH')  # => PosixPath('app/static')
     env.dump()['STATIC_PATH']  # => 'app/static'
+
+Reading ``.env`` files
+----------------------
+
+Use the external `read_env <https://github.com/sloria/read_env>`_ package to read ``.env`` files into ``os.environ``. ::
+
+    pip install read_env
+
+
+.. code-block:: bash
+
+    # myapp/.env
+    DEBUG=true
+    PORT=4567
+
+.. code-block:: python
+
+    from read_env import read_env
+
+    # Read .env into os.environ
+    read_env()
+
+    env.bool('DEBUG')  # => True
+    env.int('PORT')   # => 4567
+
+
 
 Why...
 ------

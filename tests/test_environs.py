@@ -6,6 +6,7 @@ import datetime as dt
 
 import pytest
 from marshmallow import fields, validate
+import read_env
 
 import environs
 
@@ -122,6 +123,14 @@ class TestCasting:
         set_env({'UUID': str(uid)})
         assert env.uuid('UUID') == uid
 
+
+class TestEnvFileReading:
+
+    def test_read_env_integration(self, env):
+        assert env('STRING', 'default') == 'default'  # sanity check
+        read_env.read_env()
+        assert env('STRING') == 'foo'
+        assert env.list('LIST') == ['wat', 'wer', 'wen']
 
 def always_fail(value):
     raise environs.EnvError('something went wrong')
