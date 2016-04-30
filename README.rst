@@ -85,6 +85,17 @@ Handling prefixes
         port = env.int('PORT', 5000)  # => 3000
 
 
+Proxied variables
+-----------------
+
+.. code-block:: python
+
+    # export MAILGUN_LOGIN=sloria
+    # export SMTP_LOGIN={{MAILGUN_LOGIN}}
+
+    smtp_login = env('SMTP_LOGIN')  # =>'sloria'
+
+
 Validation
 ----------
 
