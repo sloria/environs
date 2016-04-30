@@ -24,18 +24,13 @@ def env():
 
 class TestCasting:
 
-    def test_get(self, set_env, env):
-        set_env({'STR': 'foo', 'INT': '42'})
-        assert env.get('STR') == 'foo'
-        assert env.get('INT') == '42'
-
-    def test_get_with_default(self, env):
-        assert env.get('NOT_SET', default='mydefault') == 'mydefault'
-        assert env.get('NOT_SET', 'mydefault') == 'mydefault'
-
-    def test_call_is_same_as_get(self, set_env, env):
+    def test_call(self, set_env, env):
         set_env({'STR': 'foo', 'INT': '42'})
         assert env('STR') == 'foo'
+        assert env('NOT_SET', 'mydefault') == 'mydefault'
+
+    def test_call_with_default(self, env):
+        assert env('NOT_SET', default='mydefault') == 'mydefault'
         assert env('NOT_SET', 'mydefault') == 'mydefault'
 
     def test_basic(self, set_env, env):

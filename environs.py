@@ -6,7 +6,7 @@ import os
 
 import marshmallow as ma
 
-__version__ = '0.1.0'
+__version__ = '1.0.0.dev0'
 __all__ = ['EnvError', 'Env']
 
 class EnvError(Exception):
@@ -79,7 +79,6 @@ def _preprocess_json(value, **kwargs):
 class Env(object):
     """An environment variable reader."""
     __parser_map__ = dict(
-        get=_field2method(ma.fields.Field, 'get'),
         bool=_field2method(ma.fields.Bool, 'bool'),
         str=_field2method(ma.fields.Str, 'str'),
         int=_field2method(ma.fields.Int, 'int'),
@@ -93,7 +92,7 @@ class Env(object):
         timedelta=_field2method(ma.fields.TimeDelta, 'timedelta'),
         uuid=_field2method(ma.fields.UUID, 'uuid'),
     )
-    __call__ = __parser_map__['get']
+    __call__ = _field2method(ma.fields.Field, '__call__')
 
     def __init__(self):
         self._fields = {}
@@ -109,7 +108,7 @@ class Env(object):
     def prefixed(self, prefix):
         """Context manager for parsing envvars with a common prefix."""
         self._prefix = prefix
-        yield
+        yield self
         self._prefix = None
 
     def __getattr__(self, name, **kwargs):

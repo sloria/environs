@@ -183,8 +183,8 @@ Marshmallow integration
     static_path = env.path('STATIC_PATH')  # => PosixPath('app/static')
     env.dump()['STATIC_PATH']  # => 'app/static'
 
-FAQ
----
+Why...
+------
 
 Why envvars?
 ++++++++++++
