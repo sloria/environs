@@ -141,8 +141,9 @@ class TestProxiedVariables:
         set_env({
             'SMTP_LOGIN': '{{MAILGUN_SMTP_LOGIN}}'
         })
-        with pytest.raises(environs.EnvError):
+        with pytest.raises(environs.EnvError) as excinfo:
             env('SMTP_LOGIN')
+        assert excinfo.value.args[0] == 'Environment variable "MAILGUN_SMTP_LOGIN" not set'
         assert env('SMTP_LOGIN', 'default') == 'default'
 
 

@@ -14,15 +14,18 @@ class EnvError(Exception):
     pass
 
 _proxied_pattern = re.compile(r'\s*{{\s*(\S*)\s*}}\s*')
-def _get_value_from_environ(key, default):
+def _get_from_environ(key, default):
     """Access a value from os.environ. Handles proxed variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
+    Returns a tuple (envvar_key, envvar_value). The ``envvar_key`` will be different from
+    the passed key for proxied variables.
     """
     value = os.environ.get(key, default)
     if hasattr(value, 'strip'):
         match = _proxied_pattern.match(value)
         if match:  # Proxied variable
-            return _get_value_from_environ(match.groups()[0], default)
-    return value
+            proxied_key = match.groups()[0]
+            return proxied_key, _get_from_environ(proxied_key, default)[1]
+    return key, value
 
 def _field2method(field_or_factory, method_name, preprocess=None):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
@@ -33,9 +36,9 @@ def _field2method(field_or_factory, method_name, preprocess=None):
         else:
             field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
         self._fields[name] = field
-        raw_value = _get_value_from_environ(name, ma.missing)
+        parsed_key, raw_value = _get_from_environ(name, ma.missing)
         if raw_value is ma.missing and field.missing is ma.missing:
-            raise EnvError('Environment variable "{}" not set'.format(name))
+            raise EnvError('Environment variable "{}" not set'.format(parsed_key))
         value = raw_value or field.missing
         if preprocess:
             value = preprocess(value, subcast=subcast, **kwargs)
@@ -52,9 +55,9 @@ def _field2method(field_or_factory, method_name, preprocess=None):
 def _func2method(func, method_name):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
         name = self._prefix + name if self._prefix else name
-        raw_value = _get_value_from_environ(name, default)
+        parsed_key, raw_value = _get_from_environ(name, default)
         if raw_value is ma.missing:
-            raise EnvError('Environment variable "{}" not set'.format(name))
+            raise EnvError('Environment variable "{}" not set'.format(parsed_key))
         value = func(raw_value, **kwargs)
         self._fields[name] = ma.fields.Field(**kwargs)
         self._values[name] = value
