@@ -7,13 +7,13 @@ import re
 
 import marshmallow as ma
 
-__version__ = '1.0.0.dev0'
+__version__ = '1.0.0'
 __all__ = ['EnvError', 'Env']
 
 class EnvError(Exception):
     pass
 
-_proxied_pattern = re.compile(r'\s*{{\s*(\S*)\s*}}\s*')
+_PROXIED_PATTERN = re.compile(r'\s*{{\s*(\S*)\s*}}\s*')
 def _get_from_environ(key, default):
     """Access a value from os.environ. Handles proxed variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
     Returns a tuple (envvar_key, envvar_value). The ``envvar_key`` will be different from
@@ -21,7 +21,7 @@ def _get_from_environ(key, default):
     """
     value = os.environ.get(key, default)
     if hasattr(value, 'strip'):
-        match = _proxied_pattern.match(value)
+        match = _PROXIED_PATTERN.match(value)
         if match:  # Proxied variable
             proxied_key = match.groups()[0]
             return proxied_key, _get_from_environ(proxied_key, default)[1]

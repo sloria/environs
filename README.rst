@@ -209,6 +209,8 @@ Use the external `read_env <https://github.com/sloria/read_env>`_ package to rea
     DEBUG=true
     PORT=4567
 
+Call ``read_env`` before parsing variables.
+
 .. code-block:: python
 
     from environs import Env
@@ -223,8 +225,8 @@ Use the external `read_env <https://github.com/sloria/read_env>`_ package to rea
 
 
 
-Why...
-------
+Why...?
+-------
 
 Why envvars?
 ++++++++++++
@@ -242,8 +244,9 @@ Environs will help you
 * specify required envvars
 * define default values
 * validate envvars
-* parse strings into lists and dicts
+* parse list and dict values
 * parse dates, datetimes, and timedeltas
+* parse proxied variables
 * serialize your configuration to JSON, YAML, etc.
 
 Why another library?
@@ -251,10 +254,11 @@ Why another library?
 
 There are many great Python libraries for parsing environment variables. In fact, most of the credit for environs' public API goes to the authors of `envparse <https://github.com/rconradharris/envparse>`_ and `django-environ <https://github.com/joke2k/django-environ>`_.
 
-environs aims to meet two additional goals:
+environs aims to meet three additional goals:
 
 1. Make it easy to extend parsing behavior and develop plugins.
 2. Leverage the deserialization and validation functionality provided by a separate library (marshmallow).
+3. Clean up redundant API.
 
 
 License
