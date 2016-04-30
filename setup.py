@@ -1,27 +1,12 @@
 # -*- coding: utf-8 -*-
 import re
-import sys
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
 
-TESTS_REQUIRE = ['pytest']
-
-class PyTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = ['--verbose']
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-        errcode = pytest.main(self.test_args)
-        sys.exit(errcode)
-
+REQUIRES = [
+    'marshmallow',
+]
 
 def find_version(fname):
-    """Attempts to find the version number in the file names fname.
-    Raises RuntimeError if not found.
-    """
     version = ''
     with open(fname, 'r') as fp:
         reg = re.compile(r'__version__ = [\'"]([^\'"]*)[\'"]')
@@ -44,6 +29,7 @@ def read(fname):
 
 setup(
     name='environs',
+    py_modules=['environs'],
     version=__version__,
     description=('simplified environment variable parsing'),
     long_description=(read('README.rst') + '\n\n' +
@@ -51,7 +37,7 @@ setup(
     author='Steven Loria',
     author_email='sloria1@gmail.com',
     url='https://github.com/sloria/environs',
-    install_requires=['marshmallow'],
+    install_requires=REQUIRES,
     license='MIT',
     zip_safe=False,
     keywords='environment variables parsing',
@@ -68,7 +54,4 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    py_modules=['environs'],
-    tests_require=TESTS_REQUIRE,
-    cmdclass={'test': PyTest}
 )

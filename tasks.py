@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
+import sys
 import webbrowser
 
 from invoke import task, run
 
 @task
-def test():
-    flake()
-    run('python setup.py test', echo=True, pty=True)
+def test(lint=True, watch=False, last_failing=False):
+    import pytest
+    if lint:
+        flake()
+    args = []
+    if watch:
+        args.append('-f')
+    if last_failing:
+        args.append('--lf')
+    retcode = pytest.main(args)
+    sys.exit(retcode)
 
-@task
+@task(aliases=['lint'])
 def flake():
     run('flake8 .', echo=True)
 
