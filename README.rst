@@ -200,8 +200,10 @@ Use the external `read_env <https://github.com/sloria/read_env>`_ package to rea
 
 .. code-block:: python
 
+    from environs import Env
     from read_env import read_env
 
+    env = Env()
     # Read .env into os.environ
     read_env()
 
