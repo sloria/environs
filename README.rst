@@ -27,8 +27,9 @@ Basic usage
 .. code-block:: python
 
     # export GITHUB_USER=sloria
-    # export API_KEY=123abc
+    # export MAX_CONNECTIONS=100
     # export SHIP_DATE='1984-06-25'
+    # export TTL=42
     # export ENABLE_LOGIN=true
     # export GITHUB_REPOS=webargs,konch,ped
     # export COORDINATES=23.3,50.0
@@ -36,13 +37,14 @@ Basic usage
     from environs import Env
 
     env = Env()
-    # reading an environment variable
+    # required variables
     gh_user = env('GITHUB_USER')  # => 'sloria'
     secret = env('SECRET')  # => raises error if not set
 
     # casting
-    api_key = env.str('API_KEY')  # => '123abc'
-    date = env.date('SHIP_DATE')  # => datetime.date(1984, 6, 25)
+    max_connections = env.int('MAX_CONNECTIONS')  # => 100
+    ship_date = env.date('SHIP_DATE')  # => datetime.date(1984, 6, 25)
+    ttl = env.timedelta('TTL')  # => datetime.timedelta(0, 42)
 
     # providing a default value
     enable_login = env.bool('ENABLE_LOGIN', False)  # => True
@@ -132,15 +134,16 @@ Serialization
 
     # serialize to a dictionary of simple types (numbers and strings)
     env.dump()
-    # { 'API_KEY': '123abc',
-    # 'COORDINATES': [23.3, 50.0],
+    # {'COORDINATES': [23.3, 50.0],
     # 'ENABLE_FEATURE_X': False,
     # 'ENABLE_LOGIN': True,
     # 'GITHUB_REPOS': ['webargs', 'konch', 'ped'],
     # 'GITHUB_USER': 'sloria',
+    # 'MAX_CONNECTIONS': 100,
     # 'MYAPP_HOST': 'lolcathost',
     # 'MYAPP_PORT': 3000,
-    # 'SHIP_DATE': '1984-06-25'}
+    # 'SHIP_DATE': '1984-06-25',
+    # 'TTL': 42}
 
 Defining custom parser behavior
 -------------------------------
