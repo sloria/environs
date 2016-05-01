@@ -2,6 +2,11 @@
 Changelog
 *********
 
+1.1.0 (unreleased)
+------------------
+
+* Add ``Env.read_env`` method for reading ``.env`` files.
+
 1.0.0 (2016-04-30)
 ------------------
 

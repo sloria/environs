@@ -198,32 +198,24 @@ Marshmallow integration
 Reading ``.env`` files
 ----------------------
 
-Use the external `read_env <https://github.com/sloria/read_env>`_ package to read ``.env`` files into ``os.environ``. ::
-
-    pip install read_env
-
-
 .. code-block:: bash
 
     # myapp/.env
     DEBUG=true
     PORT=4567
 
-Call ``read_env`` before parsing variables.
+Call ``Env.read_env`` before parsing variables.
 
 .. code-block:: python
 
     from environs import Env
-    from read_env import read_env
 
     env = Env()
     # Read .env into os.environ
-    read_env()
+    env.read_env()
 
     env.bool('DEBUG')  # => True
     env.int('PORT')   # => 4567
-
-
 
 Why...?
 -------
