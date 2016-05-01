@@ -4,6 +4,7 @@ from setuptools import setup
 
 REQUIRES = [
     'marshmallow',
+    'read_env>=1.1.0',
 ]
 
 def find_version(fname):

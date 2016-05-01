@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import contextlib
+import inspect
 import functools
 import json as pyjson
 import os
 import re
 
 import marshmallow as ma
+from read_env import read_env as _read_env
 
 __version__ = '1.0.0'
 __all__ = ['EnvError', 'Env']
@@ -118,6 +120,18 @@ class Env(object):
         return '<{} {}>'.format(self.__class__.__name__, self._values)
 
     __str__ = __repr__
+
+    @staticmethod
+    def read_env(path=None):
+        """Read a .env file into os.environ. If .env is not found in the directory from
+        which this method is called, recurse up the directory tree until a .env file is found.
+        """
+        # By default, start search from the same file this function is called
+        if path is None:
+            frame = inspect.currentframe().f_back
+            caller_dir = os.path.dirname(frame.f_code.co_filename)
+            path = os.path.join(os.path.abspath(caller_dir), '.env')
+        return _read_env(path=path)
 
     @contextlib.contextmanager
     def prefixed(self, prefix):

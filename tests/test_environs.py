@@ -6,7 +6,6 @@ import datetime as dt
 
 import pytest
 from marshmallow import fields, validate
-import read_env
 
 import environs
 
@@ -149,9 +148,9 @@ class TestProxiedVariables:
 
 class TestEnvFileReading:
 
-    def test_read_env_integration(self, env):
+    def test_read_env(self, env):
         assert env('STRING', 'default') == 'default'  # sanity check
-        read_env.read_env()
+        env.read_env()
         assert env('STRING') == 'foo'
         assert env.list('LIST') == ['wat', 'wer', 'wen']
 
