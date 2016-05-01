@@ -14,5 +14,3 @@ wheel
 
 # Linting
 flake8
-
-read_env

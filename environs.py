@@ -144,7 +144,7 @@ class Env(object):
         try:
             return functools.partial(self.__parser_map__[name], self)
         except KeyError:
-            raise AttributeError('{} has not attribute {}'.format(self, name))
+            raise AttributeError('{} has no attribute {}'.format(self, name))
 
     def add_parser(self, name, func):
         """Register a new parser method with the name ``name``. ``func`` must
