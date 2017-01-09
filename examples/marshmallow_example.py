@@ -15,6 +15,7 @@ class PathField(ma.fields.Field):
     def _serialize(self, value, *args, **kwargs):
         return str(value)
 
+
 env = Env()
 env.parser_from_field('path', PathField)
 

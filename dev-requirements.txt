@@ -1,5 +1,5 @@
 # Task running
-invoke
+invoke>=0.13.0
 
 # Testing
 pytest

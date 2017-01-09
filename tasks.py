@@ -5,10 +5,10 @@ import webbrowser
 from invoke import task, run
 
 @task
-def test(lint=True, watch=False, last_failing=False):
+def test(ctx, lint=True, watch=False, last_failing=False):
     import pytest
     if lint:
-        flake()
+        flake(ctx)
     args = []
     if watch:
         args.append('-f')
@@ -18,26 +18,26 @@ def test(lint=True, watch=False, last_failing=False):
     sys.exit(retcode)
 
 @task(aliases=['lint'])
-def flake():
+def flake(ctx):
     run('flake8 .', echo=True)
 
 @task
-def clean():
-    run("rm -rf build")
-    run("rm -rf dist")
-    run("rm -rf environs.egg-info")
+def clean(ctx):
+    run('rm -rf build')
+    run('rm -rf dist')
+    run('rm -rf environs.egg-info')
     print("Cleaned up.")
 
 @task
-def readme(browse=False):
-    run("rst2html.py README.rst > README.html")
+def readme(ctx, browse=False):
+    run('rst2html.py README.rst > README.html')
     if browse:
         webbrowser.open_new_tab('README.html')
 
 @task
-def publish(test=False):
+def publish(ctx, test=False):
     """Publish to the cheeseshop."""
-    clean()
+    clean(ctx)
     if test:
         run('python setup.py register -r test sdist bdist_wheel', echo=True)
         run('twine upload dist/* -r test', echo=True)

@@ -22,6 +22,7 @@ def setup(env):
 
 ##### End of the plugin code #####
 
+
 os.environ['GITHUB_URL'] = 'https://github.com/sloria/environs'
 
 # Our application activates the plugin using the setup function

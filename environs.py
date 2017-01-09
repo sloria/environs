@@ -15,6 +15,7 @@ __all__ = ['EnvError', 'Env']
 class EnvError(Exception):
     pass
 
+
 _PROXIED_PATTERN = re.compile(r'\s*{{\s*(\S*)\s*}}\s*')
 def _get_from_environ(key, default):
     """Access a value from os.environ. Handles proxed variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
