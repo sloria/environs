@@ -281,6 +281,22 @@ def test_str(set_env, env):
     env.str('FOO')
     assert repr(env) == '<Env {}>'.format({'FOO': 'foo'})
 
+def test_env_isolation(set_env):
+    set_env({'FOO': 'foo'})
+    env1 = environs.Env()
+
+    @env1.parser_for('foo')
+    def foo(value):
+        return value
+
+    env2 = environs.Env()
+
+    # env1 has a parser for foo, but env2 does not
+    assert env1.foo('FOO') == 'foo'
+    with pytest.raises(AttributeError):
+        env2.foo('FOO')
+
+
 class TestPrefix:
 
     @pytest.fixture(autouse=True)

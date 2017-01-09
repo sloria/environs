@@ -96,26 +96,26 @@ def _preprocess_json(value, **kwargs):
 
 class Env(object):
     """An environment variable reader."""
-    __parser_map__ = dict(
-        bool=_field2method(ma.fields.Bool, 'bool'),
-        str=_field2method(ma.fields.Str, 'str'),
-        int=_field2method(ma.fields.Int, 'int'),
-        float=_field2method(ma.fields.Float, 'float'),
-        decimal=_field2method(ma.fields.Decimal, 'decimal'),
-        list=_field2method(_make_list_field, 'list', preprocess=_preprocess_list),
-        dict=_field2method(ma.fields.Dict, 'dict', preprocess=_preprocess_dict),
-        json=_field2method(ma.fields.Field, 'json', preprocess=_preprocess_json),
-        datetime=_field2method(ma.fields.DateTime, 'datetime'),
-        date=_field2method(ma.fields.Date, 'date'),
-        timedelta=_field2method(ma.fields.TimeDelta, 'timedelta'),
-        uuid=_field2method(ma.fields.UUID, 'uuid'),
-    )
     __call__ = _field2method(ma.fields.Field, '__call__')
 
     def __init__(self):
         self._fields = {}
         self._values = {}
         self._prefix = None
+        self.__parser_map__ = dict(
+            bool=_field2method(ma.fields.Bool, 'bool'),
+            str=_field2method(ma.fields.Str, 'str'),
+            int=_field2method(ma.fields.Int, 'int'),
+            float=_field2method(ma.fields.Float, 'float'),
+            decimal=_field2method(ma.fields.Decimal, 'decimal'),
+            list=_field2method(_make_list_field, 'list', preprocess=_preprocess_list),
+            dict=_field2method(ma.fields.Dict, 'dict', preprocess=_preprocess_dict),
+            json=_field2method(ma.fields.Field, 'json', preprocess=_preprocess_json),
+            datetime=_field2method(ma.fields.DateTime, 'datetime'),
+            date=_field2method(ma.fields.Date, 'date'),
+            timedelta=_field2method(ma.fields.TimeDelta, 'timedelta'),
+            uuid=_field2method(ma.fields.UUID, 'uuid'),
+        )
 
     def __repr__(self):
         return '<{} {}>'.format(self.__class__.__name__, self._values)
