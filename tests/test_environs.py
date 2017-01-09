@@ -3,6 +3,11 @@ from __future__ import unicode_literals
 import uuid
 from decimal import Decimal
 import datetime as dt
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    # Python 2
+    import urlparse
 
 import pytest
 from marshmallow import fields, validate
@@ -17,7 +22,7 @@ def set_env(monkeypatch):
     return _set_env
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def env():
     return environs.Env()
 
@@ -44,7 +49,7 @@ class TestCasting:
     def test_invalid_int(self, set_env, env):
         set_env({'INT': 'invalid'})
         with pytest.raises(environs.EnvError) as excinfo:
-            env.int('INT') == 42
+            env.int('INT')
         assert 'Environment variable "INT" invalid' in excinfo.value.args[0]
 
     def test_float_cast(self, set_env, env):
@@ -121,6 +126,23 @@ class TestCasting:
         uid = uuid.uuid1()
         set_env({'UUID': str(uid)})
         assert env.uuid('UUID') == uid
+
+    def test_url_cast(self, set_env, env):
+        set_env({'URL': 'http://stevenloria.com/projects/?foo=42'})
+        res = env.url('URL')
+        assert isinstance(res, urlparse.ParseResult)
+
+    @pytest.mark.parametrize('url',
+    [
+        'foo',
+        '42',
+        'foo@bar',
+    ])
+    def test_invalid_url(self, url, set_env, env):
+        set_env({'URL': url})
+        with pytest.raises(environs.EnvError) as excinfo:
+            env.url('URL')
+        assert 'Environment variable "URL" invalid' in excinfo.value.args[0]
 
 
 class TestProxiedVariables:
@@ -248,17 +270,25 @@ class TestCustomTypes:
 class TestDumping:
     def test_dump(self, set_env, env):
         dtime = dt.datetime.utcnow()
-        set_env({'STR': 'foo', 'INT': '42', 'DTIME': dtime.isoformat()})
+        set_env({
+            'STR': 'foo',
+            'INT': '42',
+            'DTIME': dtime.isoformat(),
+            'URLPARSE': 'http://stevenloria.com/projects/?foo=42',
+        })
 
         env.str('STR')
         env.int('INT')
         env.datetime('DTIME')
+        env.url('URLPARSE')
 
         result = env.dump()
         assert result['STR'] == 'foo'
         assert result['INT'] == 42
         assert 'DTIME' in result
         assert type(result['DTIME']) is str
+        assert type(result['URLPARSE']) is str
+        assert result['URLPARSE'] == 'http://stevenloria.com/projects/?foo=42'
 
     def test_env_with_custom_parser(self, set_env, env):
         @env.parser_for('url')

@@ -5,6 +5,11 @@ import functools
 import json as pyjson
 import os
 import re
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    # Python 2
+    import urlparse
 
 import marshmallow as ma
 from read_env import read_env as _read_env
@@ -94,6 +99,16 @@ def _preprocess_dict(value, **kwargs):
 def _preprocess_json(value, **kwargs):
     return pyjson.loads(value)
 
+class URLField(ma.fields.URL):
+    def _serialize(self, value, attr, obj):
+        return value.geturl()
+
+    # Override deserialize rather than _deserialize because we need
+    # to call urlparse *after* validation has occurred
+    def deserialize(self, value, attr=None, data=None):
+        ret = super(URLField, self).deserialize(value, attr, data)
+        return urlparse.urlparse(ret)
+
 class Env(object):
     """An environment variable reader."""
     __call__ = _field2method(ma.fields.Field, '__call__')
@@ -115,6 +130,7 @@ class Env(object):
             date=_field2method(ma.fields.Date, 'date'),
             timedelta=_field2method(ma.fields.TimeDelta, 'timedelta'),
             uuid=_field2method(ma.fields.UUID, 'uuid'),
+            url=_field2method(URLField, 'url'),
         )
 
     def __repr__(self):
