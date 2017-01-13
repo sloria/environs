@@ -14,7 +14,7 @@ except ImportError:
 import marshmallow as ma
 from read_env import read_env as _read_env
 
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __all__ = ['EnvError', 'Env']
 
 class EnvError(Exception):

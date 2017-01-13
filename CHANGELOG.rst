@@ -2,6 +2,17 @@
 Changelog
 *********
 
+1.2.0 (2017-01-12)
+------------------
+
+Features:
+
+* Add ``url`` parser that returns a ``urllib.parse.ParseResult`` (`#6 <https://github.com/sloria/environs/issues/6>`_). Thanks `IlyaSemenov <https://github.com/IlyaSemenov>`_ for the suggestion.
+
+Bug fixes:
+
+* Every instance of ``Env`` gets its own parser map, so calling ``env.parser_for`` for one instance doesn't affect other instances.
+
 1.1.0 (2016-05-01)
 ------------------
 
