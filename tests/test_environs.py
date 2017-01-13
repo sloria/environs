@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import uuid
 from decimal import Decimal
 import datetime as dt
+from marshmallow.compat import basestring
 try:
     import urllib.parse as urlparse
 except ImportError:
@@ -287,7 +288,7 @@ class TestDumping:
         assert result['INT'] == 42
         assert 'DTIME' in result
         assert type(result['DTIME']) is str
-        assert type(result['URLPARSE']) is str
+        assert isinstance(result['URLPARSE'], basestring)
         assert result['URLPARSE'] == 'http://stevenloria.com/projects/?foo=42'
 
     def test_env_with_custom_parser(self, set_env, env):
