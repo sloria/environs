@@ -1,11 +1,7 @@
 import os
-try:
-    import urllib.parse as urlparse
-except ImportError:
-    # Python 2
-    import urlparse
 
 from furl import furl as Furl
+from yarl import URL
 from environs import Env
 
 ##### This is the beginning of the plugin code #####
@@ -14,11 +10,11 @@ def furl_parser(value):
     return Furl(value)
 
 def urlparse_parser(value):
-    return urlparse.urlparse(value)
+    return URL(value)
 
 def setup(env):
     env.add_parser('furl', furl_parser)
-    env.add_parser('purl', urlparse_parser)
+    env.add_parser('yurl', urlparse_parser)
 
 ##### End of the plugin code #####
 
@@ -30,7 +26,7 @@ os.environ['GITHUB_URL'] = 'https://github.com/sloria/environs'
 env = Env()
 setup(env)
 
-# We now have the 'furl' and 'purl' methods available
+# We now have the 'furl' and 'yurl' methods available
 
 github_furl = env.furl('GITHUB_URL')
-github_purl = env.purl('GITHUB_URL')
+github_yurl = env.yurl('GITHUB_URL')
