@@ -153,9 +153,13 @@ class Env(object):
     @contextlib.contextmanager
     def prefixed(self, prefix):
         """Context manager for parsing envvars with a common prefix."""
-        self._prefix = prefix
+        old_prefix = self._prefix
+        if old_prefix is None:
+            self._prefix = prefix
+        else:
+            self._prefix = "{}{}".format(old_prefix, prefix)
         yield self
-        self._prefix = None
+        self._prefix = old_prefix
 
     def __getattr__(self, name, **kwargs):
         try:
