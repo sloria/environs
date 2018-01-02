@@ -87,6 +87,16 @@ Handling prefixes
         host = env('HOST', 'localhost')  # => 'lolcathost'
         port = env.int('PORT', 5000)  # => 3000
 
+    # nested prefixes are also supported:
+
+    # export MYAPP_DB_HOST=lolcathost
+    # export MYAPP_DB_PORT=10101
+
+    with env.prefixed('MYAPP_'):
+        with env.prefixed('DB_'):
+            db_host = env('HOST', 'lolcathost')
+            db_port = env.int('PORT', 10101)
+
 
 Proxied variables
 -----------------

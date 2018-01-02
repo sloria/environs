@@ -346,3 +346,31 @@ class TestPrefix:
             env.int('INT') == 42
             env('NOT_FOUND', 'mydefault') == 'mydefault'
         assert env.dump() == {'APP_STR': 'foo', 'APP_INT': 42, 'APP_NOT_FOUND': 'mydefault'}
+
+class TestNestedPrefix:
+
+    @pytest.fixture(autouse=True)
+    def default_environ(self, set_env):
+        set_env({'APP_STR': 'foo', 'APP_NESTED_INT': '42'})
+
+    def test_nested_prefixed(self, env):
+        with env.prefixed('APP_'):
+            with env.prefixed('NESTED_'):
+                assert env.int('INT') == 42
+                assert env('NOT_FOUND', 'mydefault') == 'mydefault'
+            assert env.str('STR') == 'foo'
+            assert env('NOT_FOUND', 'mydefault') == 'mydefault'
+
+    def test_dump_with_nested_prefixed(self, env):
+        with env.prefixed('APP_'):
+            with env.prefixed('NESTED_'):
+                env.int('INT') == 42
+                env('NOT_FOUND', 'mydefault') == 'mydefault'
+            env.str('STR') == 'foo'
+            env('NOT_FOUND', 'mydefault') == 'mydefault'
+        assert env.dump() == {
+            'APP_STR': 'foo',
+            'APP_NOT_FOUND': 'mydefault',
+            'APP_NESTED_INT': 42,
+            'APP_NESTED_NOT_FOUND': 'mydefault'
+        }
