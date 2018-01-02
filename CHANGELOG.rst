@@ -2,6 +2,18 @@
 Changelog
 *********
 
+2.0.0 (unreleased)
+------------------
+
+Features:
+
+* Add support for nested prefixes (`#8 <https://github.com/sloria/environs/pull/8>`_).
+  Thanks `gvialetto <https://github.com/gvialetto>`_ for the PR.
+
+Other changes:
+
+* *Backwards-incompatible*: Drop support for Python 3.3 and 3.4.
+
 1.2.0 (2017-01-12)
 ------------------
 
