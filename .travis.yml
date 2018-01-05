@@ -1,11 +1,10 @@
-# Config file for automatic testing at travis-ci.org
 language: python
 sudo: false
 python:
-- "3.6"
-- "3.5"
-- "2.7"
-- "pypy"
+- '3.6'
+- '3.5'
+- '2.7'
+- pypy
 install:
 - pip install -U .
 - pip install -r dev-requirements.txt
@@ -14,9 +13,8 @@ jobs:
   include:
   - stage: PyPI Release
     if: tag IS present
-    python: "3.6"
+    python: '3.6'
     env: []
-    # Override before_install, install, and script to no-ops
     before_install: true
     install: true
     script: echo "Releasing to PyPI..."
@@ -28,4 +26,4 @@ jobs:
         tags: true
       distributions: sdist bdist_wheel
       password:
-        secure: LOpaUZEDeJadNiejr04i9bhFQRi8cYbKSo58gBlUEv/oxh6l4uPHm04zDH9GXqgs7kgcRVryLq1+LPFd3sKS1bASMSzdRs0P7SmsQugJVGxvzILw6QNwj5f8pK9ol8qyqSZHmVWoPr8nPwoLB++xIE+B9ZNkaejFr/2zNvLqOWg=
+        secure: ptcK+xOvW1G+hJnK/7mG99iDQeSfYn/bmDXJ6ay0rRa8fBHAxdiBrrUM3m4UVhJmvCvEX4R8MqLEotj88QWJa3fykAssD8Zh9VXSj0HyzswzMZMGDM2/3SWIFLGhpCn6bkPMGGUU7USDtwZg6HPHrgtNCxdjvERXbB3Nfram03hJB317jzk3XlhXRiekh9S1KvlpkMSveziSRjJQP51TmBYybewkmfqTsUDtgmaUtCWuIDhCJmHAZ3C2FYQ/QVv2vV2iffBpywG3bZ9BonabaPMp3oK8wG+aZPSaTb0KvW7UUvEqwN2FFEngJy6aQSak+O/b2XtV20NlPT0jz/8SC4DY+wYpDbRYoMq8XVEkKRtyGvKdH9tqVhgnfBi8vbjMzmwVGYjfkkOprZh+Hb83viwt093z2wPOkvkXL/fpVRMKCF22TjW2yVIP73yv+JCPCFC6+RHNBkUY+LxbbWPQ9SjndyylrnoAehXhZPQzZ+du/K8J9evyfVheqfFsu5Cci28QCG+YUevBqA62HvC3cwmoHvSnTtC5tlZhlQPrUmqt9k1ZkSv7hSqHcw3wI5H81MHCkfJPNlls4q5hqCL3VyValOYG5sCYgWv6E7j7GclXoQmwQ/A46rgaf5FsXXh8TylZtAK5oSQA2EJxbdk5Dcze4l5EpcFSaH5w5DbQu5o=
