@@ -2,6 +2,14 @@
 Changelog
 *********
 
+2.1.0 (2018-01-25)
+------------------
+
+Features:
+
+* Add `recurse` parameter to `Env.read_env` (`#9 <https://github.com/sloria/environs/pull/9>`_).
+  Thanks `gthank <https://github.com/gthank>`_ for the PR.
+
 2.0.0 (2018-01-02)
 ------------------
 
