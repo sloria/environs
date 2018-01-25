@@ -139,16 +139,20 @@ class Env(object):
     __str__ = __repr__
 
     @staticmethod
-    def read_env(path=None):
-        """Read a .env file into os.environ. If .env is not found in the directory from
-        which this method is called, recurse up the directory tree until a .env file is found.
+    def read_env(path=None, recurse=True):
+        """Read a .env file into os.environ.
+
+        If .env is not found in the directory from which this method is called,
+        the default behavior is to recurse up the directory tree until a .env
+        file is found. If you do not wish to recurse up the tree, you may pass
+        False as a second positional argument.
         """
         # By default, start search from the same file this function is called
         if path is None:
             frame = inspect.currentframe().f_back
             caller_dir = os.path.dirname(frame.f_code.co_filename)
             path = os.path.join(os.path.abspath(caller_dir), '.env')
-        return _read_env(path=path)
+        return _read_env(path=path, recurse=recurse)
 
     @contextlib.contextmanager
     def prefixed(self, prefix):
