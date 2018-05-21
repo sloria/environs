@@ -1,13 +1,20 @@
 language: python
+cache: pip
 sudo: false
 python:
 - '3.6'
 - '3.5'
 - '2.7'
 - pypy
+env:
+  # Lowest supported version
+  - MARSHMALLOW_VERSION="==2.7.0"
+  # Latest release
+  - MARSHMALLOW_VERSION=""
 install:
-- pip install -U .
-- pip install -r dev-requirements.txt
+- travis_retry pip install -U .
+- travis_retry pip install -r dev-requirements.txt
+- travis_retry pip install -U marshmallow"$MARSHMALLOW_VERSION" --pre
 script: invoke test
 jobs:
   include:
