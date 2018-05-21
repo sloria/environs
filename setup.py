@@ -3,7 +3,7 @@ import re
 from setuptools import setup
 
 REQUIRES = [
-    'marshmallow',
+    'marshmallow>=2.7.0',
     'read_env>=1.1.0',
 ]
 
