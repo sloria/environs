@@ -2,6 +2,13 @@
 Changelog
 *********
 
+2.1.1 (2018-05-21)
+------------------
+
+Features:
+
+* Fix compatibility with marshmallow 3 beta.
+
 2.1.0 (2018-01-25)
 ------------------
 
