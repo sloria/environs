@@ -17,6 +17,10 @@ from read_env import read_env as _read_env
 __version__ = '2.1.0'
 __all__ = ['EnvError', 'Env']
 
+MARSHMALLOW_VERSION_INFO = tuple(
+    [int(part) for part in ma.__version__.split('.') if part.isdigit()]
+)
+
 class EnvError(Exception):
     pass
 
@@ -196,4 +200,5 @@ class Env(object):
         and strings).
         """
         schema = _dict2schema(self._fields, instance=True)
-        return schema.dump(self._values).data
+        dump_result = schema.dump(self._values)
+        return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result

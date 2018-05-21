@@ -10,6 +10,9 @@ environs: simplified environment variable parsing
     :target: https://travis-ci.org/sloria/environs
     :alt: Travis-CI
 
+.. image:: https://img.shields.io/badge/marshmallow-3-blue.svg
+    :target: https://marshmallow.readthedocs.io/en/latest/upgrading.html
+    :alt: marshmallow 3 compatible
 
 Environs is a Python library for parsing environment variables.
 
