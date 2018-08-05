@@ -20,6 +20,7 @@ def find_version(fname):
         raise RuntimeError('Cannot find version information')
     return version
 
+
 __version__ = find_version('environs.py')
 
 
@@ -27,6 +28,7 @@ def read(fname):
     with open(fname) as fp:
         content = fp.read()
     return content
+
 
 setup(
     name='environs',
@@ -41,7 +43,7 @@ setup(
     install_requires=REQUIRES,
     license='MIT',
     zip_safe=False,
-    keywords='environment variables parsing',
+    keywords='environment variables parsing config configuration 12factor envvars',
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
