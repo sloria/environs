@@ -1,17 +1,15 @@
 # Task running
-invoke>=0.13.0
+invoke==1.1.1
 
 # Testing
-pytest
-pytest-xdist
-tox
+pytest==3.7.1
+pytest-xdist==1.22.5
+tox==3.1.3
 
 # Docs
 Sphinx>=1.2.2
 
-# Distribution
-twine
-wheel
-
 # Linting
-flake8
+flake8==3.5.0
+
+-e '.'
