@@ -325,6 +325,8 @@ environs aims to meet three additional goals:
 2. Leverage the deserialization and validation functionality provided by a separate library (marshmallow).
 3. Clean up redundant API.
 
+See `this GitHub issue <https://github.com/rconradharris/envparse/issues/12#issue-151036722>`_ which details specific differences with envparse.
+
 
 License
 -------
