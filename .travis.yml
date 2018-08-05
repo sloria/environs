@@ -14,7 +14,9 @@ env:
 install:
 - travis_retry pip install -r dev-requirements.txt
 - travis_retry pip install -U marshmallow"$MARSHMALLOW_VERSION" --pre
-script: invoke test
+script:
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then invoke test; fi
+  - if [[ $TRAVIS_PYTHON_VERSION != 3.6* ]]; then invoke test --no-lint; fi
 jobs:
   include:
   - stage: PyPI Release
