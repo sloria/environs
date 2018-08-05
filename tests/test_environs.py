@@ -4,6 +4,7 @@ import uuid
 from decimal import Decimal
 import datetime as dt
 from marshmallow.compat import basestring
+import dj_database_url
 
 try:
     import urllib.parse as urlparse
@@ -386,3 +387,17 @@ class TestNestedPrefix:
             "APP_NESTED_INT": 42,
             "APP_NESTED_NOT_FOUND": "mydefault",
         }
+
+
+class TestDjango:
+    def test_dj_db_url(self, env, set_env):
+        db_url = "postgresql://localhost:5432/mydb"
+        set_env({"DATABASE_URL": db_url})
+        res = env.dj_db_url("DATABASE_URL")
+        assert res == dj_database_url.parse(db_url)
+
+    def test_dj_db_url_passes_kwargs(self, env, set_env):
+        db_url = "postgresql://localhost:5432/mydb"
+        set_env({"DATABASE_URL": db_url})
+        res = env.dj_db_url("DATABASE_URL", conn_max_age=600)
+        assert res == dj_database_url.parse(db_url, conn_max_age=600)

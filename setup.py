@@ -38,6 +38,7 @@ setup(
     author_email="sloria1@gmail.com",
     url="https://github.com/sloria/environs",
     install_requires=REQUIRES,
+    extras_require={"django": ["dj-database-url"]},
     license="MIT",
     zip_safe=False,
     keywords="environment variables parsing config configuration 12factor envvars",
