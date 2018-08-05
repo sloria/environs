@@ -180,6 +180,11 @@ class TestEnvFileReading:
         assert env("STRING") == "foo"
         assert env.list("LIST") == ["wat", "wer", "wen"]
 
+    def test_read_env_not_found(self, env):
+        with pytest.warns(UserWarning) as record:
+            env.read_env("notfound")
+        assert "notfound" in record[0].message.args[0]
+
 
 def always_fail(value):
     raise environs.EnvError("something went wrong")

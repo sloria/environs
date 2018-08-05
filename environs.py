@@ -5,6 +5,7 @@ import functools
 import json as pyjson
 import os
 import re
+import warnings
 
 try:
     import urllib.parse as urlparse
@@ -197,8 +198,16 @@ class Env(object):
         if path is None:
             frame = inspect.currentframe().f_back
             caller_dir = os.path.dirname(frame.f_code.co_filename)
-            path = os.path.join(os.path.abspath(caller_dir), ".env")
-        return _read_env(path=path, recurse=recurse)
+            start = os.path.join(os.path.abspath(caller_dir), ".env")
+        else:
+            start = path
+        try:
+            return _read_env(path=start, recurse=recurse)
+        except getattr(__builtins__, "FileNotFoundError", IOError):
+            if path:
+                warnings.warn("{} not found.".format(path), UserWarning)
+            else:
+                warnings.warn(".env file not found.", UserWarning)
 
     @contextlib.contextmanager
     def prefixed(self, prefix):
