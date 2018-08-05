@@ -5,7 +5,7 @@ import marshmallow as ma
 from environs import Env
 
 
-os.environ['STATIC_PATH'] = 'app/static'
+os.environ["STATIC_PATH"] = "app/static"
 
 
 class PathField(ma.fields.Field):
@@ -17,9 +17,9 @@ class PathField(ma.fields.Field):
 
 
 env = Env()
-env.parser_from_field('path', PathField)
+env.parser_from_field("path", PathField)
 
-static_path = env.path('STATIC_PATH')
+static_path = env.path("STATIC_PATH")
 assert isinstance(static_path, pathlib.Path)
 
 print(env.dump())
