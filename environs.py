@@ -18,10 +18,11 @@ from read_env import read_env as _read_env
 
 try:
     import dj_database_url
+    import dj_email_url
 except ImportError:
-    HAS_DJ_DB_URL = False
+    HAS_DJANGO = False
 else:
-    HAS_DJ_DB_URL = True
+    HAS_DJANGO = True
 
 
 __version__ = "2.1.1"
@@ -134,12 +135,22 @@ def _preprocess_json(value, **kwargs):
 
 
 def _dj_db_url_parser(value, **kwargs):
-    if HAS_DJ_DB_URL:
+    if HAS_DJANGO:
         return dj_database_url.parse(value, **kwargs)
     else:
         raise RuntimeError(
             "The dj_db_url parser requires the dj-database-url package. "
             "You can install it with: pip install dj-database-url"
+        )
+
+
+def _dj_email_url_parser(value, **kwargs):
+    if HAS_DJANGO:
+        return dj_email_url.parse(value, **kwargs)
+    else:
+        raise RuntimeError(
+            "The dj_email_url parser requires the dj-email-url package. "
+            "You can install it with: pip install dj-email-url"
         )
 
 
@@ -178,6 +189,7 @@ class Env(object):
             uuid=_field2method(ma.fields.UUID, "uuid"),
             url=_field2method(URLField, "url"),
             dj_db_url=_func2method(_dj_db_url_parser, "dj_db_url"),
+            dj_email_url=_func2method(_dj_email_url_parser, "dj_email_url"),
         )
 
     def __repr__(self):

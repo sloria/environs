@@ -249,12 +249,9 @@ Call ``Env.read_env`` before parsing variables.
 Django integration (optional)
 -----------------------------
 
-environs includes a ``dj_db_url`` parser for parsing database connection
-URL. It relies on the dj-database-url package, which you can install
-manually with ``pip`` or when you install environs: ::
+environs includes a number of helpers for parsing connection
+URLs. To install environs with django support: ::
 
-    pip install dj-database-url
-    # OR
     pip install environs[django]
 
 Use ``env.dj_db_url`` to parse the ``DATABASE_URL`` environment
@@ -272,8 +269,26 @@ variable.
 
     SECRET_KEY = env.str("SECRET_KEY")
 
+Use ``env.dj_email_url`` to parse the ``EMAIL_URL`` environment
+variable.
+
 For a more complete example, see `django_example.py <https://github.com/sloria/environs/blob/master/examples/django_example.py>`_
 in the ``examples/`` directory.
+
+.. code-block:: python
+
+    # export DATABASE_URL="postgresql://localhost:5432/mydb"
+
+    from environs import Env
+
+    env = Env()
+
+    email = env.dj_email_url("EMAIL_URL", default="smtp://")
+    EMAIL_HOST = email["EMAIL_HOST"]
+    EMAIL_PORT = email["EMAIL_PORT"]
+    EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
+    EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
+    EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
 
 Why...?
 -------

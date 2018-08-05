@@ -5,6 +5,7 @@ from decimal import Decimal
 import datetime as dt
 from marshmallow.compat import basestring
 import dj_database_url
+import dj_email_url
 
 try:
     import urllib.parse as urlparse
@@ -406,3 +407,9 @@ class TestDjango:
         set_env({"DATABASE_URL": db_url})
         res = env.dj_db_url("DATABASE_URL", conn_max_age=600)
         assert res == dj_database_url.parse(db_url, conn_max_age=600)
+
+    def test_dj_email_url(self, env, set_env):
+        email_url = "smtp://user@domain.com:pass@smtp.example.com:465/?ssl=True"
+        set_env({"EMAIL_URL": email_url})
+        res = env.dj_email_url("EMAIL_URL")
+        assert res == dj_email_url.parse(email_url)

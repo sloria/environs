@@ -36,11 +36,12 @@ USE_TZ = True
 # NOTE: Error will be raised if SECRET_KEY is unset
 SECRET_KEY = env.str("SECRET_KEY")
 
-EMAIL_HOST = env.str("EMAIL_HOST", default="localhost")
-EMAIL_PORT = env.int("EMAIL_PORT", default=25)
-EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="")
-EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="")
-EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
+email = env.dj_email_url("EMAIL_URL", default="smtp://")
+EMAIL_HOST = email["EMAIL_HOST"]
+EMAIL_PORT = email["EMAIL_PORT"]
+EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
+EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
+EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
 
 # For demo purposes only
 pprint(env.dump(), indent=2)
