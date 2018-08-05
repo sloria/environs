@@ -15,6 +15,14 @@ except ImportError:
 import marshmallow as ma
 from read_env import read_env as _read_env
 
+try:
+    import dj_database_url
+except ImportError:
+    HAS_DJ_DB_URL = False
+else:
+    HAS_DJ_DB_URL = True
+
+
 __version__ = "2.1.1"
 __all__ = ["EnvError", "Env"]
 
@@ -124,6 +132,16 @@ def _preprocess_json(value, **kwargs):
     return pyjson.loads(value)
 
 
+def _dj_db_url_parser(value, **kwargs):
+    if HAS_DJ_DB_URL:
+        return dj_database_url.parse(value, **kwargs)
+    else:
+        raise RuntimeError(
+            "The dj_db_url parser requires the dj-database-url package. "
+            "You can install it with: pip install dj-database-url"
+        )
+
+
 class URLField(ma.fields.URL):
     def _serialize(self, value, attr, obj):
         return value.geturl()
@@ -158,6 +176,7 @@ class Env(object):
             timedelta=_field2method(ma.fields.TimeDelta, "timedelta"),
             uuid=_field2method(ma.fields.UUID, "uuid"),
             url=_field2method(URLField, "url"),
+            dj_db_url=_func2method(_dj_db_url_parser, "dj_db_url"),
         )
 
     def __repr__(self):

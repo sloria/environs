@@ -238,6 +238,38 @@ Call ``Env.read_env`` before parsing variables.
     env.bool('DEBUG')  # => True
     env.int('PORT')   # => 4567
 
+
+Django integration (optional)
+-----------------------------
+
+environs includes a ``dj_db_url`` parser for parsing database connection
+URL. It relies on the dj-database-url package, which you can install
+manually with ``pip`` or when you install environs: ::
+
+    pip install dj-database-url
+    # OR
+    pip install environs[django]
+
+Use ``env.dj_db_url`` to parse the ``DATABASE_URL`` environment
+variable.
+
+.. code-block:: python
+
+    # export DATABASE_URL="postgresql://localhost:5432/mydb"
+
+    from environs imort Env
+
+    env = Env()
+
+    DATABASES = {
+        "default": env.dj_db_url("DATABASE_URL")
+    }
+
+    SECRET_KEY = env.str("SECRET_KEY")
+
+For a more complete example, see `django_example.py <https://github.com/sloria/environs/blob/master/examples/django_example.py>`_
+in the ``examples/`` directory.
+
 Why...?
 -------
 
