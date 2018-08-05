@@ -2,6 +2,18 @@
 Changelog
 *********
 
+3.0.0 (unreleased)
+------------------
+
+Features:
+
+* *Backwards-incompatible*: ``Env.read_env`` raises a warning instead of an error when ``.env``
+  isn't found (`#10 <https://github.com/sloria/environs/issues/10>`_).
+  Thanks `lachlancooper <https://github.com/lachlancooper>`_ for the
+  suggestion.
+* Add optional Django support. Install using ``pip install environs[django]``, which
+  enables ``env.dj_db_url`` and ``env.dj_email_url``.
+
 2.1.1 (2018-05-21)
 ------------------
 
