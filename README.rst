@@ -45,21 +45,21 @@ Basic usage
 
     env = Env()
     # required variables
-    gh_user = env('GITHUB_USER')  # => 'sloria'
-    secret = env('SECRET')  # => raises error if not set
+    gh_user = env("GITHUB_USER")  # => 'sloria'
+    secret = env("SECRET")  # => raises error if not set
 
     # casting
-    max_connections = env.int('MAX_CONNECTIONS')  # => 100
-    ship_date = env.date('SHIP_DATE')  # => datetime.date(1984, 6, 25)
-    ttl = env.timedelta('TTL')  # => datetime.timedelta(0, 42)
+    max_connections = env.int("MAX_CONNECTIONS")  # => 100
+    ship_date = env.date("SHIP_DATE")  # => datetime.date(1984, 6, 25)
+    ttl = env.timedelta("TTL")  # => datetime.timedelta(0, 42)
 
     # providing a default value
-    enable_login = env.bool('ENABLE_LOGIN', False)  # => True
-    enable_feature_x = env.bool('ENABLE_FEATURE_X', False)  # => False
+    enable_login = env.bool("ENABLE_LOGIN", False)  # => True
+    enable_feature_x = env.bool("ENABLE_FEATURE_X", False)  # => False
 
     # parsing lists
-    gh_repos = env.list('GITHUB_REPOS')  # => ['webargs', 'konch', 'ped']
-    coords = env.list('COORDINATES', subcast=float)  # => [23.3, 50.0]
+    gh_repos = env.list("GITHUB_REPOS")  # => ['webargs', 'konch', 'ped']
+    coords = env.list("COORDINATES", subcast=float)  # => [23.3, 50.0]
 
 
 Supported types
@@ -90,19 +90,19 @@ Handling prefixes
     # export MYAPP_HOST=lolcathost
     # export MYAPP_PORT=3000
 
-    with env.prefixed('MYAPP_'):
-        host = env('HOST', 'localhost')  # => 'lolcathost'
-        port = env.int('PORT', 5000)  # => 3000
+    with env.prefixed("MYAPP_"):
+        host = env("HOST", "localhost")  # => 'lolcathost'
+        port = env.int("PORT", 5000)  # => 3000
 
     # nested prefixes are also supported:
 
     # export MYAPP_DB_HOST=lolcathost
     # export MYAPP_DB_PORT=10101
 
-    with env.prefixed('MYAPP_'):
-        with env.prefixed('DB_'):
-            db_host = env('HOST', 'lolcathost')
-            db_port = env.int('PORT', 10101)
+    with env.prefixed("MYAPP_"):
+        with env.prefixed("DB_"):
+            db_host = env("HOST", "lolcathost")
+            db_port = env.int("PORT", 10101)
 
 
 Proxied variables
@@ -113,7 +113,7 @@ Proxied variables
     # export MAILGUN_LOGIN=sloria
     # export SMTP_LOGIN={{MAILGUN_LOGIN}}
 
-    smtp_login = env('SMTP_LOGIN')  # =>'sloria'
+    smtp_login = env("SMTP_LOGIN")  # =>'sloria'
 
 
 Validation
@@ -127,21 +127,24 @@ Validation
 
 
     # simple validator
-    env.int('TTL', validate=lambda n: n > 0)
+    env.int("TTL", validate=lambda n: n > 0)
     # => Environment variable "TTL" invalid: ['Invalid value.']
 
     # using marshmallow validators
     from marshmallow.validate import OneOf
 
-    env.str('NODE_ENV',
-            validate=OneOf(['production', 'development'],
-                            error='NODE_ENV must be one of: {choices}'))
+    env.str(
+        "NODE_ENV",
+        validate=OneOf(
+            ["production", "development"], error="NODE_ENV must be one of: {choices}"
+        ),
+    )
     # => Environment variable "NODE_ENV" invalid: ['NODE_ENV must be one of: production, development']
 
     # multiple validators
     from marshmallow.validate import Length, Email
 
-    env.str('EMAIL', validate=[Length(min=4), Email()])
+    env.str("EMAIL", validate=[Length(min=4), Email()])
     # => Environment variable "EMAIL" invalid: ['Shorter than minimum length 4.', 'Not a valid email address.']
 
 
@@ -174,21 +177,23 @@ Defining custom parser behavior
     from furl import furl
 
     # Register a new parser method for paths
-    @env.parser_for('furl')
+    @env.parser_for("furl")
     def furl_parser(value):
         return furl(value)
 
-    domain = env.furl('DOMAIN')  # => furl('https://myapp.com')
+
+    domain = env.furl("DOMAIN")  # => furl('https://myapp.com')
 
 
     # Custom parsers can take extra keyword arguments
-    @env.parser_for('enum')
+    @env.parser_for("enum")
     def enum_parser(value, choices):
         if value not in choices:
-            raise environs.EnvError('Invalid!')
+            raise environs.EnvError("Invalid!")
         return value
 
-    color = env.enum('COLOR', choices=['black'])  # => raises EnvError
+
+    color = env.enum("COLOR", choices=["black"])  # => raises EnvError
 
 Note: Environment variables parsed with a custom parser function will be serialized by ``Env.dump`` without any modification. To define special serialization behavior, use ``Env.parser_from_field`` instead (see next section).
 
@@ -204,6 +209,7 @@ Marshmallow integration
 
     import marshmallow as ma
 
+
     class PathField(ma.fields.Field):
         def _deserialize(self, value, *args, **kwargs):
             return pathlib.Path(value)
@@ -211,10 +217,11 @@ Marshmallow integration
         def _serialize(self, value, *args, **kwargs):
             return str(value)
 
-    env.add_parser_from_field('path', PathField)
 
-    static_path = env.path('STATIC_PATH')  # => PosixPath('app/static')
-    env.dump()['STATIC_PATH']  # => 'app/static'
+    env.add_parser_from_field("path", PathField)
+
+    static_path = env.path("STATIC_PATH")  # => PosixPath('app/static')
+    env.dump()["STATIC_PATH"]  # => 'app/static'
 
 Reading ``.env`` files
 ----------------------
@@ -235,8 +242,8 @@ Call ``Env.read_env`` before parsing variables.
     # Read .env into os.environ
     env.read_env()
 
-    env.bool('DEBUG')  # => True
-    env.int('PORT')   # => 4567
+    env.bool("DEBUG")  # => True
+    env.int("PORT")  # => 4567
 
 
 Django integration (optional)
@@ -257,13 +264,11 @@ variable.
 
     # export DATABASE_URL="postgresql://localhost:5432/mydb"
 
-    from environs imort Env
+    from environs import Env
 
     env = Env()
 
-    DATABASES = {
-        "default": env.dj_db_url("DATABASE_URL")
-    }
+    DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
 
     SECRET_KEY = env.str("SECRET_KEY")
 
