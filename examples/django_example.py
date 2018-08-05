@@ -12,10 +12,7 @@ from pprint import pprint
 import environs
 
 env = environs.Env()
-try:
-    env.read_env()
-except IOError:
-    pass
+env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
