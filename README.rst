@@ -81,6 +81,29 @@ The following are all type-casting methods of  ``Env``:
 * ``env.url``
 * ``env.uuid``
 
+Reading ``.env`` files
+----------------------
+
+.. code-block:: bash
+
+    # myapp/.env
+    DEBUG=true
+    PORT=4567
+
+Call ``Env.read_env`` before parsing variables.
+
+.. code-block:: python
+
+    from environs import Env
+
+    env = Env()
+    # Read .env into os.environ
+    env.read_env()
+
+    env.bool("DEBUG")  # => True
+    env.int("PORT")  # => 4567
+
+
 
 Handling prefixes
 -----------------
@@ -223,72 +246,93 @@ Marshmallow integration
     static_path = env.path("STATIC_PATH")  # => PosixPath('app/static')
     env.dump()["STATIC_PATH"]  # => 'app/static'
 
-Reading ``.env`` files
-----------------------
-
-.. code-block:: bash
-
-    # myapp/.env
-    DEBUG=true
-    PORT=4567
-
-Call ``Env.read_env`` before parsing variables.
+Usage with Flask
+----------------
 
 .. code-block:: python
+
+    # myapp/settings.py
 
     from environs import Env
 
     env = Env()
-    # Read .env into os.environ
     env.read_env()
 
-    env.bool("DEBUG")  # => True
-    env.int("PORT")  # => 4567
+    # Override in .env for local development
+    DEBUG = env.bool("FLASK_DEBUG", default=False)
+    # SECRET_KEY is required
+    SECRET_KEY = env.str("SECRET_KEY")
+
+Load the configuration after you initialize your app.
+
+.. code-block:: python
+
+    # myapp/app.py
+
+    from flask import Flask
+
+    app = Flask(__name__)
+    app.config.from_object("myapp.settings")
 
 
-Django integration (optional)
------------------------------
+For local development, use a ``.env`` file to override the default
+configuration.
+
+
+.. code-block:: bash
+
+    # .env
+    DEBUG=true
+    SECRET_KEY="not so secret"
+
+
+Usage with Django
+-----------------
 
 environs includes a number of helpers for parsing connection
 URLs. To install environs with django support: ::
 
     pip install environs[django]
 
-Use ``env.dj_db_url`` to parse the ``DATABASE_URL`` environment
-variable.
+Use ``env.dj_db_url`` and ``env.dj_email_url`` to parse the ``DATABASE_URL``
+and ``EMAIL_URL`` environment variables, respectively.
 
 .. code-block:: python
 
-    # export DATABASE_URL="postgresql://localhost:5432/mydb"
-
+    # myproject/settings.py
     from environs import Env
 
     env = Env()
+    env.read_env()
 
-    DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
-
+    # Override in .env for local development
+    DEBUG = env.bool("DEBUG", default=False)
+    # SECRET_KEY is required
     SECRET_KEY = env.str("SECRET_KEY")
 
-Use ``env.dj_email_url`` to parse the ``EMAIL_URL`` environment
-variable.
+    # Parse database URLs, e.g.  "postgres://localhost:5432/mydb"
+    DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
 
-For a more complete example, see `django_example.py <https://github.com/sloria/environs/blob/master/examples/django_example.py>`_
-in the ``examples/`` directory.
-
-.. code-block:: python
-
-    # export DATABASE_URL="postgresql://localhost:5432/mydb"
-
-    from environs import Env
-
-    env = Env()
-
+    # Parse email URLs, e.g. "smtp://"
     email = env.dj_email_url("EMAIL_URL", default="smtp://")
     EMAIL_HOST = email["EMAIL_HOST"]
     EMAIL_PORT = email["EMAIL_PORT"]
     EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
     EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
     EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
+
+For local development, use a ``.env`` file to override the default
+configuration.
+
+
+.. code-block:: bash
+
+    # .env
+    DEBUG=true
+    SECRET_KEY="not so secret"
+
+For a more complete example, see `django_example.py <https://github.com/sloria/environs/blob/master/examples/django_example.py>`_
+in the ``examples/`` directory.
 
 Why...?
 -------

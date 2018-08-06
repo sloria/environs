@@ -16,7 +16,11 @@ env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Override in .env for local development
 DEBUG = TEMPLATE_DEBUG = env.bool("DEBUG", default=False)
+
+# NOTE: Error will be raised if SECRET_KEY is unset
+SECRET_KEY = env.str("SECRET_KEY")
 
 DATABASES = {
     "default": env.dj_db_url(
@@ -29,9 +33,6 @@ DATABASES = {
 TIME_ZONE = env.str("TIME_ZONE", default="America/Chicago")
 USE_L10N = True
 USE_TZ = True
-
-# NOTE: Error will be raised if SECRET_KEY is unset
-SECRET_KEY = env.str("SECRET_KEY")
 
 email = env.dj_email_url("EMAIL_URL", default="smtp://")
 EMAIL_HOST = email["EMAIL_HOST"]
