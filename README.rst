@@ -18,9 +18,9 @@ environs: simplified environment variable parsing
     :target: https://github.com/ambv/black
     :alt: Black code style
 
-Environs is a Python library for parsing environment variables.
+**environs** is a Python library for parsing environment variables.
 
-Environs is inspired by `envparse <https://github.com/rconradharris/envparse>`_ and uses `marshmallow <https://github.com/marshmallow-code/marshmallow>`_ under the hood for validating, deserializing, and serializing values.
+environs is inspired by `envparse <https://github.com/rconradharris/envparse>`_ and uses `marshmallow <https://github.com/marshmallow-code/marshmallow>`_ under the hood for validating, deserializing, and serializing values.
 
 Install
 -------
@@ -346,9 +346,9 @@ See `The 12-factor App <http://12factor.net/config>`_ section on `configuration 
 Why not ``os.environ``?
 +++++++++++++++++++++++
 
-While ``os.environ`` is enough for simple use cases, a typical application will need a way to manipulate and validate raw environment variables. Environs abstracts common tasks for handling environment variables.
+While ``os.environ`` is enough for simple use cases, a typical application will need a way to manipulate and validate raw environment variables. environs abstracts common tasks for handling environment variables.
 
-Environs will help you
+environs will help you
 
 * cast envvars to the correct type
 * specify required envvars
