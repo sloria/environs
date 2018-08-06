@@ -180,6 +180,7 @@ class TestEnvFileReading:
         env.read_env()
         assert env("STRING") == "foo"
         assert env.list("LIST") == ["wat", "wer", "wen"]
+        assert env("PROXIED") == "foo"
 
     def test_read_env_not_found_with_verbose_warns(self, env):
         with pytest.warns(UserWarning) as record:
