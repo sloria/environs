@@ -2,6 +2,13 @@
 Changelog
 *********
 
+4.0.0 (unreleased)
+------------------
+
+* Use python-dotenv for parsing .env files. ``Env.read_env`` behaves mostly the
+  same except that a warning isn't raised by default if a .env file
+  isn't found. Pass ``verbose=True`` to raise a warning.
+
 3.0.0 (2018-08-05)
 ------------------
 

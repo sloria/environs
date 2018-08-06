@@ -2,7 +2,7 @@
 import re
 from setuptools import setup
 
-REQUIRES = ["marshmallow>=2.7.0", "read_env>=1.1.0"]
+REQUIRES = ["marshmallow>=2.7.0", "python-dotenv"]
 
 
 def find_version(fname):

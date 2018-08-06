@@ -181,10 +181,10 @@ class TestEnvFileReading:
         assert env("STRING") == "foo"
         assert env.list("LIST") == ["wat", "wer", "wen"]
 
-    def test_read_env_not_found(self, env):
+    def test_read_env_not_found_with_verbose_warns(self, env):
         with pytest.warns(UserWarning) as record:
-            env.read_env("notfound")
-        assert "notfound" in record[0].message.args[0]
+            env.read_env("notfound", recurse=False, verbose=True)
+        assert "File doesn't exist" in record[0].message.args[0]
 
 
 def always_fail(value):

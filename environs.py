@@ -5,7 +5,6 @@ import functools
 import json as pyjson
 import os
 import re
-import warnings
 
 try:
     import urllib.parse as urlparse
@@ -14,7 +13,8 @@ except ImportError:
     import urlparse
 
 import marshmallow as ma
-from read_env import read_env as _read_env
+from dotenv import load_dotenv
+from dotenv.main import _walk_to_root
 
 try:
     import dj_database_url
@@ -198,7 +198,7 @@ class Env(object):
     __str__ = __repr__
 
     @staticmethod
-    def read_env(path=None, recurse=True):
+    def read_env(path=None, recurse=True, stream=None, verbose=False, override=False):
         """Read a .env file into os.environ.
 
         If .env is not found in the directory from which this method is called,
@@ -210,16 +210,20 @@ class Env(object):
         if path is None:
             frame = inspect.currentframe().f_back
             caller_dir = os.path.dirname(frame.f_code.co_filename)
-            start = os.path.join(os.path.abspath(caller_dir), ".env")
+            start = os.path.join(os.path.abspath(caller_dir))
         else:
             start = path
-        try:
-            return _read_env(path=start, recurse=recurse)
-        except getattr(__builtins__, "FileNotFoundError", IOError):
-            if path:
-                warnings.warn("{} not found.".format(path), UserWarning)
-            else:
-                warnings.warn(".env file not found.", UserWarning)
+        if recurse:
+            for dirname in _walk_to_root(start):
+                check_path = os.path.join(dirname, ".env")
+                if os.path.exists(check_path):
+                    return load_dotenv(
+                        check_path, stream=stream, verbose=verbose, override=override
+                    )
+        else:
+            if path is None:
+                start = os.path.join(start, ".env")
+            return load_dotenv(start, stream=stream, verbose=verbose, override=override)
 
     @contextlib.contextmanager
     def prefixed(self, prefix):
