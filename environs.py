@@ -16,15 +16,6 @@ import marshmallow as ma
 from dotenv import load_dotenv
 from dotenv.main import _walk_to_root
 
-try:
-    import dj_database_url
-    import dj_email_url
-except ImportError:
-    HAS_DJANGO = False
-else:
-    HAS_DJANGO = True
-
-
 __version__ = "3.0.0"
 __all__ = ["EnvError", "Env"]
 
@@ -135,23 +126,25 @@ def _preprocess_json(value, **kwargs):
 
 
 def _dj_db_url_parser(value, **kwargs):
-    if HAS_DJANGO:
-        return dj_database_url.parse(value, **kwargs)
-    else:
+    try:
+        import dj_database_url
+    except ImportError:
         raise RuntimeError(
             "The dj_db_url parser requires the dj-database-url package. "
             "You can install it with: pip install dj-database-url"
         )
+    return dj_database_url.parse(value, **kwargs)
 
 
 def _dj_email_url_parser(value, **kwargs):
-    if HAS_DJANGO:
-        return dj_email_url.parse(value, **kwargs)
-    else:
+    try:
+        import dj_email_url
+    except ImportError:
         raise RuntimeError(
             "The dj_email_url parser requires the dj-email-url package. "
             "You can install it with: pip install dj-email-url"
         )
+    return dj_email_url.parse(value, **kwargs)
 
 
 class URLField(ma.fields.URL):
