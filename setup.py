@@ -33,7 +33,8 @@ setup(
     py_modules=["environs"],
     version=__version__,
     description=("simplified environment variable parsing"),
-    long_description=(read("README.rst") + "\n\n" + read("CHANGELOG.rst")),
+    long_description=read("README.md"),
+    long_description_content_type="text/markdown",
     author="Steven Loria",
     author_email="sloria1@gmail.com",
     url="https://github.com/sloria/environs",
@@ -54,4 +55,8 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
+    project_urls={
+        "Issues": "https://github.com/sloria/environs/issues",
+        "Changelog": "https://github.com/sloria/environs/blob/master/CHANGELOG.md",
+    },
 )
