@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.0.0 (unreleased)
+## 4.0.0 (2018-08-06)
 
 - Use python-dotenv for parsing .env files. `Env.read_env` behaves
   mostly the same except that a warning isn't raised by default if a
