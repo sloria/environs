@@ -203,31 +203,6 @@ serialized by `Env.dump` without any modification. To define special
 serialization behavior, use `Env.parser_from_field` instead (see next
 section).
 
-## Marshmallow integration
-
-```python
-# export STATIC_PATH='app/static'
-
-# Custom parsers can be defined as marshmallow Fields
-import pathlib
-
-import marshmallow as ma
-
-
-class PathField(ma.fields.Field):
-    def _deserialize(self, value, *args, **kwargs):
-        return pathlib.Path(value)
-
-    def _serialize(self, value, *args, **kwargs):
-        return str(value)
-
-
-env.add_parser_from_field("path", PathField)
-
-static_path = env.path("STATIC_PATH")  # => PosixPath('app/static')
-env.dump()["STATIC_PATH"]  # => 'app/static'
-```
-
 ## Usage with Flask
 
 ```python
