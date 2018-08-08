@@ -23,14 +23,21 @@ It allows you to store configuration separate from your code, as per
 
 ## Basic usage
 
+With some environment variables set...
+
+```bash
+export GITHUB_USER=sloria
+export MAX_CONNECTIONS=100
+export SHIP_DATE='1984-06-25'
+export TTL=42
+export ENABLE_LOGIN=true
+export GITHUB_REPOS=webargs,konch,ped
+export COORDINATES=23.3,50.0
+```
+
+Parse them with environs...
+
 ```python
-# export GITHUB_USER=sloria
-# export MAX_CONNECTIONS=100
-# export SHIP_DATE='1984-06-25'
-# export TTL=42
-# export ENABLE_LOGIN=true
-# export GITHUB_REPOS=webargs,konch,ped
-# export COORDINATES=23.3,50.0
 
 from environs import Env
 
@@ -233,6 +240,9 @@ configuration.
 DEBUG=true
 SECRET_KEY="not so secret"
 ```
+
+Note: Because environs depends on [python-dotenv](https://github.com/theskumar/python-dotenv),
+the `flask` CLI will automatically read .env and .flaskenv files.
 
 ## Usage with Django
 
