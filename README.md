@@ -75,7 +75,7 @@ The following are all type-casting methods of `Env`:
 ## Reading `.env` files
 
 ```bash
-# myapp/.env
+# .env
 DEBUG=true
 PORT=4567
 ```
@@ -197,11 +197,6 @@ def enum_parser(value, choices):
 
 color = env.enum("COLOR", choices=["black"])  # => raises EnvError
 ```
-
-Note: Environment variables parsed with a custom parser function will be
-serialized by `Env.dump` without any modification. To define special
-serialization behavior, use `Env.parser_from_field` instead (see next
-section).
 
 ## Usage with Flask
 
