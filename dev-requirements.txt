@@ -4,7 +4,7 @@ invoke==1.1.1
 # Testing
 pytest==3.7.1
 pytest-xdist==1.22.5
-tox==3.2.0
+tox==3.2.1
 
 # Docs
 Sphinx>=1.2.2
