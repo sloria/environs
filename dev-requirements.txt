@@ -14,6 +14,6 @@ pre-commit==1.10.5
 
 # Linting
 flake8==3.5.0
-flake8-bugbear==18.2.0; python_version >= '3.5'
+flake8-bugbear==18.8.0; python_version >= '3.5'
 
 -e '.[django]'
