@@ -13,7 +13,7 @@ Sphinx>=1.2.2
 pre-commit==1.11.2
 
 # Linting
-flake8==3.5.0
+flake8==3.6.0
 flake8-bugbear==18.8.0; python_version >= '3.5'
 
 -e '.[django]'
