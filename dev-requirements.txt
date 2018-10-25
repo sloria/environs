@@ -10,7 +10,7 @@ tox==3.5.2
 Sphinx>=1.2.2
 
 # Pre-commit hooks (runs black)
-pre-commit==1.11.2
+pre-commit==1.12.0
 
 # Linting
 flake8==3.6.0
