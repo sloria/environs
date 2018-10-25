@@ -38,7 +38,6 @@ export COORDINATES=23.3,50.0
 Parse them with environs...
 
 ```python
-
 from environs import Env
 
 env = Env()
