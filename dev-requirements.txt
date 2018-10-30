@@ -3,7 +3,7 @@ invoke==1.2.0
 
 # Testing
 pytest==3.9.3
-pytest-xdist==1.23.2
+pytest-xdist==1.24.0
 tox==3.5.3
 
 # Docs
