@@ -1,32 +1,31 @@
 language: python
-cache: pip
 sudo: false
-python:
-- '3.6'
-- '3.5'
-- '2.7'
-- pypy
-env:
-  # Lowest supported version
-  - MARSHMALLOW_VERSION="==2.7.0"
-  # Latest release
-  - MARSHMALLOW_VERSION=""
-install:
-- travis_retry pip install -r dev-requirements.txt
-- travis_retry pip install -U marshmallow"$MARSHMALLOW_VERSION" --pre
-script:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then invoke test; fi
-  - if [[ $TRAVIS_PYTHON_VERSION != 3.6* ]]; then invoke test --no-lint; fi
+cache: pip
+install: travis_retry pip install -U tox
+script: tox
 jobs:
+  fast_finish: true
+
   include:
+  - { python: '3.6', env: TOXENV=lint }
+
+  - { python: '2.7', env: TOXENV=py27-marshmallow2 }
+  - { python: '2.7', env: TOXENV=py27-marshmallow3 }
+
+  - { python: '3.5', env: TOXENV=py35-marshmallow2 }
+  - { python: '3.5', env: TOXENV=py35-marshmallow3 }
+
+  - { python: '3.6', env: TOXENV=py36-marshmallow2 }
+  - { python: '3.6', env: TOXENV=py36-marshmallow3 }
+
+  - { python: '3.7', env: TOXENV=py37-marshmallow2, dist: xenial, sudo: required }
+  - { python: '3.7', env: TOXENV=py37-marshmallow3, dist: xenial, sudo: required }
+
   - stage: PyPI Release
     if: tag IS present
-    python: '3.6'
-    env: []
-    before_install: true
-    install: true
-    script: echo "Releasing to PyPI..."
-    after_success: true
+    python: "3.6"
+    install: skip
+    script: skip
     deploy:
       provider: pypi
       user: sloria
