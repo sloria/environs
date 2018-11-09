@@ -2,7 +2,25 @@
 import re
 from setuptools import setup
 
-REQUIRES = ["marshmallow>=2.7.0", "python-dotenv"]
+INSTALL_REQUIRES = ["marshmallow>=2.7.0", "python-dotenv"]
+DJANGO_REQUIRES = ["dj-database-url", "dj-email-url"]
+EXTRAS_REQUIRE = {
+    "django": DJANGO_REQUIRES,
+    "tests": [
+        "pytest",
+        "mock",
+        "webtest==2.0.32",
+        'webtest-aiohttp==2.0.0; python_version >= "3.5"',
+        'pytest-aiohttp>=0.3.0; python_version >= "3.5"',
+    ]
+    + DJANGO_REQUIRES,
+    "lint": [
+        "flake8==3.6.0",
+        'flake8-bugbear==18.8.0; python_version >= "3.5"',
+        "pre-commit==1.12.0",
+    ],
+}
+EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
 
 
 def find_version(fname):
@@ -19,9 +37,6 @@ def find_version(fname):
     return version
 
 
-__version__ = find_version("environs.py")
-
-
 def read(fname):
     with open(fname) as fp:
         content = fp.read()
@@ -31,15 +46,15 @@ def read(fname):
 setup(
     name="environs",
     py_modules=["environs"],
-    version=__version__,
-    description=("simplified environment variable parsing"),
+    version=find_version("environs.py"),
+    description="simplified environment variable parsing",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     author="Steven Loria",
     author_email="sloria1@gmail.com",
     url="https://github.com/sloria/environs",
-    install_requires=REQUIRES,
-    extras_require={"django": ["dj-database-url", "dj-email-url"]},
+    install_requires=INSTALL_REQUIRES,
+    extras_require=EXTRAS_REQUIRE,
     license="MIT",
     zip_safe=False,
     keywords="environment variables parsing config configuration 12factor envvars",
@@ -52,8 +67,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: Python :: 3.7",
     ],
     project_urls={
         "Issues": "https://github.com/sloria/environs/issues",
