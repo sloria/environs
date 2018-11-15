@@ -47,6 +47,7 @@ def _get_from_environ(key, default):
 
 def _field2method(field_or_factory, method_name, preprocess=None):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
+        raw_name = name
         name = self._prefix + name if self._prefix else name
         missing = kwargs.pop("missing", None) or default
         if isinstance(field_or_factory, type) and issubclass(
@@ -57,6 +58,8 @@ def _field2method(field_or_factory, method_name, preprocess=None):
             field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
         self._fields[name] = field
         parsed_key, raw_value = _get_from_environ(name, ma.missing)
+        if raw_value is ma.missing and raw_name != name:  # try reading non-prefixed value instead
+            parsed_key, raw_value = _get_from_environ(raw_name, ma.missing)        
         if raw_value is ma.missing and field.missing is ma.missing:
             raise EnvError('Environment variable "{}" not set'.format(parsed_key))
         value = raw_value or field.missing
