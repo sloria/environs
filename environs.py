@@ -24,7 +24,7 @@ MARSHMALLOW_VERSION_INFO = tuple(
 )
 
 
-class EnvError(Exception):
+class EnvError(ValueError):
     pass
 
 
