@@ -1,7 +1,9 @@
 # Changelog
 
-## 4.1.0 (unreleased)
+## 4.1.0 (2018-12-10)
 
+- `EnvError` subclasses `ValueError` ([#50](https://github.com/sloria/environs/pull/50)).
+  Thanks [alexpirine](https://github.com/alexpirine).
 - Test against Python 3.7.
 
 ## 4.0.0 (2018-08-06)
