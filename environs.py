@@ -31,23 +31,8 @@ class EnvError(ValueError):
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
 
 
-def _get_from_environ(key, default):
-    """Access a value from os.environ. Handles proxed variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
-    Returns a tuple (envvar_key, envvar_value). The ``envvar_key`` will be different from
-    the passed key for proxied variables.
-    """
-    value = os.environ.get(key, default)
-    if hasattr(value, "strip"):
-        match = _PROXIED_PATTERN.match(value)
-        if match:  # Proxied variable
-            proxied_key = match.groups()[0]
-            return proxied_key, _get_from_environ(proxied_key, default)[1]
-    return key, value
-
-
 def _field2method(field_or_factory, method_name, preprocess=None):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
-        name = self._prefix + name if self._prefix else name
         missing = kwargs.pop("missing", None) or default
         if isinstance(field_or_factory, type) and issubclass(
             field_or_factory, ma.fields.Field
@@ -55,10 +40,12 @@ def _field2method(field_or_factory, method_name, preprocess=None):
             field = field_or_factory(missing=missing, **kwargs)
         else:
             field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
-        self._fields[name] = field
-        parsed_key, raw_value = _get_from_environ(name, ma.missing)
+        parsed_key, raw_value, proxied_key = self._get_from_environ(name, ma.missing)
+        self._fields[parsed_key] = field
         if raw_value is ma.missing and field.missing is ma.missing:
-            raise EnvError('Environment variable "{}" not set'.format(parsed_key))
+            raise EnvError(
+                'Environment variable "{}" not set'.format(proxied_key or parsed_key)
+            )
         value = raw_value or field.missing
         if preprocess:
             value = preprocess(value, subcast=subcast, **kwargs)
@@ -69,7 +56,7 @@ def _field2method(field_or_factory, method_name, preprocess=None):
                 'Environment variable "{}" invalid: {}'.format(name, err.args[0])
             )
         else:
-            self._values[name] = value
+            self._values[parsed_key] = value
             return value
 
     method.__name__ = str(method_name)  # cast to str for Py2 compat
@@ -78,13 +65,14 @@ def _field2method(field_or_factory, method_name, preprocess=None):
 
 def _func2method(func, method_name):
     def method(self, name, default=ma.missing, subcast=None, **kwargs):
-        name = self._prefix + name if self._prefix else name
-        parsed_key, raw_value = _get_from_environ(name, default)
+        parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
         if raw_value is ma.missing:
-            raise EnvError('Environment variable "{}" not set'.format(parsed_key))
+            raise EnvError(
+                'Environment variable "{}" not set'.format(proxied_key or parsed_key)
+            )
         value = func(raw_value, **kwargs)
-        self._fields[name] = ma.fields.Field(**kwargs)
-        self._values[name] = value
+        self._fields[parsed_key] = ma.fields.Field(**kwargs)
+        self._values[parsed_key] = value
         return value
 
     method.__name__ = str(method_name)  # cast to str for Py2 compat
@@ -264,3 +252,20 @@ class Env(object):
         schema = _dict2schema(self._fields, instance=True)
         dump_result = schema.dump(self._values)
         return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result
+
+    def _get_from_environ(self, key, default):
+        """Access a value from os.environ. Handles proxed variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
+        Returns a tuple (envvar_key, envvar_value, proxied_key). The ``envvar_key`` will be different from
+        the passed key for proxied variables. proxied_key will be None if the envvar isn't proxied.
+        """
+        env_key = self._get_key(key)
+        value = os.environ.get(env_key, default)
+        if hasattr(value, "strip"):
+            match = _PROXIED_PATTERN.match(value)
+            if match:  # Proxied variable
+                proxied_key = match.groups()[0]
+                return key, self._get_from_environ(proxied_key, default)[1], proxied_key
+        return env_key, value, None
+
+    def _get_key(self, key):
+        return self._prefix + key if self._prefix else key
