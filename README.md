@@ -1,9 +1,9 @@
 # environs: simplified environment variable parsing
 
-[![Latest version](https://badge.fury.io/py/environs.svg)](http://badge.fury.io/py/environs)
-[![Travis-CI](https://travis-ci.org/sloria/environs.svg?branch=master)](https://travis-ci.org/sloria/environs)
-[![marshmallow 3 compatible](https://img.shields.io/badge/marshmallow-3-blue.svg)](https://marshmallow.readthedocs.io/en/latest/upgrading.html)
-[![Black code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![Latest version](https://badgen.net/pypi/v/environs)](http://badge.fury.io/py/environs)
+[![Travis-CI](https://badgen.net/travis/sloria/environs/master)](https://travis-ci.org/sloria/environs)
+[![marshmallow 2/3 compatible](https://badgen.net/badge/marshmallow/2,3?list=1)](https://marshmallow.readthedocs.io/en/latest/upgrading.html)
+[![Black code style](https://badgen.net/badge/code%20style/black/000)](https://github.com/ambv/black)
 
 **environs** is a Python library for parsing environment variables.
 It allows you to store configuration separate from your code, as per
