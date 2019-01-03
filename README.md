@@ -9,6 +9,26 @@
 It allows you to store configuration separate from your code, as per
 [The Twelve-Factor App](https://12factor.net/config) methodology.
 
+## Contents
+
+* [Features](#features)
+* [Install](#install)
+* [Basic usage](#basic-usage)
+* [Supported types](#supported-types)
+* [Reading .env files](#reading-env-files)
+* [Handling prefixes](#handling-prefixes)
+* [Proxied variables](#proxied-variables)
+* [Validation](#validation)
+* [Serialization](#serialization)
+* [Defining custom parser behavior](#defining-custom-parser-behavior)
+* [Usage with Flask](#usage-with-flask)
+* [Usage with Django](#usage-with-django)
+* [Why...?](#why)
+   * [Why envvars?](#why-envvars)
+   * [Why not os.environ?](#why-not-osenviron)
+   * [Why another library?](#why-another-library)
+* [License](#license)
+
 ## Features
 
 * Type-casting
@@ -332,8 +352,7 @@ See [this GitHub
 issue](https://github.com/rconradharris/envparse/issues/12#issue-151036722)
 which details specific differences with envparse.
 
-License
-=======
+## License
 
 MIT licensed. See the
 [LICENSE](https://github.com/sloria/environs/blob/master/LICENSE) file
