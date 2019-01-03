@@ -79,16 +79,19 @@ def _func2method(func, method_name):
     return method
 
 
-def _dict2schema(argmap, instance=False, **kwargs):
-    """Generate a `marshmallow.Schema` class given a dictionary of fields.
+# From webargs
+def _dict2schema(dct):
+    """Generate a `marshmallow.Schema` class given a dictionary of
+    `Fields <marshmallow.fields.Field>`.
     """
+    attrs = dct.copy()
+    if MARSHMALLOW_VERSION_INFO[0] < 3:
 
-    class Meta(object):
-        strict = True
+        class Meta(object):
+            strict = True
 
-    attrs = dict(argmap, Meta=Meta)
-    cls = type(str(""), (ma.Schema,), attrs)
-    return cls if not instance else cls(**kwargs)
+        attrs["Meta"] = Meta
+    return type(str(""), (ma.Schema,), attrs)
 
 
 def _make_list_field(**kwargs):
@@ -249,7 +252,7 @@ class Env(object):
         """Dump parsed environment variables to a dictionary of simple data types (numbers
         and strings).
         """
-        schema = _dict2schema(self._fields, instance=True)
+        schema = _dict2schema(self._fields)()
         dump_result = schema.dump(self._values)
         return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result
 
