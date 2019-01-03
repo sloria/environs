@@ -194,7 +194,7 @@ def always_fail(value):
 
 class TestValidation:
     def test_can_add_validator(self, set_env, env):
-        set_env({"NUM": 3})
+        set_env({"NUM": "3"})
 
         with pytest.raises(environs.EnvError) as excinfo:
             env.int("NUM", validate=lambda n: n > 3)
@@ -318,13 +318,13 @@ class TestDumping:
 
 
 def test_repr(set_env, env):
-    set_env({"FOO": "foo", "BAR": 42})
+    set_env({"FOO": "foo", "BAR": "42"})
     env.str("FOO")
     assert repr(env) == "<Env {}>".format({"FOO": "foo"})
 
 
 def test_str(set_env, env):
-    set_env({"FOO": "foo", "BAR": 42})
+    set_env({"FOO": "foo", "BAR": "42"})
     env.str("FOO")
     assert repr(env) == "<Env {}>".format({"FOO": "foo"})
 
