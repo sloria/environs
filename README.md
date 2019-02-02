@@ -1,6 +1,6 @@
 # environs: simplified environment variable parsing
 
-[![Latest version](https://badgen.net/pypi/v/environs)](http://badge.fury.io/py/environs)
+[![Latest version](https://badgen.net/pypi/v/environs)](https://pypi.org/project/environs/)
 [![Travis-CI](https://badgen.net/travis/sloria/environs/master)](https://travis-ci.org/sloria/environs)
 [![marshmallow 2/3 compatible](https://badgen.net/badge/marshmallow/2,3?list=1)](https://marshmallow.readthedocs.io/en/latest/upgrading.html)
 [![Black code style](https://badgen.net/badge/code%20style/black/000)](https://github.com/ambv/black)
