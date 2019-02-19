@@ -15,7 +15,7 @@ EXTRAS_REQUIRE = {
     ]
     + DJANGO_REQUIRES,
     "lint": [
-        "flake8==3.7.5",
+        "flake8==3.7.6",
         'flake8-bugbear==18.8.0; python_version >= "3.5"',
         "pre-commit==1.14.4",
     ],
