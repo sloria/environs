@@ -202,9 +202,8 @@ class TestValidation:
 
     def test_can_add_marshmallow_validator(self, set_env, env):
         set_env({"NODE_ENV": "invalid"})
-        with pytest.raises(environs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError):
             env("NODE_ENV", validate=validate.OneOf(["development", "production"]))
-        assert "Not a valid choice." in excinfo.value.args[0]
 
     def test_validator_can_raise_enverror(self, set_env, env):
         with pytest.raises(environs.EnvError) as excinfo:
