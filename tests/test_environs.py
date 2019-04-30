@@ -173,6 +173,20 @@ class TestProxiedVariables:
         )
         assert env("SMTP_LOGIN", "default") == "default"
 
+    def test_reading_proxied_variable_in_prefix_scope(self, set_env, env):
+        set_env(
+            {
+                "MAILGUN_SMTP_LOGIN": "szabolcs",
+                "SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}",
+                "SMTP_NESTED_LOGIN": "{{SMTP_LOGIN}}",
+            }
+        )
+
+        with env.prefixed("SMTP_"):
+            assert env.str("LOGIN") == "szabolcs"
+            with env.prefixed("NESTED_"):
+                assert env.str("LOGIN") == "szabolcs"
+
 
 class TestEnvFileReading:
     def test_read_env(self, env):
