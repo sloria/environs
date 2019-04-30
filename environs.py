@@ -256,19 +256,31 @@ class Env(object):
         dump_result = schema.dump(self._values)
         return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result
 
-    def _get_from_environ(self, key, default):
-        """Access a value from os.environ. Handles proxed variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
+    def _get_from_environ(self, key, default, proxied=False):
+        """Access a value from os.environ. Handles proxied variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
+
+
+        The ``proxied`` flag is recursively set by the method if a proxy lookup is required to get a
+        proxy env key.
         Returns a tuple (envvar_key, envvar_value, proxied_key). The ``envvar_key`` will be different from
         the passed key for proxied variables. proxied_key will be None if the envvar isn't proxied.
         """
-        env_key = self._get_key(key)
+        env_key = self._get_key(key, omit_prefix=proxied)
         value = os.environ.get(env_key, default)
         if hasattr(value, "strip"):
             match = _PROXIED_PATTERN.match(value)
             if match:  # Proxied variable
                 proxied_key = match.groups()[0]
-                return key, self._get_from_environ(proxied_key, default)[1], proxied_key
+                return (
+                    key,
+                    self._get_from_environ(proxied_key, default, proxied=True)[1],
+                    proxied_key,
+                )
         return env_key, value, None
 
-    def _get_key(self, key):
-        return self._prefix + key if self._prefix else key
+    def _get_key(self, key, omit_prefix=False):
+        """Get environ key with the right prefix.
+
+        If the ``omit_prefix`` flag is set then the returned key will not contain any prefix.
+        """
+        return self._prefix + key if self._prefix and not omit_prefix else key
