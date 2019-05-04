@@ -1,5 +1,9 @@
 *.py[cod]
 
+# virtualenv
+.venv/
+venv/
+
 # C extensions
 *.so
 
@@ -44,6 +48,5 @@ docs/_build
 README.html
 
 sandbox
-
 
 !tests/.env
