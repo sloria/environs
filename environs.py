@@ -46,7 +46,10 @@ def _field2method(field_or_factory, method_name, preprocess=None):
             raise EnvError(
                 'Environment variable "{}" not set'.format(proxied_key or parsed_key)
             )
-        value = raw_value or field.missing
+        if raw_value or raw_value == "":
+            value = raw_value
+        else:
+            value = field.missing
         if preprocess:
             value = preprocess(value, subcast=subcast, **kwargs)
         try:

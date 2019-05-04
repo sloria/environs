@@ -47,6 +47,10 @@ class TestCasting:
         set_env({"STR": "foo"})
         assert env.str("STR") == "foo"
 
+    def test_empty_str(self, set_env, env):
+        set_env({"STR": ""})
+        assert env.str("STR") == ""
+
     def test_int_cast(self, set_env, env):
         set_env({"INT": "42"})
         assert env.int("INT") == 42
