@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.1.1 (2019-05-04)
+
+Bug fixes:
+
+- Fix accessing proxied envvars when using `env.prefixed`
+  ([#72](https://github.com/sloria/environs/issues/72)).
+  Thanks [Kamforka](https://github.com/Kamforka) for the catch and patch.
+- Fix behavior when an envvar is explicitly set to an empty string
+  ([#71](https://github.com/sloria/environs/issues/71)).
+  Thanks [twosigmajab](https://github.com/twosigmajab) for reporting
+  and thanks [hvtuananh](https://github.com/hvtuananh) for the PR.
+
+
 ## 4.1.0 (2018-12-10)
 
 - `EnvError` subclasses `ValueError` ([#50](https://github.com/sloria/environs/pull/50)).
