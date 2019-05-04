@@ -260,10 +260,11 @@ class Env(object):
         """Access a value from os.environ. Handles proxied variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
 
 
-        The ``proxied`` flag is recursively set by the method if a proxy lookup is required to get a
-        proxy env key.
         Returns a tuple (envvar_key, envvar_value, proxied_key). The ``envvar_key`` will be different from
         the passed key for proxied variables. proxied_key will be None if the envvar isn't proxied.
+
+        The ``proxied`` flag is recursively passed if a proxy lookup is required to get a
+        proxy env key.
         """
         env_key = self._get_key(key, omit_prefix=proxied)
         value = os.environ.get(env_key, default)
@@ -279,8 +280,4 @@ class Env(object):
         return env_key, value, None
 
     def _get_key(self, key, omit_prefix=False):
-        """Get environ key with the right prefix.
-
-        If the ``omit_prefix`` flag is set then the returned key will not contain any prefix.
-        """
         return self._prefix + key if self._prefix and not omit_prefix else key

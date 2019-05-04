@@ -178,14 +178,18 @@ class TestProxiedVariables:
             {
                 "MAILGUN_SMTP_LOGIN": "szabolcs",
                 "SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}",
+                "SMTP_PASSWORD": "secret",
                 "SMTP_NESTED_LOGIN": "{{SMTP_LOGIN}}",
+                "SMTP_NESTED_PASSWORD": "nested-secret",
             }
         )
 
         with env.prefixed("SMTP_"):
             assert env.str("LOGIN") == "szabolcs"
+            assert env.str("PASSWORD") == "secret"
             with env.prefixed("NESTED_"):
                 assert env.str("LOGIN") == "szabolcs"
+                assert env.str("PASSWORD") == "nested-secret"
 
 
 class TestEnvFileReading:
