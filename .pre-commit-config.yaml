@@ -1,4 +1,8 @@
 repos:
+- repo: https://github.com/asottile/pyupgrade
+  rev: v1.16.3
+  hooks:
+  - id: pyupgrade
 - repo: https://github.com/ambv/black
   rev: 19.3b0
   hooks:
