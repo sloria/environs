@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.2 (2019-05-05)
+
+Bug fixes:
+
+- Fix compatibility with marshmallow 3.0.0>=rc6.
+
 ## 4.1.1 (2019-05-04)
 
 Bug fixes:
