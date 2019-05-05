@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import uuid
 from decimal import Decimal
 import datetime as dt
-from marshmallow.compat import basestring
 import dj_database_url
 import dj_email_url
 
@@ -12,6 +11,12 @@ try:
 except ImportError:
     # Python 2
     import urlparse
+
+try:
+    basestring
+except NameError:
+    # Python 3
+    basestring = (str, bytes)
 
 import pytest
 from marshmallow import fields, validate
