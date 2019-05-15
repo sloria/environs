@@ -106,6 +106,12 @@ class TestCasting:
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT", subcast=int) == {"key1": 1, "key2": 2}
 
+    def test_dict_with_default_from_string(self, set_env, env):
+        assert env.dict("DICT", "key1=1,key2=2") == {"key1": "1", "key2": "2"}
+
+    def test_dict_with_default_from_dict(self, set_env, env):
+        assert env.dict("DICT", {"key1": "1"}) == {"key1": "1"}
+
     def test_decimat_cast(self, set_env, env):
         set_env({"DECIMAL": "12.34"})
         assert env.decimal("DECIMAL") == Decimal("12.34")
