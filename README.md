@@ -119,6 +119,27 @@ env.bool("DEBUG")  # => True
 env.int("PORT")  # => 4567
 ```
 
+## Reading arbitary env formatted files
+
+Note that it's already possible to read files not called `.env` when using `recurse=False`, so perhaps that offers a work-around for some use cases:
+
+```python
+from environs import Env
+
+# let's create test.txt which is in form of env file
+with open("test.txt", "w") as fobj:
+    fobj.write("A=foo\n")
+    fobj.write("B=123\n")
+
+# read that test.txt file
+env = Env()
+env.read_env("test.txt", recurse=False)
+
+# validate the read values
+assert env("A") == "foo"
+assert env.int("B") == 123
+```
+
 ## Handling prefixes
 
 ```python
