@@ -16,6 +16,7 @@ It allows you to store configuration separate from your code, as per
 * [Basic usage](#basic-usage)
 * [Supported types](#supported-types)
 * [Reading .env files](#reading-env-files)
+   * [Reading a specific file](#reading-a-specific-file)
 * [Handling prefixes](#handling-prefixes)
 * [Proxied variables](#proxied-variables)
 * [Validation](#validation)
@@ -119,23 +120,23 @@ env.bool("DEBUG")  # => True
 env.int("PORT")  # => 4567
 ```
 
-## Reading arbitary env formatted files
+### Reading a specific file
 
-Note that it's already possible to read files not called `.env` when using `recurse=False`, so perhaps that offers a work-around for some use cases:
+By default, `Env.read_env` will look for a `.env` file in current
+directory and recurse upwards until a `.env` file is found.
+
+You can also read a specific file:
 
 ```python
 from environs import Env
 
-# let's create test.txt which is in form of env file
-with open("test.txt", "w") as fobj:
+with open(".env.test", "w") as fobj:
     fobj.write("A=foo\n")
     fobj.write("B=123\n")
 
-# read that test.txt file
 env = Env()
-env.read_env("test.txt", recurse=False)
+env.read_env(".env.test", recurse=False)
 
-# validate the read values
 assert env("A") == "foo"
 assert env.int("B") == 123
 ```
