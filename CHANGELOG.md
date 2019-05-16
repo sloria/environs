@@ -1,5 +1,20 @@
 # Changelog
 
+## 4.1.3 (2019-05-15)
+
+Bug fixes:
+
+- Fix behavior when passing a `dict` value as the default
+  to `env.dict` ([#76](https://github.com/sloria/environs/pull/76)).
+  Thanks [c-w](https://github.com/c-w) for the PR.
+
+Support:
+
+- Document how to read a specific file with `env.read_env`
+ ([#66](https://github.com/sloria/environs/issues/66)).
+ Thanks [nvtkaszpir](https://github.com/nvtkaszpir) and 
+ [c-w](https://github.com/c-w).
+
 ## 4.1.2 (2019-05-05)
 
 Bug fixes:
