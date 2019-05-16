@@ -123,7 +123,8 @@ env.int("PORT")  # => 4567
 ### Reading a specific file
 
 By default, `Env.read_env` will look for a `.env` file in current
-directory and recurse upwards until a `.env` file is found.
+directory and (if no .env exists in the CWD) recurse 
+upwards until a `.env` file is found.
 
 You can also read a specific file:
 
