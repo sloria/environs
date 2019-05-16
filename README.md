@@ -16,6 +16,7 @@ It allows you to store configuration separate from your code, as per
 * [Basic usage](#basic-usage)
 * [Supported types](#supported-types)
 * [Reading .env files](#reading-env-files)
+   * [Reading a specific file](#reading-a-specific-file)
 * [Handling prefixes](#handling-prefixes)
 * [Proxied variables](#proxied-variables)
 * [Validation](#validation)
@@ -117,6 +118,27 @@ env.read_env()
 
 env.bool("DEBUG")  # => True
 env.int("PORT")  # => 4567
+```
+
+### Reading a specific file
+
+By default, `Env.read_env` will look for a `.env` file in current
+directory and recurse upwards until a `.env` file is found.
+
+You can also read a specific file:
+
+```python
+from environs import Env
+
+with open(".env.test", "w") as fobj:
+    fobj.write("A=foo\n")
+    fobj.write("B=123\n")
+
+env = Env()
+env.read_env(".env.test", recurse=False)
+
+assert env("A") == "foo"
+assert env.int("B") == 123
 ```
 
 ## Handling prefixes
