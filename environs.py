@@ -12,6 +12,12 @@ except ImportError:
     # Python 2
     import urlparse
 
+try:
+    from collections.abc import Mapping
+except ImportError:
+    # Python 2
+    from collections import Mapping
+
 import marshmallow as ma
 from dotenv import load_dotenv
 from dotenv.main import _walk_to_root
@@ -108,6 +114,9 @@ def _preprocess_list(value, **kwargs):
 
 
 def _preprocess_dict(value, **kwargs):
+    if isinstance(value, Mapping):
+        return value
+
     subcast = kwargs.get("subcast")
     return {
         key.strip(): subcast(val.strip()) if subcast else val.strip()
