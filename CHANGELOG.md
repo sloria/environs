@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.0 (unreleased)
+
+- Minor optimization.
+
 ## 4.1.3 (2019-05-15)
 
 Bug fixes:
