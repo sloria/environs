@@ -166,27 +166,29 @@ class Env(object):
 
     __call__ = _field2method(ma.fields.Field, "__call__")
 
+    default_parser_map = dict(
+        bool=_field2method(ma.fields.Bool, "bool"),
+        str=_field2method(ma.fields.Str, "str"),
+        int=_field2method(ma.fields.Int, "int"),
+        float=_field2method(ma.fields.Float, "float"),
+        decimal=_field2method(ma.fields.Decimal, "decimal"),
+        list=_field2method(_make_list_field, "list", preprocess=_preprocess_list),
+        dict=_field2method(ma.fields.Dict, "dict", preprocess=_preprocess_dict),
+        json=_field2method(ma.fields.Field, "json", preprocess=_preprocess_json),
+        datetime=_field2method(ma.fields.DateTime, "datetime"),
+        date=_field2method(ma.fields.Date, "date"),
+        timedelta=_field2method(ma.fields.TimeDelta, "timedelta"),
+        uuid=_field2method(ma.fields.UUID, "uuid"),
+        url=_field2method(URLField, "url"),
+        dj_db_url=_func2method(_dj_db_url_parser, "dj_db_url"),
+        dj_email_url=_func2method(_dj_email_url_parser, "dj_email_url"),
+    )
+
     def __init__(self):
         self._fields = {}
         self._values = {}
         self._prefix = None
-        self.__parser_map__ = dict(
-            bool=_field2method(ma.fields.Bool, "bool"),
-            str=_field2method(ma.fields.Str, "str"),
-            int=_field2method(ma.fields.Int, "int"),
-            float=_field2method(ma.fields.Float, "float"),
-            decimal=_field2method(ma.fields.Decimal, "decimal"),
-            list=_field2method(_make_list_field, "list", preprocess=_preprocess_list),
-            dict=_field2method(ma.fields.Dict, "dict", preprocess=_preprocess_dict),
-            json=_field2method(ma.fields.Field, "json", preprocess=_preprocess_json),
-            datetime=_field2method(ma.fields.DateTime, "datetime"),
-            date=_field2method(ma.fields.Date, "date"),
-            timedelta=_field2method(ma.fields.TimeDelta, "timedelta"),
-            uuid=_field2method(ma.fields.UUID, "uuid"),
-            url=_field2method(URLField, "url"),
-            dj_db_url=_func2method(_dj_db_url_parser, "dj_db_url"),
-            dj_email_url=_func2method(_dj_email_url_parser, "dj_email_url"),
-        )
+        self.__parser_map__ = self.default_parser_map.copy()
 
     def __repr__(self):
         return "<{} {}>".format(self.__class__.__name__, self._values)
