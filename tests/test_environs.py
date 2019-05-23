@@ -38,6 +38,10 @@ def env():
     return environs.Env()
 
 
+class FauxTestException(Exception):
+    pass
+
+
 class TestCasting:
     def test_call(self, set_env, env):
         set_env({"STR": "foo", "INT": "42"})
@@ -432,6 +436,29 @@ class TestNestedPrefix:
             "APP_NESTED_INT": 42,
             "APP_NESTED_NOT_FOUND": "mydefault",
         }
+
+
+class TestFailedNestedPrefix:
+    @pytest.fixture(autouse=True)
+    def default_environ(self, set_env):
+        set_env({"APP_STR": "foo", "APP_NESTED_INT": "42"})
+
+    def test_failed_nested_prefixed(self, env):
+        # with pytest.raises(Exception) as e_info:
+        try:
+            with env.prefixed("APP_"):
+                with env.prefixed("NESTED_"):
+                    assert env.int("INT") == 42
+                    assert env("NOT_FOUND", "mydefault") == "mydefault"
+                assert env.str("STR") == "foo"
+                assert env("NOT_FOUND", "mydefault") == "mydefault"
+                raise FauxTestException
+        except FauxTestException:
+            with env.prefixed("APP_"):
+                with env.prefixed("NESTED_"):
+                    assert env.int("INT") == 42
+                    assert env("NOT_FOUND", "mydefault") == "mydefault"
+                assert env.str("STR") == "foo"
 
 
 class TestDjango:
