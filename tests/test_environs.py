@@ -38,6 +38,10 @@ def env():
     return environs.Env()
 
 
+class FauxTestException(Exception):
+    pass
+
+
 class TestCasting:
     def test_call(self, set_env, env):
         set_env({"STR": "foo", "INT": "42"})
@@ -432,6 +436,54 @@ class TestNestedPrefix:
             "APP_NESTED_INT": 42,
             "APP_NESTED_NOT_FOUND": "mydefault",
         }
+
+
+class TestFailedNestedPrefix:
+    @pytest.fixture(autouse=True)
+    def default_environ(self, set_env):
+        set_env({"APP_STR": "foo", "APP_NESTED_INT": "42"})
+
+    def test_failed_nested_prefixed(self, env):
+
+        # define repeated prefixed steps
+        def nested_prefixed(env, fail=False):
+            with env.prefixed("APP_"):
+                with env.prefixed("NESTED_"):
+                    assert env.int("INT") == 42
+                    assert env("NOT_FOUND", "mydefault") == "mydefault"
+                assert env.str("STR") == "foo"
+                assert env("NOT_FOUND", "mydefault") == "mydefault"
+                if fail:
+                    raise FauxTestException
+
+        try:
+            nested_prefixed(env, fail=True)
+        except FauxTestException:
+            nested_prefixed(env, fail=False)
+
+    def test_failed_dump_with_nested_prefixed(self, env):
+
+        # define repeated prefixed steps
+        def dump_with_nested_prefixed(env, fail=False):
+            with env.prefixed("APP_"):
+                with env.prefixed("NESTED_"):
+                    env.int("INT") == 42
+                    env("NOT_FOUND", "mydefault") == "mydefault"
+                env.str("STR") == "foo"
+                env("NOT_FOUND", "mydefault") == "mydefault"
+                if fail:
+                    raise FauxTestException
+            assert env.dump() == {
+                "APP_STR": "foo",
+                "APP_NOT_FOUND": "mydefault",
+                "APP_NESTED_INT": 42,
+                "APP_NESTED_NOT_FOUND": "mydefault",
+            }
+
+        try:
+            dump_with_nested_prefixed(env, fail=True)
+        except FauxTestException:
+            dump_with_nested_prefixed(env, fail=False)
 
 
 class TestDjango:
