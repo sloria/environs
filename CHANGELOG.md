@@ -4,6 +4,12 @@
 
 - Minor optimization.
 
+Bug fixes:
+
+- Reset prefix when an exception is raised within an `env.prefixed()`
+  context ([#78](https://github.com/sloria/environs/issues/78)).
+  Thanks [rcuza](https://github.com/rcuza) for the catch and patch.
+
 ## 4.1.3 (2019-05-15)
 
 Bug fixes:
