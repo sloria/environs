@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import contextlib
 import inspect
 import functools
@@ -96,11 +95,11 @@ def _dict2schema(dct):
     attrs = dct.copy()
     if MARSHMALLOW_VERSION_INFO[0] < 3:
 
-        class Meta(object):
+        class Meta:
             strict = True
 
         attrs["Meta"] = Meta
-    return type(str(""), (ma.Schema,), attrs)
+    return type("", (ma.Schema,), attrs)
 
 
 def _make_list_field(**kwargs):
@@ -157,11 +156,11 @@ class URLField(ma.fields.URL):
     # Override deserialize rather than _deserialize because we need
     # to call urlparse *after* validation has occurred
     def deserialize(self, value, attr=None, data=None):
-        ret = super(URLField, self).deserialize(value, attr, data)
+        ret = super().deserialize(value, attr, data)
         return urlparse.urlparse(ret)
 
 
-class Env(object):
+class Env:
     """An environment variable reader."""
 
     __call__ = _field2method(ma.fields.Field, "__call__")

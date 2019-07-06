@@ -1,5 +1,12 @@
 # Changelog
 
+### 5.0.0 (unreleased)
+
+Other changes:
+
+- _Backwards-incompatible_: Drop support for Python 2. If you use Python 2,
+  you will need to use version 4.2.0 or older.
+
 ## 4.2.0 (2019-06-01)
 
 - Minor optimization.
