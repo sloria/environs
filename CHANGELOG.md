@@ -2,6 +2,12 @@
 
 ### 5.0.0 (unreleased)
 
+Features:
+
+- Add `env.path` ([#81](https://github.com/sloria/environs/issues/81)).
+  Thanks [umrashrf](https://github.com/umrashrf) for the suggestion.
+- Add type annotations.
+
 Other changes:
 
 - _Backwards-incompatible_: Drop support for Python 2. If you use Python 2,
