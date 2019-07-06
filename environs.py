@@ -74,7 +74,7 @@ def _func2method(func: typing.Callable, method_name: str) -> typing.Callable:
         self._values[parsed_key] = value
         return value
 
-    method.__name__ = str(method_name)  # cast to str for Py2 compat
+    method.__name__ = method_name
     return method
 
 
