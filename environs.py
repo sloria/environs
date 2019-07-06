@@ -13,7 +13,7 @@ import marshmallow as ma
 from dotenv import load_dotenv
 from dotenv.main import _walk_to_root
 
-__version__ = "4.2.0"
+__version__ = "5.0.0"
 __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple([int(part) for part in ma.__version__.split(".") if part.isdigit()])

@@ -1,6 +1,6 @@
 # Changelog
 
-### 5.0.0 (unreleased)
+### 5.0.0 (2019-07-06)
 
 Features:
 
