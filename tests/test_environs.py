@@ -1,23 +1,12 @@
 from __future__ import unicode_literals
 
 import uuid
-from decimal import Decimal
 import datetime as dt
+import urllib.parse
+from decimal import Decimal
+
 import dj_database_url
 import dj_email_url
-
-try:
-    import urllib.parse as urlparse
-except ImportError:
-    # Python 2
-    import urlparse
-
-try:
-    basestring
-except NameError:
-    # Python 3
-    basestring = (str, bytes)
-
 import pytest
 from marshmallow import fields, validate
 
@@ -160,7 +149,7 @@ class TestCasting:
     def test_url_cast(self, set_env, env):
         set_env({"URL": "http://stevenloria.com/projects/?foo=42"})
         res = env.url("URL")
-        assert isinstance(res, urlparse.ParseResult)
+        assert isinstance(res, urllib.parse.ParseResult)
 
     @pytest.mark.parametrize("url", ["foo", "42", "foo@bar"])
     def test_invalid_url(self, url, set_env, env):
@@ -344,7 +333,7 @@ class TestDumping:
         assert result["INT"] == 42
         assert "DTIME" in result
         assert type(result["DTIME"]) is str
-        assert isinstance(result["URLPARSE"], basestring)
+        assert isinstance(result["URLPARSE"], str)
         assert result["URLPARSE"] == "http://stevenloria.com/projects/?foo=42"
 
     def test_env_with_custom_parser(self, set_env, env):

@@ -4,18 +4,8 @@ import functools
 import json as pyjson
 import os
 import re
-
-try:
-    import urllib.parse as urlparse
-except ImportError:
-    # Python 2
-    import urlparse
-
-try:
-    from collections.abc import Mapping
-except ImportError:
-    # Python 2
-    from collections import Mapping
+from urllib.parse import urlparse
+from collections.abc import Mapping
 
 import marshmallow as ma
 from dotenv import load_dotenv
@@ -157,7 +147,7 @@ class URLField(ma.fields.URL):
     # to call urlparse *after* validation has occurred
     def deserialize(self, value, attr=None, data=None):
         ret = super().deserialize(value, attr, data)
-        return urlparse.urlparse(ret)
+        return urlparse(ret)
 
 
 class Env:
