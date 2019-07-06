@@ -24,9 +24,7 @@ SECRET_KEY = env.str("SECRET_KEY")
 
 DATABASES = {
     "default": env.dj_db_url(
-        "DATABASE_URL",
-        default="sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3"),
-        ssl_require=not DEBUG,
+        "DATABASE_URL", default="sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3"), ssl_require=not DEBUG
     )
 }
 
