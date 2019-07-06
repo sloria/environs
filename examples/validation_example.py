@@ -20,10 +20,7 @@ except EnvError as err:
 # marshmallow validator
 try:
     env.str(
-        "NODE_ENV",
-        validate=OneOf(
-            ["production", "development"], error="NODE_ENV must be one of: {choices}"
-        ),
+        "NODE_ENV", validate=OneOf(["production", "development"], error="NODE_ENV must be one of: {choices}")
     )
 except EnvError as err:
     print(err)

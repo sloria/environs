@@ -169,12 +169,7 @@ class TestProxiedVariables:
                 "SMTP_LOGIN_RPADDED": "{{MAILGUN_SMTP_LOGIN }}",
             }
         )
-        for key in (
-            "MAILGUN_SMTP_LOGIN",
-            "SMTP_LOGIN",
-            "SMTP_LOGIN_LPADDED",
-            "SMTP_LOGIN_RPADDED",
-        ):
+        for key in ("MAILGUN_SMTP_LOGIN", "SMTP_LOGIN", "SMTP_LOGIN_LPADDED", "SMTP_LOGIN_RPADDED"):
             assert env(key) == "sloria"
             assert env.dump()[key] == "sloria"
 
@@ -182,9 +177,7 @@ class TestProxiedVariables:
         set_env({"SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}"})
         with pytest.raises(environs.EnvError) as excinfo:
             env("SMTP_LOGIN")
-        assert (
-            excinfo.value.args[0] == 'Environment variable "MAILGUN_SMTP_LOGIN" not set'
-        )
+        assert excinfo.value.args[0] == 'Environment variable "MAILGUN_SMTP_LOGIN" not set'
         assert env("SMTP_LOGIN", "default") == "default"
 
     def test_reading_proxied_variable_in_prefix_scope(self, set_env, env):
@@ -392,11 +385,7 @@ class TestPrefix:
             env.str("STR") == "foo"
             env.int("INT") == 42
             env("NOT_FOUND", "mydefault") == "mydefault"
-        assert env.dump() == {
-            "APP_STR": "foo",
-            "APP_INT": 42,
-            "APP_NOT_FOUND": "mydefault",
-        }
+        assert env.dump() == {"APP_STR": "foo", "APP_INT": 42, "APP_NOT_FOUND": "mydefault"}
 
 
 class TestNestedPrefix:

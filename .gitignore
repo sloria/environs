@@ -47,6 +47,10 @@ output/*/index.html
 docs/_build
 README.html
 
+# mypy
+
+.mypy_cache
+
 sandbox
 
 !tests/.env
