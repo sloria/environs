@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.2.0 (unreleased)
+## 4.2.0 (2019-06-01)
 
 - Minor optimization.
 
@@ -21,9 +21,9 @@ Bug fixes:
 Support:
 
 - Document how to read a specific file with `env.read_env`
- ([#66](https://github.com/sloria/environs/issues/66)).
- Thanks [nvtkaszpir](https://github.com/nvtkaszpir) and 
- [c-w](https://github.com/c-w).
+  ([#66](https://github.com/sloria/environs/issues/66)).
+  Thanks [nvtkaszpir](https://github.com/nvtkaszpir) and
+  [c-w](https://github.com/c-w).
 
 ## 4.1.2 (2019-05-05)
 
@@ -43,7 +43,6 @@ Bug fixes:
   Thanks [twosigmajab](https://github.com/twosigmajab) for reporting
   and thanks [hvtuananh](https://github.com/hvtuananh) for the PR.
 
-
 ## 4.1.0 (2018-12-10)
 
 - `EnvError` subclasses `ValueError` ([#50](https://github.com/sloria/environs/pull/50)).
@@ -60,7 +59,7 @@ Bug fixes:
 
 Features:
 
-- *Backwards-incompatible*: `Env.read_env` raises a warning instead of
+- _Backwards-incompatible_: `Env.read_env` raises a warning instead of
   an error when `.env` isn\'t found
   ([#10](https://github.com/sloria/environs/issues/10)). Thanks
   [lachlancooper](https://github.com/lachlancooper) for the
@@ -79,7 +78,7 @@ Features:
 
 Features:
 
-- Add recurse parameter to Env.read\_env
+- Add recurse parameter to Env.read_env
   ([#9](https://github.com/sloria/environs/pull/9)). Thanks
   [gthank](https://github.com/gthank) for the PR.
 
@@ -93,7 +92,7 @@ Features:
 
 Other changes:
 
-- *Backwards-incompatible*: Drop support for Python 3.3 and 3.4.
+- _Backwards-incompatible_: Drop support for Python 3.3 and 3.4.
 
 ## 1.2.0 (2017-01-12)
 
@@ -116,8 +115,8 @@ Bug fixes:
 
 - Support for proxied variables
   ([#2](https://github.com/sloria/environs/issues/2)).
-- *Backwards-incompatible*: Remove `env.get` method. Use `env()`
-   instead.
+- _Backwards-incompatible_: Remove `env.get` method. Use `env()`
+  instead.
 - Document how to read `.env` files
   ([#1](https://github.com/sloria/environs/issues/1)).
 
