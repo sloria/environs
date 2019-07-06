@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import uuid
 import datetime as dt
 import urllib.parse
+import pathlib
 from decimal import Decimal
 
 import dj_database_url
@@ -150,6 +151,11 @@ class TestCasting:
         set_env({"URL": "http://stevenloria.com/projects/?foo=42"})
         res = env.url("URL")
         assert isinstance(res, urllib.parse.ParseResult)
+
+    def test_path_cast(self, set_env, env):
+        set_env({"PTH": "/home/sloria"})
+        res = env.path("PTH")
+        assert isinstance(res, pathlib.Path)
 
     @pytest.mark.parametrize("url", ["foo", "42", "foo@bar"])
     def test_invalid_url(self, url, set_env, env):
@@ -313,6 +319,7 @@ class TestDumping:
                 "INT": "42",
                 "DTIME": dtime.isoformat(),
                 "URLPARSE": "http://stevenloria.com/projects/?foo=42",
+                "PTH": "/home/sloria",
             }
         )
 
@@ -320,6 +327,7 @@ class TestDumping:
         env.int("INT")
         env.datetime("DTIME")
         env.url("URLPARSE")
+        env.path("PTH")
 
         result = env.dump()
         assert result["STR"] == "foo"
@@ -328,6 +336,8 @@ class TestDumping:
         assert type(result["DTIME"]) is str
         assert isinstance(result["URLPARSE"], str)
         assert result["URLPARSE"] == "http://stevenloria.com/projects/?foo=42"
+        assert isinstance(result["PTH"], str)
+        assert result["PTH"] == str(pathlib.Path("/home/sloria"))
 
     def test_env_with_custom_parser(self, set_env, env):
         @env.parser_for("url")

@@ -7,6 +7,7 @@ import re
 import typing
 from collections.abc import Mapping
 from urllib.parse import urlparse, ParseResult
+from pathlib import Path
 
 import marshmallow as ma
 from dotenv import load_dotenv
@@ -151,6 +152,12 @@ class URLField(ma.fields.URL):
         return urlparse(ret)
 
 
+class PathField(ma.fields.Str):
+    def _deserialize(self, value, *args, **kwargs) -> Path:
+        ret = super()._deserialize(value, *args, **kwargs)
+        return Path(ret)
+
+
 class Env:
     """An environment variable reader."""
 
@@ -167,6 +174,7 @@ class Env:
         json=_field2method(ma.fields.Field, "json", preprocess=_preprocess_json),
         datetime=_field2method(ma.fields.DateTime, "datetime"),
         date=_field2method(ma.fields.Date, "date"),
+        path=_field2method(PathField, "path"),
         timedelta=_field2method(ma.fields.TimeDelta, "timedelta"),
         uuid=_field2method(ma.fields.UUID, "uuid"),
         url=_field2method(URLField, "url"),
