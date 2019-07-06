@@ -1,7 +1,7 @@
 # environs: simplified environment variable parsing
 
 [![Latest version](https://badgen.net/pypi/v/environs)](https://pypi.org/project/environs/)
-[![Travis-CI](https://badgen.net/travis/sloria/environs/master)](https://travis-ci.org/sloria/environs)
+[![Build Status](https://dev.azure.com/sloria/sloria/_apis/build/status/sloria.environs?branchName=master)](https://dev.azure.com/sloria/sloria/_build/latest?definitionId=12&branchName=master)
 [![marshmallow 2/3 compatible](https://badgen.net/badge/marshmallow/2,3?list=1)](https://marshmallow.readthedocs.io/en/latest/upgrading.html)
 [![Black code style](https://badgen.net/badge/code%20style/black/000)](https://github.com/ambv/black)
 
@@ -11,32 +11,32 @@ It allows you to store configuration separate from your code, as per
 
 ## Contents
 
-* [Features](#features)
-* [Install](#install)
-* [Basic usage](#basic-usage)
-* [Supported types](#supported-types)
-* [Reading .env files](#reading-env-files)
-   * [Reading a specific file](#reading-a-specific-file)
-* [Handling prefixes](#handling-prefixes)
-* [Proxied variables](#proxied-variables)
-* [Validation](#validation)
-* [Serialization](#serialization)
-* [Defining custom parser behavior](#defining-custom-parser-behavior)
-* [Usage with Flask](#usage-with-flask)
-* [Usage with Django](#usage-with-django)
-* [Why...?](#why)
-   * [Why envvars?](#why-envvars)
-   * [Why not os.environ?](#why-not-osenviron)
-   * [Why another library?](#why-another-library)
-* [License](#license)
+- [Features](#features)
+- [Install](#install)
+- [Basic usage](#basic-usage)
+- [Supported types](#supported-types)
+- [Reading .env files](#reading-env-files)
+  - [Reading a specific file](#reading-a-specific-file)
+- [Handling prefixes](#handling-prefixes)
+- [Proxied variables](#proxied-variables)
+- [Validation](#validation)
+- [Serialization](#serialization)
+- [Defining custom parser behavior](#defining-custom-parser-behavior)
+- [Usage with Flask](#usage-with-flask)
+- [Usage with Django](#usage-with-django)
+- [Why...?](#why)
+  - [Why envvars?](#why-envvars)
+  - [Why not os.environ?](#why-not-osenviron)
+  - [Why another library?](#why-another-library)
+- [License](#license)
 
 ## Features
 
-* Type-casting
-* Read `.env` files into `os.environ` (useful for local development)
-* Validation
-* Define custom parser behavior
-* Framework-agnostic, but integrates well with [Flask](#usage-with-flask) and [Django](#usage-with-django)
+- Type-casting
+- Read `.env` files into `os.environ` (useful for local development)
+- Validation
+- Define custom parser behavior
+- Framework-agnostic, but integrates well with [Flask](#usage-with-flask) and [Django](#usage-with-django)
 
 ## Install
 
@@ -123,7 +123,7 @@ env.int("PORT")  # => 4567
 ### Reading a specific file
 
 By default, `Env.read_env` will look for a `.env` file in current
-directory and (if no .env exists in the CWD) recurse 
+directory and (if no .env exists in the CWD) recurse
 upwards until a `.env` file is found.
 
 You can also read a specific file:
@@ -330,7 +330,7 @@ SECRET_KEY="not so secret"
 ```
 
 For a more complete example, see
-[django\_example.py](https://github.com/sloria/environs/blob/master/examples/django_example.py)
+[django_example.py](https://github.com/sloria/environs/blob/master/examples/django_example.py)
 in the `examples/` directory.
 
 ## Why\...?
@@ -348,14 +348,14 @@ environs abstracts common tasks for handling environment variables.
 
 environs will help you
 
--   cast envvars to the correct type
--   specify required envvars
--   define default values
--   validate envvars
--   parse list and dict values
--   parse dates, datetimes, and timedeltas
--   parse proxied variables
--   serialize your configuration to JSON, YAML, etc.
+- cast envvars to the correct type
+- specify required envvars
+- define default values
+- validate envvars
+- parse list and dict values
+- parse dates, datetimes, and timedeltas
+- parse proxied variables
+- serialize your configuration to JSON, YAML, etc.
 
 ### Why another library?
 
