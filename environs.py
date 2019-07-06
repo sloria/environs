@@ -59,7 +59,7 @@ def _field2method(
             self._values[parsed_key] = value
             return value
 
-    method.__name__ = str(method_name)  # cast to str for Py2 compat
+    method.__name__ = method_name
     return method
 
 
