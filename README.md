@@ -98,6 +98,7 @@ The following are all type-casting methods of `Env`:
 - `env.timedelta` (assumes value is an integer in seconds)
 - `env.url`
 - `env.uuid`
+- `env.path` (casts to a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html))
 
 ## Reading `.env` files
 
