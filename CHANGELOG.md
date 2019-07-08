@@ -1,5 +1,11 @@
 # Changelog
 
+### 5.1.0 (unreleased)
+
+Other changes:
+
+- Improve typings.
+
 ### 5.0.0 (2019-07-06)
 
 Features:
