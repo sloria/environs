@@ -29,7 +29,7 @@ FieldFactory = typing.Callable[..., ma.fields.Field]
 
 
 def _field2method(
-    field_or_factory: typing.Union[ma.fields.Field, FieldFactory],
+    field_or_factory: typing.Union[typing.Type[ma.fields.Field], FieldFactory],
     method_name: str,
     preprocess: typing.Callable = None,
 ) -> typing.Callable:
@@ -38,7 +38,7 @@ def _field2method(
     ):
         missing = kwargs.pop("missing", None) or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
-            field = typing.cast(ma.fields.Field, field_or_factory)(missing=missing, **kwargs)
+            field = typing.cast(typing.Type[ma.fields.Field], field_or_factory)(missing=missing, **kwargs)
         else:
             field = typing.cast(FieldFactory, field_or_factory)(subcast=subcast, missing=missing, **kwargs)
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, ma.missing)
