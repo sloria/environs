@@ -2,6 +2,7 @@ import contextlib
 import inspect
 import functools
 import json as pyjson
+import logging
 import os
 import re
 import typing
@@ -156,6 +157,17 @@ class PathField(ma.fields.Str):
         return Path(ret)
 
 
+class LogLevelField(ma.fields.Int):
+    def _format_num(self, value):
+        try:
+            return super()._format_num(value)
+        except (TypeError, ValueError) as error:
+            if hasattr(logging, value):
+                return getattr(logging, value)
+            else:
+                raise ma.ValidationError("Not a valid log level.") from error
+
+
 class Env:
     """An environment variable reader."""
 
@@ -173,6 +185,7 @@ class Env:
         datetime=_field2method(ma.fields.DateTime, "datetime"),
         date=_field2method(ma.fields.Date, "date"),
         path=_field2method(PathField, "path"),
+        log_level=_field2method(LogLevelField, "log_level"),
         timedelta=_field2method(ma.fields.TimeDelta, "timedelta"),
         uuid=_field2method(ma.fields.UUID, "uuid"),
         url=_field2method(URLField, "url"),

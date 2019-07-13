@@ -1,5 +1,4 @@
-from __future__ import unicode_literals
-
+import logging
 import uuid
 import datetime as dt
 import urllib.parse
@@ -106,7 +105,7 @@ class TestCasting:
     def test_dict_with_default_from_dict(self, set_env, env):
         assert env.dict("DICT", {"key1": "1"}) == {"key1": "1"}
 
-    def test_decimat_cast(self, set_env, env):
+    def test_decimal_cast(self, set_env, env):
         set_env({"DECIMAL": "12.34"})
         assert env.decimal("DECIMAL") == Decimal("12.34")
 
@@ -156,6 +155,17 @@ class TestCasting:
         set_env({"PTH": "/home/sloria"})
         res = env.path("PTH")
         assert isinstance(res, pathlib.Path)
+
+    def test_log_level_cast(self, set_env, env):
+        set_env({"LOG_LEVEL": "WARNING", "LOG_LEVEL_INT": str(logging.WARNING)})
+        assert env.log_level("LOG_LEVEL_INT") == logging.WARNING
+        assert env.log_level("LOG_LEVEL") == logging.WARNING
+
+    def test_invalid_log_level(self, set_env, env):
+        set_env({"LOG_LEVEL": "INVALID"})
+        with pytest.raises(environs.EnvError) as excinfo:
+            env.log_level("LOG_LEVEL")
+        assert "Not a valid log level" in excinfo.value.args[0]
 
     @pytest.mark.parametrize("url", ["foo", "42", "foo@bar"])
     def test_invalid_url(self, url, set_env, env):
@@ -320,6 +330,7 @@ class TestDumping:
                 "DTIME": dtime.isoformat(),
                 "URLPARSE": "http://stevenloria.com/projects/?foo=42",
                 "PTH": "/home/sloria",
+                "LOG_LEVEL": "WARNING",
             }
         )
 
@@ -328,6 +339,7 @@ class TestDumping:
         env.datetime("DTIME")
         env.url("URLPARSE")
         env.path("PTH")
+        env.log_level("LOG_LEVEL")
 
         result = env.dump()
         assert result["STR"] == "foo"
@@ -338,6 +350,7 @@ class TestDumping:
         assert result["URLPARSE"] == "http://stevenloria.com/projects/?foo=42"
         assert isinstance(result["PTH"], str)
         assert result["PTH"] == str(pathlib.Path("/home/sloria"))
+        assert result["LOG_LEVEL"] == logging.WARNING
 
     def test_env_with_custom_parser(self, set_env, env):
         @env.parser_for("url")
