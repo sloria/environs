@@ -54,6 +54,7 @@ export TTL=42
 export ENABLE_LOGIN=true
 export GITHUB_REPOS=webargs,konch,ped
 export COORDINATES=23.3,50.0
+export LOG_LEVEL=DEBUG
 ```
 
 Parse them with environs...
@@ -71,6 +72,7 @@ secret = env("SECRET")  # => raises error if not set
 max_connections = env.int("MAX_CONNECTIONS")  # => 100
 ship_date = env.date("SHIP_DATE")  # => datetime.date(1984, 6, 25)
 ttl = env.timedelta("TTL")  # => datetime.timedelta(0, 42)
+log_level = env.log_level("LOG_LEVEL")  # => logging.DEBUG
 
 # providing a default value
 enable_login = env.bool("ENABLE_LOGIN", False)  # => True
@@ -98,6 +100,7 @@ The following are all type-casting methods of `Env`:
 - `env.timedelta` (assumes value is an integer in seconds)
 - `env.url`
 - `env.uuid`
+- `env.log_level`
 - `env.path` (casts to a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html))
 
 ## Reading `.env` files

@@ -2,6 +2,10 @@
 
 ### 5.1.0 (unreleased)
 
+Features:
+
+- Add `env.log_level` ([#7](https://github.com/sloria/environs/issues/7)).
+
 Other changes:
 
 - Improve typings.
