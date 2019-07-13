@@ -52,8 +52,8 @@ def _field2method(
             value = preprocess(value, subcast=subcast, **kwargs)
         try:
             value = field.deserialize(value)
-        except ma.ValidationError as err:
-            raise EnvError('Environment variable "{}" invalid: {}'.format(name, err.args[0]))
+        except ma.ValidationError as error:
+            raise EnvError('Environment variable "{}" invalid: {}'.format(name, error.args[0])) from error
         else:
             self._values[parsed_key] = value
             return value
@@ -121,22 +121,22 @@ def _preprocess_json(value: str, **kwargs):
 def _dj_db_url_parser(value: str, **kwargs) -> dict:
     try:
         import dj_database_url
-    except ImportError:
+    except ImportError as error:
         raise RuntimeError(
             "The dj_db_url parser requires the dj-database-url package. "
             "You can install it with: pip install dj-database-url"
-        )
+        ) from error
     return dj_database_url.parse(value, **kwargs)
 
 
 def _dj_email_url_parser(value: str, **kwargs) -> dict:
     try:
         import dj_email_url
-    except ImportError:
+    except ImportError as error:
         raise RuntimeError(
             "The dj_email_url parser requires the dj-email-url package. "
             "You can install it with: pip install dj-email-url"
-        )
+        ) from error
     return dj_email_url.parse(value, **kwargs)
 
 
@@ -257,8 +257,8 @@ class Env:
     def __getattr__(self, name: str, **kwargs):
         try:
             return functools.partial(self.__parser_map__[name], self)
-        except KeyError:
-            raise AttributeError("{} has no attribute {}".format(self, name))
+        except KeyError as error:
+            raise AttributeError("{} has no attribute {}".format(self, name)) from error
 
     def add_parser(self, name: str, func: typing.Callable) -> None:
         """Register a new parser method with the name ``name``. ``func`` must
