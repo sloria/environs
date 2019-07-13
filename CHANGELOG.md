@@ -1,10 +1,11 @@
 # Changelog
 
-### 5.1.0 (unreleased)
+### 5.1.0 (2019-07-13)
 
 Features:
 
 - Add `env.log_level` ([#7](https://github.com/sloria/environs/issues/7)).
+- Use `raise from` to improve tracebacks.
 
 Other changes:
 
