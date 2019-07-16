@@ -55,9 +55,10 @@ class TestCasting:
 
     def test_invalid_int(self, set_env, env):
         set_env({"INT": "invalid"})
-        with pytest.raises(environs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvError, match='Environment variable "INT" invalid') as excinfo:
             env.int("INT")
-        assert 'Environment variable "INT" invalid' in excinfo.value.args[0]
+        exc = excinfo.value
+        assert "Not a valid integer." in exc.error_messages
 
     def test_float_cast(self, set_env, env):
         set_env({"FLOAT": "33.3"})
@@ -505,3 +506,51 @@ class TestDjango:
         set_env({"EMAIL_URL": email_url})
         res = env.dj_email_url("EMAIL_URL")
         assert res == dj_email_url.parse(email_url)
+
+
+class TestDeferredValidation:
+    @pytest.fixture
+    def env(self):
+        return environs.Env(eager=False)
+
+    def test_valid(self, env, set_env):
+        set_env({"STR": "foo", "INT": "42"})
+        str_val = env.str("STR")
+        int_val = env.int("INT")
+        env.seal()
+        assert str_val == "foo"
+        assert int_val == 42
+
+    def test_validation(self, env, set_env):
+        set_env({"INT": "invalid", "DTIME": "notadatetime"})
+        env.int("INT")
+        env.datetime("DTIME")
+        env.str("REQUIRED")
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        exc = excinfo.value
+        msg = exc.args[0]
+        assert "REQUIRED" in msg
+        assert "INT" in msg
+        assert "DTIME" in msg
+        assert "REQUIRED" in exc.error_messages
+        assert "INT" in exc.error_messages
+        assert "DTIME" in exc.error_messages
+
+    def test_cannot_add_after_seal(self, env, set_env):
+        set_env({"STR": "foo", "INT": "42"})
+        env.str("STR")
+        env.seal()
+        with pytest.raises(environs.EnvSealedError, match="Env has already been sealed"):
+            env.int("INT")
+
+    def test_custom_parser_not_called_after_seal(self, env, set_env):
+        set_env({"URL": "test.test/"})
+
+        @env.parser_for("url")
+        def url(value):
+            return "https://" + value
+
+        env.seal()
+        with pytest.raises(environs.EnvSealedError, match="Env has already been sealed"):
+            env.url("URL")
