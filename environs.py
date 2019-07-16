@@ -28,14 +28,13 @@ _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
 T = typing.TypeVar("T")
 FieldFactory = typing.Callable[..., ma.fields.Field]
 Subcast = typing.Union[typing.Type, typing.Callable[..., T]]
+FieldType = typing.Type[ma.fields.Field]
+FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable[..., T]
 
 
 def _field2method(
-    field_or_factory: typing.Union[typing.Type[ma.fields.Field], FieldFactory],
-    method_name: str,
-    *,
-    preprocess: typing.Callable = None,
+    field_or_factory: FieldOrFactory, method_name: str, *, preprocess: typing.Callable = None
 ) -> ParserMethod:
     def method(
         self: "Env", name: str, default: typing.Any = ma.missing, subcast: Subcast = None, **kwargs
