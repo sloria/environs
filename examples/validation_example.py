@@ -13,7 +13,7 @@ env = Env()
 
 # simple validator
 try:
-    env.int("TTL", validate=lambda n: n > 0)  # => 'sloria'
+    env.int("TTL", validate=lambda n: n > 0)
 except EnvError as err:
     print(err)
 

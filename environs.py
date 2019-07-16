@@ -25,16 +25,21 @@ class EnvError(ValueError):
 
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
 
+T = typing.TypeVar("T")
 FieldFactory = typing.Callable[..., ma.fields.Field]
-Subcast = typing.Union[typing.Type, typing.Callable]
+Subcast = typing.Union[typing.Type, typing.Callable[..., T]]
+ParserMethod = typing.Callable[..., T]
 
 
 def _field2method(
     field_or_factory: typing.Union[typing.Type[ma.fields.Field], FieldFactory],
     method_name: str,
+    *,
     preprocess: typing.Callable = None,
-) -> typing.Callable:
-    def method(self: "Env", name: str, default: typing.Any = ma.missing, subcast: Subcast = None, **kwargs):
+) -> ParserMethod:
+    def method(
+        self: "Env", name: str, default: typing.Any = ma.missing, subcast: Subcast = None, **kwargs
+    ) -> T:
         missing = kwargs.pop("missing", None) or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
             field = typing.cast(typing.Type[ma.fields.Field], field_or_factory)(missing=missing, **kwargs)
@@ -62,7 +67,7 @@ def _field2method(
     return method
 
 
-def _func2method(func: typing.Callable, method_name: str) -> typing.Callable:
+def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     def method(
         self: "Env", name: str, default: typing.Any = ma.missing, subcast: typing.Type = None, **kwargs
     ):
@@ -103,8 +108,8 @@ def _preprocess_list(value: typing.Union[str, typing.Iterable], **kwargs) -> typ
 
 
 def _preprocess_dict(
-    value: typing.Union[str, typing.Mapping], subcast: Subcast, **kwargs
-) -> typing.Mapping[str, typing.Any]:
+    value: typing.Union[str, typing.Mapping[str, T]], subcast: Subcast, **kwargs
+) -> typing.Mapping[str, T]:
     if isinstance(value, Mapping):
         return value
 
@@ -158,7 +163,7 @@ class PathField(ma.fields.Str):
 
 
 class LogLevelField(ma.fields.Int):
-    def _format_num(self, value):
+    def _format_num(self, value) -> int:
         try:
             return super()._format_num(value)
         except (TypeError, ValueError) as error:
@@ -171,7 +176,7 @@ class LogLevelField(ma.fields.Int):
 class Env:
     """An environment variable reader."""
 
-    __call__ = _field2method(ma.fields.Field, "__call__")
+    __call__ = _field2method(ma.fields.Field, "__call__")  # type: ParserMethod
 
     default_parser_map = dict(
         bool=_field2method(ma.fields.Bool, "bool"),
@@ -191,7 +196,7 @@ class Env:
         url=_field2method(URLField, "url"),
         dj_db_url=_func2method(_dj_db_url_parser, "dj_db_url"),
         dj_email_url=_func2method(_dj_email_url_parser, "dj_email_url"),
-    )  # type: typing.Dict[str, typing.Callable]
+    )  # type: typing.Dict[str, ParserMethod]
 
     def __init__(self):
         self._fields = {}  # type: typing.Dict[str, ma.fields.Field]
@@ -291,10 +296,9 @@ class Env:
         return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result
 
     def _get_from_environ(
-        self, key: str, default: typing.Any, proxied: bool = False
+        self, key: str, default: typing.Any, *, proxied: bool = False
     ) -> typing.Tuple[str, typing.Any, typing.Optional[str]]:
         """Access a value from os.environ. Handles proxied variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
-
 
         Returns a tuple (envvar_key, envvar_value, proxied_key). The ``envvar_key`` will be different from
         the passed key for proxied variables. proxied_key will be None if the envvar isn't proxied.
@@ -311,5 +315,5 @@ class Env:
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
         return env_key, value, None
 
-    def _get_key(self, key: str, omit_prefix: bool = False) -> str:
+    def _get_key(self, key: str, *, omit_prefix: bool = False) -> str:
         return self._prefix + key if self._prefix and not omit_prefix else key
