@@ -17,12 +17,6 @@ __version__ = "5.1.0"
 __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple([int(part) for part in ma.__version__.split(".") if part.isdigit()])
-
-
-class EnvError(ValueError):
-    pass
-
-
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
 
 T = typing.TypeVar("T")
@@ -31,6 +25,10 @@ Subcast = typing.Union[typing.Type, typing.Callable[..., T]]
 FieldType = typing.Type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable[..., T]
+
+
+class EnvError(ValueError):
+    pass
 
 
 def _field2method(
