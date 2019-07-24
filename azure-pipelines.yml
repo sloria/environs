@@ -4,6 +4,15 @@ trigger:
   tags:
     include: ['*']
 
+# Run builds nightly to catch incompatibilities with new marshmallow releases
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily midnight build
+  branches:
+    include:
+      - master
+  always: "true"
+
 resources:
   repositories:
     - repository: sloria
@@ -29,6 +38,7 @@ jobs:
       - py36-marshmallow3
       - py37-marshmallow2
       - py37-marshmallow3
+      - py37-marshmallowdev
     os: linux
 - template: job--pypi-release.yml@sloria
   parameters:
