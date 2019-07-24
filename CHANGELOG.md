@@ -1,8 +1,8 @@
 # Changelog
 
-## 5.2.0 (unreleased)
+## 5.2.0 (2019-07-19)
 
-Other changes:
+Changes:
 
 - Improve typings.
 
