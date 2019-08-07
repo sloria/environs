@@ -228,12 +228,16 @@ class Env:
                 raise RuntimeError("Could not get current call frame.")
             frame = current_frame.f_back
             caller_dir = os.path.dirname(frame.f_code.co_filename)
+            # Will be a directory
             start = os.path.join(os.path.abspath(caller_dir))
         else:
+            # Could be directory or a file
             start = path
         if recurse:
+            # Reaching this point, 'start' MUST exist. If it is a file, 'os.path.dirname' will be used.
+            env_name = os.path.basename(start) if os.path.isfile(start) else '.env'
             for dirname in _walk_to_root(start):
-                check_path = os.path.join(dirname, ".env")
+                check_path = os.path.join(dirname, env_name)
                 if os.path.exists(check_path):
                     return load_dotenv(check_path, stream=stream, verbose=verbose, override=override)
         else:

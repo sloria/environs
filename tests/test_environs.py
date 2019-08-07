@@ -214,6 +214,16 @@ class TestProxiedVariables:
                 assert env.str("LOGIN") == "szabolcs"
                 assert env.str("PASSWORD") == "nested-secret"
 
+class TestSpecificFileReading:
+    def test_read_env(self, env):
+        assert env("STRING", "default") == "default"  # sanity check
+        env.read_env('.custom.env')
+        assert env("CUSTOM_STRING") == "foo"
+
+    def test_read_env_non_recurse(self, env):
+        assert env("STRING", "default") == "default"  # sanity check
+        env.read_env('.custom.env', recurse=False)
+        assert env("CUSTOM_STRING") == "foo"
 
 class TestEnvFileReading:
     def test_read_env(self, env):
