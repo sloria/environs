@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 import datetime as dt
 import urllib.parse
@@ -214,16 +215,24 @@ class TestProxiedVariables:
                 assert env.str("LOGIN") == "szabolcs"
                 assert env.str("PASSWORD") == "nested-secret"
 
+
 class TestSpecificFileReading:
-    def test_read_env(self, env):
+    def test_read_env_recurse(self, env):
+        # Make sure to remove any 'CUSTOM_STRING' environment variable
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
         assert env("CUSTOM_STRING", "default") == "default"  # sanity check
-        env.read_env('tests/.custom.env', recurse=True)
+        env.read_env("tests/.custom.env", recurse=True)
         assert env("CUSTOM_STRING") == "foo"
 
-    def test_read_env(self, env):
+    def test_read_env_non_recurse(self, env):
+        # Make sure to remove any 'CUSTOM_STRING' environment variable
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
         assert env("CUSTOM_STRING", "default") == "default"  # sanity check
-        env.read_env('tests/.custom.env', recurse=False)
+        env.read_env("tests/.custom.env", recurse=False)
         assert env("CUSTOM_STRING") == "foo"
+
 
 class TestEnvFileReading:
     def test_read_env(self, env):

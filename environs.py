@@ -235,7 +235,7 @@ class Env:
             start = path
         if recurse:
             # Reaching this point, 'start' MUST exist. If it is a file, 'os.path.dirname' will be used.
-            env_name = os.path.basename(start) if os.path.isfile(start) else '.env'
+            env_name = os.path.basename(start) if os.path.isfile(start) else ".env"
             for dirname in _walk_to_root(start):
                 check_path = os.path.join(dirname, env_name)
                 if os.path.exists(check_path):
