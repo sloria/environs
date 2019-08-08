@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 import datetime as dt
 import urllib.parse
@@ -217,6 +218,8 @@ class TestProxiedVariables:
 
 class TestEnvFileReading:
     def test_read_env(self, env):
+        if "STRING" in os.environ:
+            os.environ.pop("STRING")
         assert env("STRING", "default") == "default"  # sanity check
         env.read_env()
         assert env("STRING") == "foo"
@@ -227,6 +230,21 @@ class TestEnvFileReading:
         with pytest.warns(UserWarning) as record:
             env.read_env("notfound", recurse=False, verbose=True)
         assert "File doesn't exist" in record[0].message.args[0]
+
+    # Regression test for https://github.com/sloria/environs/issues/96
+    def test_read_env_recurse(self, env):
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
+        assert env("CUSTOM_STRING", "default") == "default"  # sanity check
+        env.read_env("tests/.custom.env", recurse=True)
+        assert env("CUSTOM_STRING") == "foo"
+
+    def test_read_env_non_recurse(self, env):
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
+        assert env("CUSTOM_STRING", "default") == "default"  # sanity check
+        env.read_env("tests/.custom.env", recurse=False)
+        assert env("CUSTOM_STRING") == "foo"
 
 
 def always_fail(value):
