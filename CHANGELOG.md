@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.2.1 (unreleased)
+## 5.2.1 (2019-08-08)
 
 Bug fixes:
 
