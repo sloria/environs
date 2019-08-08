@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.2.1 (unreleased)
+
+Bug fixes:
+
+- Fix behavior when recursively searching for a specified file
+  ([#96](https://github.com/sloria/environs/issues/96)).
+  Thanks [ribeaud](https://github.com/ribeaud) for the catch and patch.
+
 ## 5.2.0 (2019-07-19)
 
 Changes:
