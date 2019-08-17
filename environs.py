@@ -81,18 +81,19 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
 
 
 # From webargs
-def _dict2schema(dct: typing.Dict[str, ma.fields.Field]) -> typing.Type[ma.Schema]:
+def _dict2schema(dct, schema_class=ma.Schema):
     """Generate a `marshmallow.Schema` class given a dictionary of
     `Fields <marshmallow.fields.Field>`.
     """
+    if hasattr(schema_class, "from_dict"):  # marshmallow 3
+        return schema_class.from_dict(dct)
     attrs = dct.copy()
-    if MARSHMALLOW_VERSION_INFO[0] < 3:
 
-        class Meta:
-            strict = True
+    class Meta:
+        strict = True
 
-        attrs["Meta"] = Meta
-    return type("", (ma.Schema,), attrs)
+    attrs["Meta"] = Meta
+    return type("", (schema_class,), attrs)
 
 
 def _make_list_field(*, subcast: Subcast, **kwargs) -> ma.fields.List:
