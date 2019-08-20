@@ -234,7 +234,8 @@ class Env:
             tail = ".env"
         else:
             # Given 'path' could be a file or a directory, could exist or NOT
-            if os.path.splitext(path) == path:
+            (root, _) = os.path.splitext(path)
+            if root == path:
                 # If NO extension, then path is a directory
                 head, tail = path, ".env"
             else:
