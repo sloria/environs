@@ -231,12 +231,12 @@ class Env:
         if path is None:
             # Will be a directory
             head = os.path.abspath(caller_dir)
-            tail = '.env'
+            tail = ".env"
         else:
             # Given 'path' could be a file or a directory, could exist or NOT
             if os.path.splitext(path) == path:
                 # If NO extension, then path is a directory
-                head, tail = path, '.env'
+                head, tail = path, ".env"
             else:
                 # Given path points to a file
                 (head, tail) = os.path.split(path)
@@ -244,9 +244,9 @@ class Env:
             # We have to provide an existing path to '_walk_to_root'. Otherwise an exception will be thrown.
             for dirname in _walk_to_root(head if head else caller_dir):
                 check_path = os.path.join(dirname, tail)
-                if os.path.isfile(check_path) :
+                if os.path.isfile(check_path):
                     return load_dotenv(check_path, stream=stream, verbose=verbose, override=override)
-            raise IOError('Starting path not found')
+            raise OSError("Starting path not found")
         else:
             return load_dotenv(os.path.join(head, tail), stream=stream, verbose=verbose, override=override)
 
