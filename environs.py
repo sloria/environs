@@ -222,28 +222,33 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
+        current_frame = inspect.currentframe()
+        if not current_frame:
+            raise RuntimeError("Could not get current call frame.")
+        frame = current_frame.f_back
+        caller_dir = os.path.dirname(frame.f_code.co_filename)
         # By default, start search from the same file this function is called
         if path is None:
-            current_frame = inspect.currentframe()
-            if not current_frame:
-                raise RuntimeError("Could not get current call frame.")
-            frame = current_frame.f_back
-            caller_dir = os.path.dirname(frame.f_code.co_filename)
             # Will be a directory
-            start = os.path.join(os.path.abspath(caller_dir))
+            head = os.path.abspath(caller_dir)
+            tail = '.env'
         else:
-            # Could be directory or a file
-            start = path
+            # Given 'path' could be a file or a directory, could exist or NOT
+            if os.path.splitext(path) == path:
+                # If NO extension, then path is a directory
+                head, tail = path, '.env'
+            else:
+                # Given path points to a file
+                (head, tail) = os.path.split(path)
         if recurse:
-            env_name = os.path.basename(start) if os.path.isfile(start) else ".env"
-            for dirname in _walk_to_root(start):
-                check_path = os.path.join(dirname, env_name)
-                if os.path.exists(check_path):
+            # We have to provide an existing path to '_walk_to_root'. Otherwise an exception will be thrown.
+            for dirname in _walk_to_root(head if head else caller_dir):
+                check_path = os.path.join(dirname, tail)
+                if os.path.isfile(check_path) :
                     return load_dotenv(check_path, stream=stream, verbose=verbose, override=override)
+            raise IOError('Starting path not found')
         else:
-            if path is None:
-                start = os.path.join(start, ".env")
-            return load_dotenv(start, stream=stream, verbose=verbose, override=override)
+            return load_dotenv(os.path.join(head, tail), stream=stream, verbose=verbose, override=override)
 
     @contextlib.contextmanager
     def prefixed(self, prefix: str) -> typing.Iterator["Env"]:
