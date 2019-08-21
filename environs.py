@@ -233,7 +233,7 @@ class Env:
             head = os.path.abspath(caller_dir)
             tail = ".env"
         else:
-            # Given 'path' could be a file or a directory, could exist or NOT
+            # Given 'path' could be a file or a directory, could exist or NOT, could be absolute or NOT
             (root, _) = os.path.splitext(path)
             if root == path:
                 # If NO extension, then path is a directory

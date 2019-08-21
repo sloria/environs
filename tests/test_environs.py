@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import uuid
 import datetime as dt
 import urllib.parse
@@ -231,20 +232,52 @@ class TestEnvFileReading:
             env.read_env("notfound", recurse=False, verbose=True)
         assert "File doesn't exist" in record[0].message.args[0]
 
-    # Regression test for https://github.com/sloria/environs/issues/96
-    def test_read_env_recurse(self, env):
+    @pytest.mark.parametrize("recurse", [True, False])
+    def test_read_env_with_path_dir(self, recurse, env):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
         assert env("CUSTOM_STRING", "default") == "default"  # sanity check
-        env.read_env("tests/.custom.env", recurse=True)
+        env.read_env("tests/.custom.env", recurse=recurse)
         assert env("CUSTOM_STRING") == "foo"
 
-    def test_read_env_non_recurse(self, env):
+    @pytest.mark.parametrize("recurse", [True, False])
+    def test_read_env_with_dir_only(self, recurse, env):
+        if "STRING" in os.environ:
+            os.environ.pop("STRING")
+        assert env("STRING", "default") == "default"  # sanity check
+        env.read_env("tests", recurse=recurse)
+        assert env("STRING") == "foo"
+        assert env.list("LIST") == ["wat", "wer", "wen"]
+        assert env("PROXIED") == "foo"
+
+    @pytest.mark.parametrize("recurse", [True, False])
+    def test_read_env_recurse(self, recurse, env):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
         assert env("CUSTOM_STRING", "default") == "default"  # sanity check
-        env.read_env("tests/.custom.env", recurse=False)
-        assert env("CUSTOM_STRING") == "foo"
+        env.read_env(".custom.env", recurse=recurse)
+        if recurse:
+            assert env("CUSTOM_STRING") == "foo"
+        else:
+            # Environment variables have NOT been loaded
+            assert env("CUSTOM_STRING", "default") == "default"
+
+    @pytest.mark.parametrize("recurse", [True, False])
+    def test_read_env_recurse_in_tests_as_working_dir(self, recurse, env):
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
+        assert env("CUSTOM_STRING", "default") == "default"  # sanity check
+        current = os.getcwd()
+        shutil.move("tests/.custom.env", current)
+        os.chdir("tests")
+        env.read_env(".custom.env", recurse=recurse)
+        if recurse:
+            assert env("CUSTOM_STRING") == "foo"
+        else:
+            # Did NOT change because was NOT found
+            assert env("CUSTOM_STRING", "default") == "default"
+        os.chdir(current)
+        shutil.move(".custom.env", "tests")
 
 
 def always_fail(value):
