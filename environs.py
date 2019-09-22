@@ -13,7 +13,7 @@ from pathlib import Path
 import marshmallow as ma
 from dotenv.main import load_dotenv, DotEnv, _walk_to_root
 
-__version__ = "5.2.1"
+__version__ = "6.0.0"
 __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple([int(part) for part in ma.__version__.split(".") if part.isdigit()])
