@@ -1,5 +1,31 @@
 # Changelog
 
+## 6.0.0
+
+Features:
+
+- Default parser methods are now defined as bound methods.
+  This enables static analysis features, e.g. autocomplete ([#103](https://github.com/sloria/environs/issues/103)).
+  Thanks [rugleb](https://github.com/rugleb) for the suggestion.
+  _Backwards-incompatible_: As a result of this change, adding a parser name that is the same as an existing method
+  will result in an error being raised.
+
+```python
+import environs
+
+env = environs.Env()
+
+# Below conflicts with built-in `url` method.
+# In <6.0.0, this would override the built-in method.
+# In >=6.0.0, this raises an error:
+#   environs.ParserConflictError: Env already has a method with name 'url'. Use a different name.
+@env.parser_for("url")
+def https_url(value):
+    return "https://" + value
+```
+
+- _Backwards-incompatible_: Rename `Env.__parser_map__` to `Env.__custom_parsers__`.
+
 ## 5.2.1 (2019-08-08)
 
 Bug fixes:
@@ -161,3 +187,7 @@ Bug fixes:
 ## 0.1.0 (2016-04-25)
 
 - First PyPI release.
+
+```
+
+```
