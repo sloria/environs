@@ -206,7 +206,7 @@ class Env:
         self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
         self._prefix = None  # type: typing.Optional[_StrType]
-        self.__parser_map__ = {}
+        self.__custom_parsers__ = {}
 
     def __repr__(self) -> _StrType:
         return "<{} {}>".format(self.__class__.__name__, self._values)
@@ -268,7 +268,7 @@ class Env:
 
     def __getattr__(self, name: _StrType, **kwargs):
         try:
-            return functools.partial(self.__parser_map__[name], self)
+            return functools.partial(self.__custom_parsers__[name], self)
         except KeyError as error:
             raise AttributeError("{} has no attribute {}".format(self, name)) from error
 
@@ -280,7 +280,7 @@ class Env:
             raise ParserConflictError(
                 "Env already has a method with name '{}'. Use a different name.".format(name)
             )
-        self.__parser_map__[name] = _func2method(func, method_name=name)
+        self.__custom_parsers__[name] = _func2method(func, method_name=name)
         return None
 
     def parser_for(self, name: _StrType) -> typing.Callable[[typing.Callable], typing.Callable]:
@@ -296,7 +296,7 @@ class Env:
 
     def add_parser_from_field(self, name: _StrType, field_cls: typing.Type[ma.fields.Field]):
         """Register a new parser method with name ``name``, given a marshmallow ``Field``."""
-        self.__parser_map__[name] = _field2method(field_cls, method_name=name)
+        self.__custom_parsers__[name] = _field2method(field_cls, method_name=name)
 
     def dump(self) -> typing.Mapping[_StrType, typing.Any]:
         """Dump parsed environment variables to a dictionary of simple data types (numbers

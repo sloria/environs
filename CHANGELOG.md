@@ -24,6 +24,8 @@ def https_url(value):
     return "https://" + value
 ```
 
+- _Backwards-incompatible_: Rename `Env.__parser_map__` to `Env.__custom_parsers__`.
+
 ## 5.2.1 (2019-08-08)
 
 Bug fixes:
