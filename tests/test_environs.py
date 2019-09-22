@@ -435,6 +435,11 @@ class TestPrefix:
             env("NOT_FOUND", "mydefault") == "mydefault"
         assert env.dump() == {"APP_STR": "foo", "APP_INT": 42, "APP_NOT_FOUND": "mydefault"}
 
+    def test_error_message_for_prefixed_var(self, env):
+        with env.prefixed("APP_"):
+            with pytest.raises(environs.EnvError, match='Environment variable "APP_INT" invalid'):
+                env.int("INT", validate=lambda val: val < 42)
+
 
 class TestNestedPrefix:
     @pytest.fixture(autouse=True)
