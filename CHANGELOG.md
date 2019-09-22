@@ -24,6 +24,13 @@ def https_url(value):
     return "https://" + value
 ```
 
+Bug fixes:
+
+- Fix error message for prefixed variables ([#102](https://github.com/sloria/environs/issues/102)).
+  Thanks [AGeekInside](https://github.com/AGeekInside) for reporting.
+
+Other changes:
+
 - _Backwards-incompatible_: Rename `Env.__parser_map__` to `Env.__custom_parsers__`.
 
 ## 5.2.1 (2019-08-08)

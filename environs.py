@@ -52,8 +52,9 @@ def _field2method(
             field = typing.cast(FieldFactory, field_or_factory)(subcast=subcast, missing=missing, **kwargs)
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, ma.missing)
         self._fields[parsed_key] = field
+        source_key = proxied_key or parsed_key
         if raw_value is ma.missing and field.missing is ma.missing:
-            raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
+            raise EnvError('Environment variable "{}" not set'.format(source_key))
         if raw_value or raw_value == "":
             value = raw_value
         else:
@@ -63,7 +64,9 @@ def _field2method(
         try:
             value = field.deserialize(value)
         except ma.ValidationError as error:
-            raise EnvError('Environment variable "{}" invalid: {}'.format(name, error.args[0])) from error
+            raise EnvError(
+                'Environment variable "{}" invalid: {}'.format(source_key, error.args[0])
+            ) from error
         else:
             self._values[parsed_key] = value
             return value
