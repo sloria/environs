@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 import datetime as dt
 import urllib.parse
@@ -218,6 +219,8 @@ class TestProxiedVariables:
 
 class TestEnvFileReading:
     def test_read_env(self, env):
+        if "STRING" in os.environ:
+            os.environ.pop("STRING")
         assert env("STRING", "default") == "default"  # sanity check
         env.read_env()
         assert env("STRING") == "foo"
@@ -228,6 +231,21 @@ class TestEnvFileReading:
         with pytest.warns(UserWarning) as record:
             env.read_env("notfound", recurse=False, verbose=True)
         assert "File doesn't exist" in record[0].message.args[0]
+
+    # Regression test for https://github.com/sloria/environs/issues/96
+    def test_read_env_recurse(self, env):
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
+        assert env("CUSTOM_STRING", "default") == "default"  # sanity check
+        env.read_env("tests/.custom.env", recurse=True)
+        assert env("CUSTOM_STRING") == "foo"
+
+    def test_read_env_non_recurse(self, env):
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
+        assert env("CUSTOM_STRING", "default") == "default"  # sanity check
+        env.read_env("tests/.custom.env", recurse=False)
+        assert env("CUSTOM_STRING") == "foo"
 
 
 def always_fail(value):
@@ -265,31 +283,38 @@ class TestCustomTypes:
     def test_add_parser(self, set_env, env):
         set_env({"URL": "test.test/"})
 
-        def url(value):
+        def https_url(value):
             return "https://" + value
 
-        env.add_parser("url", url)
-        assert env.url("URL") == "https://test.test/"
+        env.add_parser("https_url", https_url)
+        assert env.https_url("URL") == "https://test.test/"
         with pytest.raises(environs.EnvError) as excinfo:
             env.url("NOT_SET")
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 
-        assert env.url("NOT_SET", "default.test/") == "https://default.test/"
+        assert env.https_url("NOT_SET", "default.test/") == "https://default.test/"
+
+    def test_cannot_override_built_in_parser(self, set_env, env):
+        def https_url(value):
+            return "https://" + value
+
+        with pytest.raises(environs.ParserConflictError):
+            env.add_parser("url", https_url)
 
     def test_parser_for(self, set_env, env):
         set_env({"URL": "test.test/"})
 
-        @env.parser_for("url")
-        def url(value):
+        @env.parser_for("https_url")
+        def https_url(value):
             return "https://" + value
 
-        assert env.url("URL") == "https://test.test/"
+        assert env.https_url("URL") == "https://test.test/"
 
         with pytest.raises(environs.EnvError) as excinfo:
-            env.url("NOT_SET")
+            env.https_url("NOT_SET")
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 
-        assert env.url("NOT_SET", "default.test/") == "https://default.test/"
+        assert env.https_url("NOT_SET", "default.test/") == "https://default.test/"
 
     def test_parser_function_can_take_extra_arguments(self, set_env, env):
         set_env({"ENV": "dev"})
@@ -307,17 +332,17 @@ class TestCustomTypes:
             env.enum("ENV", choices=["dev", "prod"])
 
     def test_add_parser_from_field(self, set_env, env):
-        class MyURL(fields.Field):
+        class HTTPSURL(fields.Field):
             def _deserialize(self, value, *args, **kwargs):
                 return "https://" + value
 
-        env.add_parser_from_field("url", MyURL)
+        env.add_parser_from_field("https_url", HTTPSURL)
 
         set_env({"URL": "test.test/"})
-        assert env.url("URL") == "https://test.test/"
+        assert env.https_url("URL") == "https://test.test/"
 
         with pytest.raises(environs.EnvError) as excinfo:
-            env.url("NOT_SET")
+            env.https_url("NOT_SET")
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 
 
@@ -354,13 +379,13 @@ class TestDumping:
         assert result["LOG_LEVEL"] == logging.WARNING
 
     def test_env_with_custom_parser(self, set_env, env):
-        @env.parser_for("url")
-        def url(value):
+        @env.parser_for("https_url")
+        def https_url(value):
             return "https://" + value
 
         set_env({"URL": "test.test"})
 
-        env.url("URL")
+        env.https_url("URL")
 
         assert env.dump() == {"URL": "https://test.test"}
 
@@ -410,6 +435,11 @@ class TestPrefix:
             env.int("INT") == 42
             env("NOT_FOUND", "mydefault") == "mydefault"
         assert env.dump() == {"APP_STR": "foo", "APP_INT": 42, "APP_NOT_FOUND": "mydefault"}
+
+    def test_error_message_for_prefixed_var(self, env):
+        with env.prefixed("APP_"):
+            with pytest.raises(environs.EnvError, match='Environment variable "APP_INT" invalid'):
+                env.int("INT", validate=lambda val: val < 42)
 
 
 class TestNestedPrefix:
@@ -547,10 +577,10 @@ class TestDeferredValidation:
     def test_custom_parser_not_called_after_seal(self, env, set_env):
         set_env({"URL": "test.test/"})
 
-        @env.parser_for("url")
-        def url(value):
+        @env.parser_for("https_url")
+        def https_url(value):
             return "https://" + value
 
         env.seal()
         with pytest.raises(environs.EnvSealedError, match="Env has already been sealed"):
-            env.url("URL")
+            env.https_url("URL")
