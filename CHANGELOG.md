@@ -1,5 +1,12 @@
 # Changelog
 
+## 6.1.0 (unreleased)
+
+Features:
+
+- Add deferred validation via the `eager` parameter and `env.seal()` ([#56](https://github.com/sloria/environs/issues/56)).
+  Thanks [robertlagrant](https://github.com/robertlagrant) for the suggestion.
+
 ## 6.0.0 (2019-09-22)
 
 Features:

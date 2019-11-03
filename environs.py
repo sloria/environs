@@ -1,3 +1,4 @@
+import collections
 import contextlib
 import inspect
 import functools
@@ -24,6 +25,8 @@ _StrType = str
 _BoolType = bool
 _IntType = int
 
+ErrorMapping = typing.Mapping[str, typing.List[str]]
+ErrorList = typing.List[str]
 FieldFactory = typing.Callable[..., ma.fields.Field]
 Subcast = typing.Union[typing.Type, typing.Callable[..., _T]]
 FieldType = typing.Type[ma.fields.Field]
@@ -33,6 +36,16 @@ ParserMethod = typing.Callable[..., _T]
 
 class EnvError(ValueError):
     """Raised when an environment variable or if a required environment variable is unset."""
+
+
+class EnvValidationError(EnvError):
+    def __init__(self, message: str, error_messages: typing.Union[ErrorList, ErrorMapping]):
+        self.error_messages = error_messages
+        super().__init__(message)
+
+
+class EnvSealedError(TypeError, EnvError):
+    pass
 
 
 class ParserConflictError(ValueError):
@@ -45,6 +58,8 @@ def _field2method(
     def method(
         self: "Env", name: str, default: typing.Any = ma.missing, subcast: Subcast = None, **kwargs
     ) -> _T:
+        if self._sealed:
+            raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         missing = kwargs.pop("missing", None) or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
             field = typing.cast(typing.Type[ma.fields.Field], field_or_factory)(missing=missing, **kwargs)
@@ -54,7 +69,11 @@ def _field2method(
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing and field.missing is ma.missing:
-            raise EnvError('Environment variable "{}" not set'.format(source_key))
+            message = "Environment variable not set."
+            if self.eager:
+                raise EnvValidationError('Environment variable "{}" not set'.format(source_key), [message])
+            else:
+                self._errors[parsed_key].append(message)
         if raw_value or raw_value == "":
             value = raw_value
         else:
@@ -64,12 +83,14 @@ def _field2method(
         try:
             value = field.deserialize(value)
         except ma.ValidationError as error:
-            raise EnvError(
-                'Environment variable "{}" invalid: {}'.format(source_key, error.args[0])
-            ) from error
+            if self.eager:
+                raise EnvValidationError(
+                    'Environment variable "{}" invalid: {}'.format(source_key, error.args[0]), error.messages
+                ) from error
+            self._errors[parsed_key].extend(error.messages)
         else:
             self._values[parsed_key] = value
-            return value
+        return value
 
     method.__name__ = method_name
     return method
@@ -79,6 +100,8 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     def method(
         self: "Env", name: str, default: typing.Any = ma.missing, subcast: typing.Type = None, **kwargs
     ):
+        if self._sealed:
+            raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
         if raw_value is ma.missing:
             raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
@@ -205,11 +228,14 @@ class Env:
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
 
-    def __init__(self):
+    def __init__(self, *, eager: _BoolType = True):
+        self.eager = eager
+        self._sealed = False  # type: bool
         self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
+        self._errors = collections.defaultdict(list)  # type: ErrorMapping
         self._prefix = None  # type: typing.Optional[_StrType]
-        self.__custom_parsers__ = {}
+        self.__custom_parsers__ = {}  # type: typing.Dict[_StrType, ParserMethod]
 
     def __repr__(self) -> _StrType:
         return "<{} {}>".format(self.__class__.__name__, self._values)
@@ -268,6 +294,19 @@ class Env:
             # explicitly reset the stored prefix on completion and exceptions
             self._prefix = None
         self._prefix = old_prefix
+
+    def seal(self):
+        """Validate parsed values and prevent new values from being added.
+
+        :raises: environs.EnvValidationError
+        """
+        self._sealed = True
+        if self._errors:
+            error_messages = dict(self._errors)
+            self._errors = {}
+            raise EnvValidationError(
+                "Environment variables invalid: {}".format(error_messages), error_messages
+            )
 
     def __getattr__(self, name: _StrType, **kwargs):
         try:
