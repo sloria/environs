@@ -1,6 +1,6 @@
 # Changelog
 
-## 6.1.0 (unreleased)
+## 6.1.0 (2019-11-03)
 
 Features:
 
