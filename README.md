@@ -20,6 +20,7 @@ It allows you to store configuration separate from your code, as per
 - [Handling prefixes](#handling-prefixes)
 - [Proxied variables](#proxied-variables)
 - [Validation](#validation)
+- [Deferred validation](#deferred-validation)
 - [Serialization](#serialization)
 - [Defining custom parser behavior](#defining-custom-parser-behavior)
 - [Usage with Flask](#usage-with-flask)
@@ -183,14 +184,17 @@ smtp_login = env("SMTP_LOGIN")  # =>'sloria'
 # export NODE_ENV='invalid'
 # export EMAIL='^_^'
 
+from environs import Env
+from marshmallow.validate import OneOf, Length, Email
+
+env = Env()
 
 # simple validator
 env.int("TTL", validate=lambda n: n > 0)
 # => Environment variable "TTL" invalid: ['Invalid value.']
 
-# using marshmallow validators
-from marshmallow.validate import OneOf
 
+# using marshmallow validators
 env.str(
     "NODE_ENV",
     validate=OneOf(
@@ -200,11 +204,40 @@ env.str(
 # => Environment variable "NODE_ENV" invalid: ['NODE_ENV must be one of: production, development']
 
 # multiple validators
-from marshmallow.validate import Length, Email
-
 env.str("EMAIL", validate=[Length(min=4), Email()])
 # => Environment variable "EMAIL" invalid: ['Shorter than minimum length 4.', 'Not a valid email address.']
 ```
+
+## Deferred validation
+
+By default, a validation error is raised immediately upon calling a parser method for an invalid environment variable.
+To defer validation and raise an exception with the combined error messages for all invalid variables, pass `eager=False` to `Env`.
+Call `env.seal()` after all variables have been parsed.
+
+```python
+# export TTL=-2
+# export NODE_ENV='invalid'
+# export EMAIL='^_^'
+
+from environs import Env
+from marshmallow.validate import OneOf, Email, Length, Range
+
+env = Env(eager=False)
+
+TTL = env.int("TTL", validate=Range(min=0, max=100))
+NODE_ENV = env.str(
+    "NODE_ENV",
+    validate=OneOf(
+        ["production", "development"], error="NODE_ENV must be one of: {choices}"
+    ),
+)
+EMAIL = env.str("EMAIL", validate=[Length(min=4), Email()])
+
+env.seal()
+# environs.EnvValidationError: Environment variables invalid: {'TTL': ['Must be greater than or equal to 0 and less than or equal to 100.'], 'NODE_ENV': ['NODE_ENV must be one of: production, development'], 'EMAIL': ['Shorter than minimum length 4.', 'Not a valid email address.']}
+```
+
+`env.seal()` validates all parsed variables and prevents further parsing (calling a parser method will raise an error).
 
 ## Serialization
 
