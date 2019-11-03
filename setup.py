@@ -6,7 +6,7 @@ DJANGO_REQUIRES = ["dj-database-url", "dj-email-url"]
 EXTRAS_REQUIRE = {
     "django": DJANGO_REQUIRES,
     "tests": ["pytest"] + DJANGO_REQUIRES,
-    "lint": ["flake8==3.7.9", "flake8-bugbear==19.8.0", "pre-commit~=1.18"],
+    "lint": ["flake8==3.7.9", "flake8-bugbear==19.8.0", "pre-commit~=1.20"],
 }
 EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
 PYTHON_REQUIRES = ">=3.5"
@@ -56,6 +56,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     project_urls={
         "Issues": "https://github.com/sloria/environs/issues",

@@ -22,8 +22,9 @@ develop-eggs
 lib
 lib64
 
-# Installer logs
+# pip
 pip-log.txt
+pip-wheel-metadata
 
 # Unit test / coverage reports
 .coverage
@@ -51,6 +52,6 @@ README.html
 
 .mypy_cache
 
-sandbox
+
 
 !tests/.env
