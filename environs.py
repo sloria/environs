@@ -272,6 +272,7 @@ class Env:
                 check_path = os.path.join(dirname, env_name)
                 if os.path.exists(check_path):
                     return load_dotenv(check_path, verbose=verbose, override=override)
+            return True
         else:
             if path is None:
                 start = os.path.join(start, ".env")
