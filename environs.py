@@ -17,7 +17,7 @@ from dotenv.main import load_dotenv, DotEnv, _walk_to_root
 __version__ = "6.1.0"
 __all__ = ["EnvError", "Env"]
 
-MARSHMALLOW_VERSION_INFO = tuple([int(part) for part in ma.__version__.split(".") if part.isdigit()])
+MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
 
 _T = typing.TypeVar("_T")
