@@ -12,7 +12,7 @@ from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
 import marshmallow as ma
-from dotenv.main import load_dotenv, DotEnv, _walk_to_root
+from dotenv.main import load_dotenv, _walk_to_root
 
 __version__ = "6.1.0"
 __all__ = ["EnvError", "Env"]
@@ -246,7 +246,7 @@ class Env:
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
-    ) -> DotEnv:
+    ) -> _BoolType:
         """Read a .env file into os.environ.
 
         If .env is not found in the directory from which this method is called,
