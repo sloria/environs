@@ -240,8 +240,6 @@ class Env:
     def __repr__(self) -> _StrType:
         return "<{} {}>".format(self.__class__.__name__, self._values)
 
-    __str__ = __repr__
-
     @staticmethod
     def read_env(
         path: _StrType = None,
