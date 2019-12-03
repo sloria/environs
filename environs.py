@@ -130,7 +130,7 @@ def _dict2schema(dct, schema_class=ma.Schema):
     return type("", (schema_class,), attrs)
 
 
-def _make_list_field(*, subcast: Subcast, **kwargs) -> ma.fields.List:
+def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.List:
     inner_field = ma.Schema.TYPE_MAPPING[subcast] if subcast else ma.fields.Field
     return ma.fields.List(inner_field, **kwargs)
 
@@ -183,8 +183,8 @@ class URLField(ma.fields.URL):
 
     # Override deserialize rather than _deserialize because we need
     # to call urlparse *after* validation has occurred
-    def deserialize(self, value: str, attr: str = None, data: typing.Mapping = None) -> ParseResult:
-        ret = super().deserialize(value, attr, data)
+    def deserialize(self, value: str, attr: str = None, data: typing.Mapping = None, **kwargs) -> ParseResult:
+        ret = super().deserialize(value, attr, data, **kwargs)
         return urlparse(ret)
 
 
@@ -195,7 +195,10 @@ class PathField(ma.fields.Str):
 
 
 class LogLevelField(ma.fields.Int):
-    def _format_num(self, value) -> int:
+    # Type ignore, because the return type annotation of the super
+    # class is a private TypeVar incompatible with int. The annotation
+    # in super should probably be Any.
+    def _format_num(self, value) -> int:  # type: ignore
         try:
             return super()._format_num(value)
         except (TypeError, ValueError) as error:
