@@ -13,6 +13,8 @@ repos:
   rev: v0.740
   hooks:
   - id: mypy
+    # Suppress errors resulting from no access to dependencies' annotations
+    args: ["--ignore-missing-imports", "--no-warn-unused-ignores"]
 - repo: https://gitlab.com/pycqa/flake8
   rev: 3.7.9
   hooks:
