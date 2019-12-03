@@ -244,7 +244,6 @@ class Env:
     def read_env(
         path: _StrType = None,
         recurse: _BoolType = True,
-        stream: _StrType = None,
         verbose: _BoolType = False,
         override: _BoolType = False,
     ) -> DotEnv:
@@ -272,11 +271,11 @@ class Env:
             for dirname in _walk_to_root(start):
                 check_path = os.path.join(dirname, env_name)
                 if os.path.exists(check_path):
-                    return load_dotenv(check_path, stream=stream, verbose=verbose, override=override)
+                    return load_dotenv(check_path, verbose=verbose, override=override)
         else:
             if path is None:
                 start = os.path.join(start, ".env")
-            return load_dotenv(start, stream=stream, verbose=verbose, override=override)
+            return load_dotenv(start, verbose=verbose, override=override)
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
