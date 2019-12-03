@@ -12,7 +12,7 @@ from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
 import marshmallow as ma
-from dotenv.main import load_dotenv, DotEnv, _walk_to_root
+from dotenv.main import load_dotenv, _walk_to_root
 
 __version__ = "6.1.0"
 __all__ = ["EnvError", "Env"]
@@ -246,7 +246,7 @@ class Env:
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
-    ) -> DotEnv:
+    ) -> None:
         """Read a .env file into os.environ.
 
         If .env is not found in the directory from which this method is called,
@@ -271,11 +271,12 @@ class Env:
             for dirname in _walk_to_root(start):
                 check_path = os.path.join(dirname, env_name)
                 if os.path.exists(check_path):
-                    return load_dotenv(check_path, verbose=verbose, override=override)
+                    load_dotenv(check_path, verbose=verbose, override=override)
+                    return
         else:
             if path is None:
                 start = os.path.join(start, ".env")
-            return load_dotenv(start, verbose=verbose, override=override)
+            load_dotenv(start, verbose=verbose, override=override)
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
