@@ -62,9 +62,9 @@ def _field2method(
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         missing = kwargs.pop("missing", None) or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
-            field = typing.cast(typing.Type[ma.fields.Field], field_or_factory)(missing=missing, **kwargs)
+            field = field_or_factory(missing=missing, **kwargs)
         else:
-            field = typing.cast(FieldFactory, field_or_factory)(subcast=subcast, missing=missing, **kwargs)
+            field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, ma.missing)
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
