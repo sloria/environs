@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.0.0 (unreleased)
+## 7.0.0 (2019-12-02)
 
 - _Backwards-incompatible_: Remove `stream` argument from `read_env`,
     since it had no effect ([#114](https://github.com/sloria/environs/pull/114)).
