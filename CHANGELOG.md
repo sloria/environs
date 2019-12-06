@@ -1,15 +1,19 @@
 # Changelog
 
+## (unreleased)
+
+- Improve typings and run mypy with dependencies type annotations ([#115](https://github.com/sloria/environs/pull/115)).
+  Thanks [hukkinj1](https://github.com/hukkinj1).
+
 ## 7.0.0 (2019-12-02)
 
 - _Backwards-incompatible_: Remove `stream` argument from `read_env`,
-    since it had no effect ([#114](https://github.com/sloria/environs/pull/114)).
+  since it had no effect ([#114](https://github.com/sloria/environs/pull/114)).
 - _Backwards-incompatible_: `Env.read_env` consistently returns `None`
-    ([#111](https://github.com/sloria/environs/pull/111)).
+  ([#111](https://github.com/sloria/environs/pull/111)).
 - Remove unnecessary `__str__` definition ([#112](https://github.com/sloria/environs/pull/112)).
 
 Thanks [hukkinj1](https://github.com/hukkinj1) for the PRs.
-
 
 ## 6.1.0 (2019-11-03)
 
