@@ -62,9 +62,9 @@ def _field2method(
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         missing = kwargs.pop("missing", None) or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
-            field = typing.cast(typing.Type[ma.fields.Field], field_or_factory)(missing=missing, **kwargs)
+            field = field_or_factory(missing=missing, **kwargs)
         else:
-            field = typing.cast(FieldFactory, field_or_factory)(subcast=subcast, missing=missing, **kwargs)
+            field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, ma.missing)
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
@@ -130,7 +130,7 @@ def _dict2schema(dct, schema_class=ma.Schema):
     return type("", (schema_class,), attrs)
 
 
-def _make_list_field(*, subcast: Subcast, **kwargs) -> ma.fields.List:
+def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.List:
     inner_field = ma.Schema.TYPE_MAPPING[subcast] if subcast else ma.fields.Field
     return ma.fields.List(inner_field, **kwargs)
 
@@ -183,8 +183,8 @@ class URLField(ma.fields.URL):
 
     # Override deserialize rather than _deserialize because we need
     # to call urlparse *after* validation has occurred
-    def deserialize(self, value: str, attr: str = None, data: typing.Mapping = None) -> ParseResult:
-        ret = super().deserialize(value, attr, data)
+    def deserialize(self, value: str, attr: str = None, data: typing.Mapping = None, **kwargs) -> ParseResult:
+        ret = super().deserialize(value, attr, data, **kwargs)
         return urlparse(ret)
 
 
@@ -195,7 +195,10 @@ class PathField(ma.fields.Str):
 
 
 class LogLevelField(ma.fields.Int):
-    def _format_num(self, value) -> int:
+    # Type ignore, because the return type annotation of the super
+    # class is a private TypeVar incompatible with int. The annotation
+    # in super should probably be Any.
+    def _format_num(self, value) -> int:  # type: ignore
         try:
             return super()._format_num(value)
         except (TypeError, ValueError) as error:
