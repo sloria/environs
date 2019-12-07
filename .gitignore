@@ -31,6 +31,7 @@ pip-wheel-metadata
 .tox
 nosetests.xml
 test-output/
+.pytest_cache
 
 # Translations
 *.mo
@@ -51,7 +52,5 @@ README.html
 # mypy
 
 .mypy_cache
-
-
 
 !tests/.env
