@@ -3,7 +3,9 @@
 ## (unreleased)
 
 - Improve typings and run mypy with dependencies type annotations ([#115](https://github.com/sloria/environs/pull/115)).
-  Thanks [hukkinj1](https://github.com/hukkinj1).
+- Distribute types per PEP 561 ([#116](https://github.com/sloria/environs/pull/116)).
+
+Thanks [hukkinj1](https://github.com/hukkinj1) for the PRs..
 
 ## 7.0.0 (2019-12-02)
 

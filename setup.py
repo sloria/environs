@@ -34,8 +34,9 @@ def read(fname):
 
 setup(
     name="environs",
-    py_modules=["environs"],
-    version=find_version("environs.py"),
+    packages=["environs"],
+    package_data={"environs": ["py.typed"]},
+    version=find_version("environs/__init__.py"),
     description="simplified environment variable parsing",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
@@ -57,6 +58,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Typing :: Typed",
     ],
     project_urls={
         "Issues": "https://github.com/sloria/environs/issues",
