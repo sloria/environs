@@ -306,7 +306,7 @@ class Env:
                 "Environment variables invalid: {}".format(error_messages), error_messages
             )
 
-    def __getattr__(self, name: _StrType, **kwargs):
+    def __getattr__(self, name: _StrType):
         try:
             return functools.partial(self.__custom_parsers__[name], self)
         except KeyError as error:
