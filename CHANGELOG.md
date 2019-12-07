@@ -1,6 +1,6 @@
 # Changelog
 
-## (unreleased)
+## 7.1.0 (unreleased)
 
 - Improve typings and run mypy with dependencies type annotations ([#115](https://github.com/sloria/environs/pull/115)).
 - Distribute types per PEP 561 ([#116](https://github.com/sloria/environs/pull/116)).
