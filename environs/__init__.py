@@ -195,10 +195,7 @@ class PathField(ma.fields.Str):
 
 
 class LogLevelField(ma.fields.Int):
-    # Type ignore, because the return type annotation of the super
-    # class is a private TypeVar incompatible with int. The annotation
-    # in super should probably be Any.
-    def _format_num(self, value) -> int:  # type: ignore
+    def _format_num(self, value) -> int:
         try:
             return super()._format_num(value)
         except (TypeError, ValueError) as error:
