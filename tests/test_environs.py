@@ -518,6 +518,82 @@ class TestFailedNestedPrefix:
             dump_with_nested_prefixed(env, fail=False)
 
 
+class TestSuffix:
+    @pytest.fixture(autouse=True)
+    def default_environ(self, set_env):
+        set_env({"STR_APP": "foo", "INT_APP": "42"})
+
+    def test_suffixed(self, env):
+        with env.suffixed("_APP"):
+            assert env.str("STR") == "foo"
+            assert env.int("INT") == 42
+            assert env("NOT_FOUND", "mydefault") == "mydefault"
+
+    def test_dump_with_suffixed(self, env):
+        with env.suffixed("_APP"):
+            env.str("STR") == "foo"
+            env.int("INT") == 42
+            env("NOT_FOUND", "mydefault") == "mydefault"
+        assert env.dump() == {"STR_APP": "foo", "INT_APP": 42, "NOT_FOUND_APP": "mydefault"}
+
+    def test_error_message_for_suffixed_var(self, env):
+        with env.suffixed("_APP"):
+            with pytest.raises(environs.EnvError, match='Environment variable "INT_APP" invalid'):
+                env.int("INT", validate=lambda val: val < 42)
+
+
+class TestNestedSuffix:
+    @pytest.fixture(autouse=True)
+    def default_environ(self, set_env):
+        set_env({"STR_APP": "foo", "INT_NESTED_APP": "42"})
+
+    def test_nested_suffixed(self, env):
+        with env.suffixed("_APP"):
+            with env.suffixed("_NESTED"):
+                assert env.int("INT") == 42
+                assert env("NOT_FOUND", "mydefault") == "mydefault"
+            assert env.str("STR") == "foo"
+            assert env("NOT_FOUND", "mydefault") == "mydefault"
+
+    def test_dump_with_nested_suffixed(self, env):
+        with env.suffixed("_APP"):
+            with env.suffixed("_NESTED"):
+                env.int("INT") == 42
+                env("NOT_FOUND", "mydefault") == "mydefault"
+            env.str("STR") == "foo"
+            env("NOT_FOUND", "mydefault") == "mydefault"
+        assert env.dump() == {
+            "STR_APP": "foo",
+            "NOT_FOUND_APP": "mydefault",
+            "INT_NESTED_APP": 42,
+            "NOT_FOUND_NESTED_APP": "mydefault",
+        }
+
+
+class TestFailedNestedSuffix:
+    @pytest.fixture(autouse=True)
+    def default_environ(self, set_env):
+        set_env({"STR_APP": "foo", "INT_NESTED_APP": "42"})
+
+    def test_failed_nested_suffixed(self, env):
+
+        # define repeated suffixed steps
+        def nested_suffixed(env, fail=False):
+            with env.suffixed("_APP"):
+                with env.suffixed("_NESTED"):
+                    assert env.int("INT") == 42
+                    assert env("NOT_FOUND", "mydefault") == "mydefault"
+                assert env.str("STR") == "foo"
+                assert env("NOT_FOUND", "mydefault") == "mydefault"
+                if fail:
+                    raise FauxTestException
+
+        try:
+            nested_suffixed(env, fail=True)
+        except FauxTestException:
+            nested_suffixed(env, fail=False)
+
+
 class TestDjango:
     def test_dj_db_url(self, env, set_env):
         db_url = "postgresql://localhost:5432/mydb"

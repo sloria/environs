@@ -296,11 +296,11 @@ class Env:
 
     @contextlib.contextmanager
     def suffixed(self, suffix: _StrType) -> typing.Iterator["Env"]:
-        try: 
+        try:
             old_suffix = self._suffix
-            if old_suffix is None: 
+            if old_suffix is None:
                 self._suffix = suffix
-            else: 
+            else:
                 self._suffix = "{}{}".format(suffix, old_suffix)
             yield self
         finally:
@@ -384,9 +384,9 @@ class Env:
         if not omit_prefix:
             if self._prefix and self._suffix:
                 return self._prefix + key + self._suffix
-            if self._prefix: 
-                return self._prefix + key 
-            if self._suffix: 
+            if self._prefix:
+                return self._prefix + key
+            if self._suffix:
                 return key + self._suffix
-            return key 
+            return key
         return key
