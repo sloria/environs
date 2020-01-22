@@ -235,6 +235,7 @@ class Env:
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
         self._errors = collections.defaultdict(list)  # type: ErrorMapping
         self._prefix = None  # type: typing.Optional[_StrType]
+        self._suffix = None  # type: typing.Optional[_StrType]
         self.__custom_parsers__ = {}  # type: typing.Dict[_StrType, ParserMethod]
 
     def __repr__(self) -> _StrType:
@@ -292,6 +293,19 @@ class Env:
             # explicitly reset the stored prefix on completion and exceptions
             self._prefix = None
         self._prefix = old_prefix
+
+    @contextlib.contextmanager
+    def suffixed(self, suffix: _StrType) -> typing.Iterator["Env"]:
+        try: 
+            old_suffix = self._suffix
+            if old_suffix is None: 
+                self._suffix = suffix
+            else: 
+                self._suffix = "{}{}".format(suffix, old_suffix)
+            yield self
+        finally:
+            self._suffix = None
+        self._suffix = old_suffix
 
     def seal(self):
         """Validate parsed values and prevent new values from being added.
@@ -367,4 +381,12 @@ class Env:
         return env_key, value, None
 
     def _get_key(self, key: _StrType, *, omit_prefix: _BoolType = False) -> _StrType:
-        return self._prefix + key if self._prefix and not omit_prefix else key
+        if not omit_prefix:
+            if self._prefix and self._suffix:
+                return self._prefix + key + self._suffix
+            if self._prefix: 
+                return self._prefix + key 
+            if self._suffix: 
+                return key + self._suffix
+            return key 
+        return key
