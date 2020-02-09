@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.2.0 (unreleased)
+## 7.2.0 (2020-02-09)
 
 - Add `dj_cache_url` for caching Django cache URLs (requires installing with `[django]`)
   ([#126](https://github.com/sloria/environs/issues/126)).
