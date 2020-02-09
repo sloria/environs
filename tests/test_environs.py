@@ -8,6 +8,7 @@ from decimal import Decimal
 
 import dj_database_url
 import dj_email_url
+import django_cache_url
 import pytest
 from marshmallow import fields, validate
 
@@ -536,6 +537,12 @@ class TestDjango:
         set_env({"EMAIL_URL": email_url})
         res = env.dj_email_url("EMAIL_URL")
         assert res == dj_email_url.parse(email_url)
+
+    def test_dj_cache_url(self, env, set_env):
+        cache_url = "redis://redis:6379/0"
+        set_env({"CACHE_URL": cache_url})
+        res = env.dj_cache_url("CACHE_URL")
+        assert res == django_cache_url.parse(cache_url)
 
 
 class TestDeferredValidation:

@@ -2,7 +2,7 @@ import re
 from setuptools import setup
 
 INSTALL_REQUIRES = ["marshmallow>=2.7.0", "python-dotenv"]
-DJANGO_REQUIRES = ["dj-database-url", "dj-email-url"]
+DJANGO_REQUIRES = ["dj-database-url", "dj-email-url", "django-cache-url"]
 EXTRAS_REQUIRE = {
     "django": DJANGO_REQUIRES,
     "tests": ["pytest"] + DJANGO_REQUIRES,
