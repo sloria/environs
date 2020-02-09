@@ -227,11 +227,6 @@ class TestEnvFileReading:
         assert env.list("LIST") == ["wat", "wer", "wen"]
         assert env("PROXIED") == "foo"
 
-    def test_read_env_not_found_with_verbose_warns(self, env):
-        with pytest.warns(UserWarning) as record:
-            env.read_env("notfound", recurse=False, verbose=True)
-        assert "File doesn't exist" in record[0].message.args[0]
-
     # Regression test for https://github.com/sloria/environs/issues/96
     def test_read_env_recurse(self, env):
         if "CUSTOM_STRING" in os.environ:
