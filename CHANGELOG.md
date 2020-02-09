@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.2.0 (unreleased)
+
+- Add `dj_cache_url` for caching Django cache URLs (requires installing with `[django]`)
+  ([#126](https://github.com/sloria/environs/issues/126)).
+  Thanks [epicserve](https://github.com/epicserve) for the suggestion and PR.
+
 ## 7.1.0 (2019-12-07)
 
 - Improve typings and run mypy with dependencies type annotations ([#115](https://github.com/sloria/environs/pull/115)).
