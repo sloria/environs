@@ -177,6 +177,17 @@ def _dj_email_url_parser(value: str, **kwargs) -> dict:
     return dj_email_url.parse(value, **kwargs)
 
 
+def _dj_cache_url_parser(value: str, **kwargs) -> dict:
+    try:
+        import django_cache_url
+    except ImportError as error:
+        raise RuntimeError(
+            "The dj_cache_url parser requires the django-cache-url package. "
+            "You can install it with: pip install django-cache-url"
+        ) from error
+    return django_cache_url.parse(value, **kwargs)
+
+
 class URLField(ma.fields.URL):
     def _serialize(self, value: ParseResult, *args, **kwargs) -> str:
         return value.geturl()
@@ -227,6 +238,7 @@ class Env:
     url = _field2method(URLField, "url")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
+    dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 
     def __init__(self, *, eager: _BoolType = True):
         self.eager = eager
