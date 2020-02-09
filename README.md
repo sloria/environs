@@ -326,12 +326,20 @@ the `flask` CLI will automatically read .env and .flaskenv files.
 ## Usage with Django
 
 environs includes a number of helpers for parsing connection URLs. To
-install environs with django support: :
+install environs with django support:
 
     pip install environs[django]
 
-Use `env.dj_db_url` and `env.dj_email_url` to parse the `DATABASE_URL`
+Use `env.dj_db_url`, `env.dj_cache_url` and `env.dj_email_url` to parse the `DATABASE_URL`, `CACHE_URL`
 and `EMAIL_URL` environment variables, respectively.
+
+For more details on URL patterns, see the following projects that environs is using for converting URLs.
+
+* [dj-database-url](https://github.com/jacobian/dj-database-url)
+* [django-cache-url](https://github.com/epicserve/django-cache-url)
+* [dj-email-url](https://github.com/migonzalvar/dj-email-url)
+
+Basic example:
 
 ```python
 # myproject/settings.py
@@ -355,6 +363,9 @@ EMAIL_PORT = email["EMAIL_PORT"]
 EMAIL_HOST_PASSWORD = email["EMAIL_HOST_PASSWORD"]
 EMAIL_HOST_USER = email["EMAIL_HOST_USER"]
 EMAIL_USE_TLS = email["EMAIL_USE_TLS"]
+
+# Parse cache URLS, e.g "redis://localhost:6379/0"
+CACHES = {"default": env.dj_cache_url("CACHE_URL")}
 ```
 
 For local development, use a `.env` file to override the default
