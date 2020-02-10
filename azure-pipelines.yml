@@ -25,8 +25,8 @@ jobs:
 - template: job--python-tox.yml@sloria
   parameters:
     toxenvs:
-      - py37-marshmallow2
-      - py37-marshmallow3
+      - py38-marshmallow2
+      - py38-marshmallow3
     os: windows
 - template: job--python-tox.yml@sloria
   parameters:
@@ -46,7 +46,7 @@ jobs:
     os: linux
 - template: job--pypi-release.yml@sloria
   parameters:
-    python: "3.7"
+    python: "3.8"
     distributions: "sdist bdist_wheel"
     dependsOn:
       - tox_windows
