@@ -8,6 +8,7 @@ import os
 import re
 import typing
 from collections.abc import Mapping
+from datetime import tzinfo
 from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
@@ -216,6 +217,27 @@ class LogLevelField(ma.fields.Int):
                 raise ma.ValidationError("Not a valid log level.") from error
 
 
+class TimezoneField(ma.fields.Str):
+    def _serialize(self, value: tzinfo, *args, **kwargs) -> str:
+        return value.zone
+
+    def _deserialize(self, value, *args, **kwargs) -> Path:
+        ret = super()._deserialize(value, *args, **kwargs)
+        try:
+            import pytz
+        except ImportError as error:
+            raise RuntimeError(
+                "The timezone parser requires the pytz package. "
+                "You can install it with: pip install pytz"
+            ) from error
+            raise ma.ValidationError("TimezoneField supported only with pytz module installed") from error
+
+        try:
+            return pytz.timezone(ret)
+        except pytz.UnknownTimeZoneError as error:
+            raise ma.ValidationError("Not a valid timezone") from error
+
+
 class Env:
     """An environment variable reader."""
 
@@ -234,6 +256,7 @@ class Env:
     path = _field2method(PathField, "path")
     log_level = _field2method(LogLevelField, "log_level")
     timedelta = _field2method(ma.fields.TimeDelta, "timedelta")
+    timezone = _field2method(TimezoneField, "timezone")
     uuid = _field2method(ma.fields.UUID, "uuid")
     url = _field2method(URLField, "url")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")

@@ -9,6 +9,7 @@ from decimal import Decimal
 import dj_database_url
 import dj_email_url
 import django_cache_url
+import pytz
 import pytest
 from marshmallow import fields, validate
 
@@ -169,6 +170,16 @@ class TestCasting:
         with pytest.raises(environs.EnvError) as excinfo:
             env.log_level("LOG_LEVEL")
         assert "Not a valid log level" in excinfo.value.args[0]
+
+    def test_timezone_cast(self, set_env, env):
+        set_env({"TIMEZONE": "America/Buenos_Aires"})
+        assert env.timezone("TIMEZONE") == pytz.timezone("America/Buenos_Aires")
+
+    def test_invalid_timezone(self, set_env, env):
+        set_env({"TIMEZONE": "America/Springfield"})
+        with pytest.raises(environs.EnvError) as excinfo:
+            env.timezone("TIMEZONE")
+        assert "Not a valid timezone" in excinfo.value.args[0]
 
     @pytest.mark.parametrize("url", ["foo", "42", "foo@bar"])
     def test_invalid_url(self, url, set_env, env):

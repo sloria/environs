@@ -3,9 +3,11 @@ from setuptools import setup
 
 INSTALL_REQUIRES = ["marshmallow>=2.7.0", "python-dotenv"]
 DJANGO_REQUIRES = ["dj-database-url", "dj-email-url", "django-cache-url"]
+PYTZ_REQUIRES = ["pytz"]
 EXTRAS_REQUIRE = {
     "django": DJANGO_REQUIRES,
-    "tests": ["pytest"] + DJANGO_REQUIRES,
+    "pytz": PYTZ_REQUIRES,
+    "tests": ["pytest"] + DJANGO_REQUIRES + PYTZ_REQUIRES,
     "lint": ["flake8==3.7.9", "flake8-bugbear==20.1.4", "mypy==0.761", "pre-commit>=1.20,<3.0"],
 }
 EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
