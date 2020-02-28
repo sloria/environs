@@ -210,7 +210,8 @@ class LogLevelField(ma.fields.Int):
         try:
             return super()._format_num(value)
         except (TypeError, ValueError) as error:
-            if hasattr(logging, value):
+            value = value.upper()
+            if hasattr(logging, value) and isinstance(int, getattr(logging, value)):
                 return getattr(logging, value)
             else:
                 raise ma.ValidationError("Not a valid log level.") from error
