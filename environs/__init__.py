@@ -218,17 +218,16 @@ class LogLevelField(ma.fields.Int):
 
 
 class TimezoneField(ma.fields.Str):
-    def _serialize(self, value: tzinfo, *args, **kwargs) -> str:
+    def _serialize(self, value, *args, **kwargs) -> str:
         return value.zone
 
-    def _deserialize(self, value, *args, **kwargs) -> Path:
+    def _deserialize(self, value, *args, **kwargs) -> tzinfo:
         ret = super()._deserialize(value, *args, **kwargs)
         try:
             import pytz
         except ImportError as error:
             raise RuntimeError(
-                "The timezone parser requires the pytz package. "
-                "You can install it with: pip install pytz"
+                "The timezone parser requires the pytz package. You can install it with: pip install pytz"
             ) from error
             raise ma.ValidationError("TimezoneField supported only with pytz module installed") from error
 

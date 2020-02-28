@@ -74,7 +74,7 @@ max_connections = env.int("MAX_CONNECTIONS")  # => 100
 ship_date = env.date("SHIP_DATE")  # => datetime.date(1984, 6, 25)
 ttl = env.timedelta("TTL")  # => datetime.timedelta(0, 42)
 log_level = env.log_level("LOG_LEVEL")  # => logging.DEBUG
-tzinfo = env.timezone("TIMEZONE")  # => pytz.timezone("America/Buenos_Aires") (requires pytz)
+tzinfo = env.timezone("TIMEZONE")  # => pytz.timezone("America/Buenos_Aires")
 
 # providing a default value
 enable_login = env.bool("ENABLE_LOGIN", False)  # => True
