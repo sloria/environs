@@ -170,9 +170,12 @@ class TestCasting:
         assert env.log_level("LOG_LEVEL_LOWER") == logging.INFO
 
     def test_invalid_log_level(self, set_env, env):
-        set_env({"LOG_LEVEL": "INVALID"})
+        set_env({"LOG_LEVEL": "INVALID", "LOG_LEVEL_BAD": "getLogger"})
         with pytest.raises(environs.EnvError) as excinfo:
             env.log_level("LOG_LEVEL")
+        assert "Not a valid log level" in excinfo.value.args[0]
+        with pytest.raises(environs.EnvError) as excinfo:
+            env.log_level("LOG_LEVEL_BAD")
         assert "Not a valid log level" in excinfo.value.args[0]
 
     @pytest.mark.parametrize("url", ["foo", "42", "foo@bar"])
