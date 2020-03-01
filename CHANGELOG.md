@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.3.0 (unreleased)
+
+- `log_level` accepts lower-cased log level names and rejects invalid
+  names ([#138](https://github.com/sloria/environs/pull/138)).
+  Thanks [gnarvaja](https://github.com/gnarvaja) for the PR.
+
 ## 7.2.0 (2020-02-09)
 
 - Add `dj_cache_url` for caching Django cache URLs (requires installing with `[django]`)

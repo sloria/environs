@@ -14,7 +14,7 @@ from pathlib import Path
 import marshmallow as ma
 from dotenv.main import load_dotenv, _walk_to_root
 
-__version__ = "7.2.0"
+__version__ = "7.3.0"
 __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
@@ -210,7 +210,8 @@ class LogLevelField(ma.fields.Int):
         try:
             return super()._format_num(value)
         except (TypeError, ValueError) as error:
-            if hasattr(logging, value):
+            value = value.upper()
+            if hasattr(logging, value) and isinstance(getattr(logging, value), int):
                 return getattr(logging, value)
             else:
                 raise ma.ValidationError("Not a valid log level.") from error
