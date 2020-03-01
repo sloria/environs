@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.3.0 (unreleased)
+## 7.3.0 (2020-03-01)
 
 - `log_level` accepts lower-cased log level names and rejects invalid
   names ([#138](https://github.com/sloria/environs/pull/138)).
