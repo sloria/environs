@@ -81,6 +81,11 @@ class TestCasting:
         assert env.list("LIST", subcast=int) == [1, 2, 3]
         assert env.list("LIST", subcast=float) == [1.0, 2.0, 3.0]
 
+    def test_list_with_empty_env_and_subcast(self, set_env, env):
+        set_env({"LIST": ""})
+        assert env.list("LIST", subcast=int) == []
+        assert env.list("LIST", subcast=float) == []
+
     def test_bool(self, set_env, env):
         set_env({"TRUTHY": "1", "FALSY": "0"})
         assert env.bool("TRUTHY") is True
