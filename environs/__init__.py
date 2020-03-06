@@ -12,6 +12,18 @@ from datetime import tzinfo
 from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
+try:
+    from dateutil import tz
+
+    _tzpackage = "dateutil"
+except ImportError:
+    try:
+        import pytz
+
+        _tzpackage = "pytz"
+    except ImportError:
+        _tzpackage = "notfound"
+
 import marshmallow as ma
 from dotenv.main import load_dotenv, _walk_to_root
 
@@ -224,18 +236,22 @@ class TimezoneField(ma.fields.Str):
 
     def _deserialize(self, value, *args, **kwargs) -> tzinfo:
         ret = super()._deserialize(value, *args, **kwargs)
-        try:
-            import pytz
-        except ImportError as error:
+        if _tzpackage == "notfound":
             raise RuntimeError(
-                "The timezone parser requires the pytz package. You can install it with: pip install pytz"
-            ) from error
-            raise ma.ValidationError("TimezoneField supported only with pytz module installed") from error
+                "The timezone parser requires the pytz or python-dateutil package. "
+                "You can install it with: pip install pytz|python-dateutil"
+            )
 
-        try:
-            return pytz.timezone(ret)
-        except pytz.UnknownTimeZoneError as error:
-            raise ma.ValidationError("Not a valid timezone") from error
+        if _tzpackage == "dateutil":
+            ret = tz.gettz(ret)
+            if ret is None:
+                raise ma.ValidationError("Not a valid timezone")
+            return ret
+        else:
+            try:
+                return pytz.timezone(ret)
+            except pytz.UnknownTimeZoneError as error:
+                raise ma.ValidationError("Not a valid timezone") from error
 
 
 class Env:

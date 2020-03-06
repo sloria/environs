@@ -9,7 +9,6 @@ from decimal import Decimal
 import dj_database_url
 import dj_email_url
 import django_cache_url
-import pytz
 import pytest
 from marshmallow import fields, validate
 
@@ -177,7 +176,7 @@ class TestCasting:
 
     def test_timezone_cast(self, set_env, env):
         set_env({"TIMEZONE": "America/Buenos_Aires"})
-        assert env.timezone("TIMEZONE") == pytz.timezone("America/Buenos_Aires")
+        assert env.timezone("TIMEZONE").tzname(dt.datetime.now()) == "-03"
 
     def test_invalid_timezone(self, set_env, env):
         set_env({"TIMEZONE": "America/Springfield"})
