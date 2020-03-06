@@ -65,7 +65,11 @@ def _field2method(
             field = field_or_factory(missing=missing, **kwargs)
         else:
             field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
-        parsed_key, raw_value, proxied_key = self._get_from_environ(name, ma.missing)
+
+        proxy_variable = kwargs.pop("proxy_variable", self._proxy_variables)
+        parsed_key, raw_value, proxied_key = self._get_from_environ(
+            name, ma.missing, proxy_variable=proxy_variable
+        )
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing and field.missing is ma.missing:
@@ -102,7 +106,11 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     ):
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
-        parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
+
+        proxy_variable = kwargs.pop("proxy_variable", self._proxy_variables)
+        parsed_key, raw_value, proxied_key = self._get_from_environ(
+            name, default, proxy_variable=proxy_variable
+        )
         if raw_value is ma.missing:
             raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
         value = func(raw_value, **kwargs)
@@ -241,7 +249,7 @@ class Env:
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 
-    def __init__(self, *, eager: _BoolType = True):
+    def __init__(self, *, eager: _BoolType = True, proxy_variables: _BoolType = True):
         self.eager = eager
         self._sealed = False  # type: bool
         self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
@@ -249,6 +257,8 @@ class Env:
         self._errors = collections.defaultdict(list)  # type: ErrorMapping
         self._prefix = None  # type: typing.Optional[_StrType]
         self.__custom_parsers__ = {}  # type: typing.Dict[_StrType, ParserMethod]
+
+        self._proxy_variables = proxy_variables
 
     def __repr__(self) -> _StrType:
         return "<{} {}>".format(self.__class__.__name__, self._values)
@@ -306,6 +316,17 @@ class Env:
             self._prefix = None
         self._prefix = old_prefix
 
+    @contextlib.contextmanager
+    def proxy_variables(self, proxy_variables: _BoolType) -> typing.Iterator["Env"]:
+        try:
+            old_proxy_variables = self._proxy_variables
+            self._proxy_variables = proxy_variables
+            yield self
+        finally:
+            # explicitly reset the stored proxy_variables setting on completion and exceptions
+            self._proxy_variables = proxy_variables
+        self._proxy_variables = old_proxy_variables
+
     def seal(self):
         """Validate parsed values and prevent new values from being added.
 
@@ -360,7 +381,12 @@ class Env:
         return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result
 
     def _get_from_environ(
-        self, key: _StrType, default: typing.Any, *, proxied: _BoolType = False
+        self,
+        key: _StrType,
+        default: typing.Any,
+        *,
+        proxied: _BoolType = False,
+        proxy_variable: _BoolType = True
     ) -> typing.Tuple[_StrType, typing.Any, typing.Optional[_StrType]]:
         """Access a value from os.environ. Handles proxied variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
 
@@ -372,11 +398,15 @@ class Env:
         """
         env_key = self._get_key(key, omit_prefix=proxied)
         value = os.environ.get(env_key, default)
-        if hasattr(value, "strip"):
+        if proxy_variable and hasattr(value, "strip"):
             match = _PROXIED_PATTERN.match(value)
             if match:  # Proxied variable
                 proxied_key = match.groups()[0]
-                return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
+                return (
+                    key,
+                    self._get_from_environ(proxied_key, default, proxied=True, proxy_variable=True)[1],
+                    proxied_key,
+                )
         return env_key, value, None
 
     def _get_key(self, key: _StrType, *, omit_prefix: _BoolType = False) -> _StrType:

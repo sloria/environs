@@ -183,6 +183,10 @@ class TestCasting:
 
 
 class TestProxiedVariables:
+    @pytest.fixture
+    def env_without_proxying(self):
+        return environs.Env(eager=False, proxy_variables=False)
+
     def test_reading_proxied_variable(self, set_env, env):
         set_env(
             {
@@ -220,6 +224,25 @@ class TestProxiedVariables:
             with env.prefixed("NESTED_"):
                 assert env.str("LOGIN") == "szabolcs"
                 assert env.str("PASSWORD") == "nested-secret"
+
+    def test_disable_proxied_variable(self, set_env, env):
+        set_env({"MAILGUN_SMTP_LOGIN": "sloria", "SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}"})
+        assert env("SMTP_LOGIN", proxy_variable=False) == "{{MAILGUN_SMTP_LOGIN}}"
+
+    def test_disable_proxied_variable_globally(self, set_env, env_without_proxying):
+        set_env({"MAILGUN_SMTP_LOGIN": "sloria", "SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}"})
+
+        assert env_without_proxying("SMTP_LOGIN") == "{{MAILGUN_SMTP_LOGIN}}"
+
+    def test_disable_proxied_variable_with_config(self, set_env, env):
+        set_env({"MAILGUN_SMTP_LOGIN": "sloria", "SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}"})
+        with env.proxy_variables(False):
+            with env.proxy_variables(True):  # test multiple nested configs
+                assert env("SMTP_LOGIN") == "sloria"
+
+            assert env("SMTP_LOGIN") == "{{MAILGUN_SMTP_LOGIN}}"
+
+        assert env("SMTP_LOGIN") == "sloria"
 
 
 class TestEnvFileReading:

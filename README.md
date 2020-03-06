@@ -177,6 +177,42 @@ with env.prefixed("MYAPP_"):
 smtp_login = env("SMTP_LOGIN")  # =>'sloria'
 ```
 
+### Disabling variable proxying
+
+In case you would like to disable proxying there are three possibilities:
+
+The first option is to disable proxying by default:
+
+```python
+# export MAILGUN_LOGIN=sloria
+# export SMTP_LOGIN={{MAILGUN_LOGIN}}
+
+env = Env(proxy_variables=False)
+env.read_env()
+smtp_login = env("SMTP_LOGIN")  # =>'{{MAILGUN_LOGIN}}'
+```
+
+
+The next next one disables it temporarily within the scope of a `with`. Of course you can also activate it in case you
+disabled it by-default (see previous option):
+
+```python
+# export MAILGUN_LOGIN=sloria
+# export SMTP_LOGIN={{MAILGUN_LOGIN}}
+
+with env.proxy_variables(False):
+    smtp_login = env("SMTP_LOGIN")  # =>'{{MAILGUN_LOGIN}}'
+```
+
+Or in case you would like to disable it only for one call, use the `proxy_variables` parameter:
+
+```python
+# export MAILGUN_LOGIN=sloria
+# export SMTP_LOGIN={{MAILGUN_LOGIN}}
+
+smtp_login = env("SMTP_LOGIN", proxy_variables=False)  # =>'{{MAILGUN_LOGIN}}'
+```
+
 ## Validation
 
 ```python
