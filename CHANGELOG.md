@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.3.1 (2020-03-22)
+
+- Fix error when parsing empty list with subcast
+  [#137](https://github.com/sloria/environs/issues/137).
+  Thanks [sabdouni] for the catch and patch.
+
 ## 7.3.0 (2020-03-01)
 
 - `log_level` accepts lower-cased log level names and rejects invalid
