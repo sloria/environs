@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import typing
+import types
 from collections.abc import Mapping
 from urllib.parse import urlparse, ParseResult
 from pathlib import Path
@@ -272,7 +273,7 @@ class Env:
             current_frame = inspect.currentframe()
             if not current_frame:
                 raise RuntimeError("Could not get current call frame.")
-            frame = current_frame.f_back
+            frame = typing.cast(types.FrameType, current_frame.f_back)
             caller_dir = os.path.dirname(frame.f_code.co_filename)
             # Will be a directory
             start = os.path.join(os.path.abspath(caller_dir))
