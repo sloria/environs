@@ -270,29 +270,56 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
-        # By default, start search from the same file this function is called
-        if path is None:
+        # set default environment file name
+        DEFAULT_ENVIRONMENT_FILE_NAME = ".env"
+
+        # remember original path
+        original_path = path
+
+        # use DEFAULT_ENVIRONMENT_FILE_NAME if path is None or empty
+        if not path:
+            path = DEFAULT_ENVIRONMENT_FILE_NAME
+
+        # make path absolute if it is relative, using the directory of the calling script as base
+        if not os.path.isabs(path):
             current_frame = inspect.currentframe()
             if not current_frame:
                 raise RuntimeError("Could not get current call frame.")
             frame = typing.cast(types.FrameType, current_frame.f_back)
             caller_dir = os.path.dirname(frame.f_code.co_filename)
-            # Will be a directory
-            start = os.path.join(os.path.abspath(caller_dir))
+            path = os.path.join(caller_dir, path)
+
+        # add DEFAULT_ENVIRONMENT_FILE_NAME to path if path is a directory
+        path = (
+            os.path.join(path, DEFAULT_ENVIRONMENT_FILE_NAME)
+            if os.path.isdir(path)
+            else path
+        )
+
+        # walk up the directory tree starting in the path directory and try to find an environment file.
+        # if recurse is False, stop after the first directory.
+        def look_for_environment_file_in_parents(path):
+            path_items = re.split("\\\\|\/", os.path.abspath(path))
+            basename = path_items[-1]
+            parents = path_items[:-1]
+            depth = len(parents)
+            while depth >= 0:
+                path_to_check = "/".join(parents[:depth]) + f"/{basename}"
+                if os.path.isfile(path_to_check):
+                    return path_to_check
+                if recurse:
+                    depth -= 1
+                    continue
+                else:
+                    return None
+
+        env_file_to_load = look_for_environment_file_in_parents(path)
+
+        # load the env file if we found one
+        if env_file_to_load:
+            load_dotenv(env_file_to_load, verbose=verbose, override=override)
         else:
-            # Could be directory or a file
-            start = path
-        if recurse:
-            env_name = os.path.basename(start) if os.path.isfile(start) else ".env"
-            for dirname in _walk_to_root(start):
-                check_path = os.path.join(dirname, env_name)
-                if os.path.exists(check_path):
-                    load_dotenv(check_path, verbose=verbose, override=override)
-                    return
-        else:
-            if path is None:
-                start = os.path.join(start, ".env")
-            load_dotenv(start, verbose=verbose, override=override)
+            raise ValueError(f"Could not find environment file for path '{original_path}', recurse = {recurse}.")
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
