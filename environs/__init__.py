@@ -13,7 +13,7 @@ from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
 import marshmallow as ma
-from dotenv.main import load_dotenv, _walk_to_root
+from dotenv.main import load_dotenv
 
 __version__ = "7.3.1"
 __all__ = ["EnvError", "Env"]
@@ -270,26 +270,39 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
-        # set default environment file name
+        # declare constants
         DEFAULT_ENVIRONMENT_FILE_NAME = ".env"
+        PATH_SEPARATOR_PATTERN = r"\\|\/"
 
         # remember original path
         original_path = path
 
-        # use DEFAULT_ENVIRONMENT_FILE_NAME if path is None or empty
+        # use .env as path if path is None or empty
         if not path:
             path = DEFAULT_ENVIRONMENT_FILE_NAME
 
         # make path absolute if it is relative, using the directory of the calling script as base
         if not os.path.isabs(path):
+            def merge_absolute_and_relative_path(absolute_path, relative_path):
+                absolute_path_items = re.split(PATH_SEPARATOR_PATTERN, absolute_path)
+                relative_path_items = re.split(PATH_SEPARATOR_PATTERN, relative_path)
+                popped = False
+                for absolute_path_item in absolute_path_items:
+                    if absolute_path_item == relative_path_items[0]:
+                        relative_path_items.pop(0)
+                        popped = True
+                    elif popped:
+                        break
+                return "/".join(absolute_path_items + relative_path_items)
+
             current_frame = inspect.currentframe()
             if not current_frame:
                 raise RuntimeError("Could not get current call frame.")
             frame = typing.cast(types.FrameType, current_frame.f_back)
             caller_dir = os.path.dirname(frame.f_code.co_filename)
-            path = os.path.join(caller_dir, path)
+            path = merge_absolute_and_relative_path(caller_dir, path)
 
-        # add DEFAULT_ENVIRONMENT_FILE_NAME to path if path is a directory
+        # add .env to path if path is a directory
         path = (
             os.path.join(path, DEFAULT_ENVIRONMENT_FILE_NAME)
             if os.path.isdir(path)
@@ -299,7 +312,7 @@ class Env:
         # walk up the directory tree starting in the path directory and try to find an environment file.
         # if recurse is False, stop after the first directory.
         def look_for_environment_file_in_parents(path):
-            path_items = re.split("\\\\|\/", os.path.abspath(path))
+            path_items = re.split(PATH_SEPARATOR_PATTERN, os.path.abspath(path))
             basename = path_items[-1]
             parents = path_items[:-1]
             depth = len(parents)
@@ -319,7 +332,8 @@ class Env:
         if env_file_to_load:
             load_dotenv(env_file_to_load, verbose=verbose, override=override)
         else:
-            raise ValueError(f"Could not find environment file for path '{original_path}', recurse = {recurse}.")
+            raise ValueError(
+                f"Could not find environment file for path '{original_path}', recurse = {recurse}.")
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
