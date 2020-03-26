@@ -317,7 +317,7 @@ class Env:
             parents = path_items[:-1]
             depth = len(parents)
             while depth >= 0:
-                path_to_check = "/".join(parents[:depth]) + f"/{basename}"
+                path_to_check = "/".join(parents[:depth]) + "/" + basename
                 if os.path.isfile(path_to_check):
                     return path_to_check
                 if recurse:
@@ -333,7 +333,7 @@ class Env:
             load_dotenv(env_file_to_load, verbose=verbose, override=override)
         else:
             raise ValueError(
-                f"Could not find environment file for path '{original_path}', recurse = {recurse}.")
+                "Could not find environment file for path '" + str(original_path) + "', recurse = " + str(recurse) + ".")
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
