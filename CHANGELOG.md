@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.4.0 (unreleased)
+
+- Add `subcast_key` argument to `env.dict` ([#151](https://github.com/sloria/environs/issues/151)).
+  Thanks [AugPro](https://github.com/AugPro) for the suggestion and PR.
+
 ## 7.3.1 (2020-03-22)
 
 - Fix error when parsing empty list with subcast
@@ -240,7 +245,3 @@ Bug fixes:
 ## 0.1.0 (2016-04-25)
 
 - First PyPI release.
-
-```
-
-```

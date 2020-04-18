@@ -143,13 +143,19 @@ def _preprocess_list(value: typing.Union[str, typing.Iterable], **kwargs) -> typ
 
 
 def _preprocess_dict(
-    value: typing.Union[str, typing.Mapping[str, _T]], subcast: Subcast, **kwargs
-) -> typing.Mapping[str, _T]:
+    value: typing.Union[str, typing.Mapping],
+    # TODO: Rename subcast to subcast_values and re-order arguments for next major release
+    subcast: Subcast,
+    subcast_key: Subcast = None,
+    **kwargs
+) -> typing.Mapping:
     if isinstance(value, Mapping):
         return value
 
     return {
-        key.strip(): subcast(val.strip()) if subcast else val.strip()
+        (subcast_key(key.strip()) if subcast_key else key.strip()): (
+            subcast(val.strip()) if subcast else val.strip()
+        )
         for key, val in (item.split("=") for item in value.split(",") if value)
     }
 
