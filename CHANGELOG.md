@@ -1,6 +1,6 @@
 # Changelog
 
-## 7.4.0 (unreleased)
+## 7.4.0 (2020-04-18)
 
 - Add `subcast_key` argument to `env.dict` ([#151](https://github.com/sloria/environs/issues/151)).
   Thanks [AugPro](https://github.com/AugPro) for the suggestion and PR.
