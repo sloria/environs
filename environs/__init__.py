@@ -13,7 +13,7 @@ from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
 import marshmallow as ma
-from dotenv.main import load_dotenv, _walk_to_root
+from dotenv.main import load_dotenv
 
 __version__ = "7.4.0"
 __all__ = ["EnvError", "Env"]
@@ -276,29 +276,74 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
-        # By default, start search from the same file this function is called
-        if path is None:
+        # declare constants
+        PATH_SEPARATOR_PATTERN = r"\\|\/"
+
+        # ensure that path is not a directory
+        if path and os.path.isdir(str(path)):
+            raise ValueError(
+                "The specified path '" + str(path) + "' is a directory. Ensure that you pass a filename."
+            )
+
+        # remember original path
+        original_path = path
+
+        # use .env as path if path is None or empty
+        if not path:
+            path = ".env"
+
+        # make path absolute if it is relative, using the directory of the calling script as base
+        if not os.path.isabs(path):
+
+            def merge_absolute_and_relative_path(absolute_path, relative_path):
+                absolute_path_items = re.split(PATH_SEPARATOR_PATTERN, absolute_path)
+                relative_path_items = re.split(PATH_SEPARATOR_PATTERN, relative_path)
+                popped = False
+                for absolute_path_item in absolute_path_items:
+                    if absolute_path_item == relative_path_items[0]:
+                        relative_path_items.pop(0)
+                        popped = True
+                    elif popped:
+                        break
+                return os.path.sep.join(absolute_path_items + relative_path_items)
+
             current_frame = inspect.currentframe()
             if not current_frame:
                 raise RuntimeError("Could not get current call frame.")
             frame = typing.cast(types.FrameType, current_frame.f_back)
             caller_dir = os.path.dirname(frame.f_code.co_filename)
-            # Will be a directory
-            start = os.path.join(os.path.abspath(caller_dir))
+            path = merge_absolute_and_relative_path(caller_dir, path)
+
+        # walk up the directory tree starting in the path directory and try to find an environment file.
+        # if recurse is False, stop after the first directory.
+        def look_for_environment_file_in_parents(path):
+            path_items = re.split(PATH_SEPARATOR_PATTERN, os.path.abspath(path))
+            basename = path_items[-1]
+            parents = path_items[:-1]
+            depth = len(parents)
+            while depth >= 0:
+                path_to_check = os.path.sep.join(parents[:depth]) + os.path.sep + basename
+                if os.path.isfile(path_to_check):
+                    return path_to_check
+                if recurse:
+                    depth -= 1
+                    continue
+                else:
+                    return None
+
+        env_file_to_load = look_for_environment_file_in_parents(path)
+
+        # load the env file if we found one
+        if env_file_to_load:
+            load_dotenv(env_file_to_load, verbose=verbose, override=override)
         else:
-            # Could be directory or a file
-            start = path
-        if recurse:
-            env_name = os.path.basename(start) if os.path.isfile(start) else ".env"
-            for dirname in _walk_to_root(start):
-                check_path = os.path.join(dirname, env_name)
-                if os.path.exists(check_path):
-                    load_dotenv(check_path, verbose=verbose, override=override)
-                    return
-        else:
-            if path is None:
-                start = os.path.join(start, ".env")
-            load_dotenv(start, verbose=verbose, override=override)
+            raise ValueError(
+                "Could not find environment file for path '"
+                + str(original_path)
+                + "', recurse = "
+                + str(recurse)
+                + "."
+            )
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
