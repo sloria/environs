@@ -284,7 +284,6 @@ class Env:
                 "The specified path '" + str(path) + "' is a directory. Ensure that you pass a filename."
             )
 
-        # remember original path
         original_path = path
 
         # use .env as path if path is None or empty
