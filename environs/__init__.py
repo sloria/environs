@@ -276,16 +276,14 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
-        # declare constants
         PATH_SEPARATOR_PATTERN = r"\\|\/"
 
         # ensure that path is not a directory
         if path and os.path.isdir(str(path)):
             raise ValueError(
-                "The specified path '" + str(path) + "' is a directory. Ensure that you pass a filename."
+                "The specified path '{}' is a directory. Ensure that you pass a filename.".format(path)
             )
 
-        # remember original path
         original_path = path
 
         # use .env as path if path is None or empty
@@ -338,11 +336,7 @@ class Env:
             load_dotenv(env_file_to_load, verbose=verbose, override=override)
         else:
             raise ValueError(
-                "Could not find environment file for path '"
-                + str(original_path)
-                + "', recurse = "
-                + str(recurse)
-                + "."
+                "Could not find environment file for path '{}', recurse = {}.".format(original_path, recurse)
             )
 
     @contextlib.contextmanager
