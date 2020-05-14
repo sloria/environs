@@ -278,7 +278,6 @@ class Env:
         """
         PATH_SEPARATOR_PATTERN = r"\\|\/"
 
-        # ensure that path is not a directory
         if path and os.path.isdir(str(path)):
             raise ValueError(
                 "The specified path '" + str(path) + "' is a directory. Ensure that you pass a filename."
