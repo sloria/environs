@@ -276,7 +276,6 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
-        # declare constants
         PATH_SEPARATOR_PATTERN = r"\\|\/"
 
         # ensure that path is not a directory
