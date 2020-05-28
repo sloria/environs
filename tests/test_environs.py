@@ -260,6 +260,17 @@ class TestEnvFileReading:
         env.read_env("tests/.custom.env", recurse=False)
         assert env("CUSTOM_STRING") == "foo"
 
+    def test_read_env_recurse_from_subfolder(self, env):
+        old_cwd = os.getcwd()
+        os.chdir("tests/subfolder")
+        env.read_env(".custom.env", recurse=True)
+        os.chdir(old_cwd)
+        assert env("CUSTOM_STRING") == "foo"
+
+    def test_read_env_directory(self, env):
+        with pytest.raises(ValueError):
+            assert env.read_env("tests")
+
 
 def always_fail(value):
     raise environs.EnvError("something went wrong")
