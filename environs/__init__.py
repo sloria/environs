@@ -282,24 +282,24 @@ class Env:
             if not current_frame:
                 raise RuntimeError("Could not get current call frame.")
             frame = typing.cast(types.FrameType, current_frame.f_back)
-            caller_dir = os.path.dirname(frame.f_code.co_filename)
-            start = os.path.join(os.path.abspath(caller_dir), ".env")
+            caller_dir = Path(frame.f_code.co_filename).parent.resolve()
+            start = caller_dir / ".env"
         else:
-            # TODO: Remove str casts when we drop Python 3.5
-            if os.path.isdir(str(path)):
+            if Path(path).is_dir():
                 raise ValueError("path must be a filename, not a directory.")
-            start = path
+            start = Path(path)
+        # TODO: Remove str casts when we drop Python 3.5
         if recurse:
             start_dir, env_name = os.path.split(str(start))
             if not start_dir:  # Only a filename was given
                 start_dir = os.getcwd()
             for dirname in _walk_to_root(start_dir):
-                check_path = os.path.join(dirname, env_name)
-                if os.path.exists(check_path):
-                    load_dotenv(check_path, verbose=verbose, override=override)
+                check_path = Path(dirname) / env_name
+                if check_path.exists():
+                    load_dotenv(str(check_path), verbose=verbose, override=override)
                     return
         else:
-            load_dotenv(start, verbose=verbose, override=override)
+            load_dotenv(str(start), verbose=verbose, override=override)
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
