@@ -14,6 +14,8 @@ from marshmallow import fields, validate
 
 import environs
 
+HERE = pathlib.Path(__file__).parent
+
 
 @pytest.fixture
 def set_env(monkeypatch):
@@ -250,15 +252,34 @@ class TestEnvFileReading:
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
         assert env("CUSTOM_STRING", "default") == "default"  # sanity check
-        env.read_env("tests/.custom.env", recurse=True)
+        env.read_env(HERE / ".custom.env", recurse=True)
         assert env("CUSTOM_STRING") == "foo"
 
     def test_read_env_non_recurse(self, env):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
         assert env("CUSTOM_STRING", "default") == "default"  # sanity check
-        env.read_env("tests/.custom.env", recurse=False)
+        env.read_env(HERE / ".custom.env", recurse=False)
         assert env("CUSTOM_STRING") == "foo"
+
+    def test_read_env_recurse_from_subfolder(self, env, monkeypatch):
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
+        env.read_env(HERE / "subfolder" / ".custom.env", recurse=True)
+        assert env("CUSTOM_STRING") == "foo"
+
+    @pytest.mark.parametrize("path", [".custom.env", (HERE / "subfolder" / ".custom.env")])
+    def test_read_env_recurse_start_from_subfolder(self, env, path, monkeypatch):
+        if "CUSTOM_STRING" in os.environ:
+            os.environ.pop("CUSTOM_STRING")
+        # TODO: Remove str cast when we drop Python 3.5
+        monkeypatch.chdir(str(HERE / "subfolder"))
+        env.read_env(path, recurse=True)
+        assert env("CUSTOM_STRING") == "foo"
+
+    def test_read_env_directory(self, env):
+        with pytest.raises(ValueError, match="path must be a filename"):
+            assert env.read_env("tests")
 
 
 def always_fail(value):
