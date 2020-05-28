@@ -272,7 +272,8 @@ class TestEnvFileReading:
     def test_read_env_recurse_start_from_subfolder(self, env, path, monkeypatch):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
-        monkeypatch.chdir(HERE / "subfolder")
+        # TODO: Remove str cast when we drop Python 3.5
+        monkeypatch.chdir(str(HERE / "subfolder"))
         env.read_env(path, recurse=True)
         assert env("CUSTOM_STRING") == "foo"
 

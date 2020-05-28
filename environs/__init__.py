@@ -276,28 +276,29 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
-        # By default, start search from the same file this function is called
         if path is None:
+            # By default, start search from the same directory this function is called
             current_frame = inspect.currentframe()
             if not current_frame:
                 raise RuntimeError("Could not get current call frame.")
             frame = typing.cast(types.FrameType, current_frame.f_back)
             caller_dir = os.path.dirname(frame.f_code.co_filename)
-            # Will be a directory
-            start = os.path.join(os.path.abspath(caller_dir))
+            start = os.path.join(os.path.abspath(caller_dir), ".env")
         else:
-            # Could be directory or a file
+            # TODO: Remove str casts when we drop Python 3.5
+            if os.path.isdir(str(path)):
+                raise ValueError("path must be a filename, not a directory.")
             start = path
         if recurse:
-            env_name = os.path.basename(start) if os.path.isfile(start) else ".env"
-            for dirname in _walk_to_root(start):
+            start_dir, env_name = os.path.split(str(start))
+            if not start_dir:  # Only a filename was given
+                start_dir = os.getcwd()
+            for dirname in _walk_to_root(start_dir):
                 check_path = os.path.join(dirname, env_name)
                 if os.path.exists(check_path):
                     load_dotenv(check_path, verbose=verbose, override=override)
                     return
         else:
-            if path is None:
-                start = os.path.join(start, ".env")
             load_dotenv(start, verbose=verbose, override=override)
 
     @contextlib.contextmanager

@@ -1,5 +1,17 @@
 # Changelog
 
+## 8.0.0 (unreleased)
+
+Bug fixes:
+
+- Fix behavior of recurse=True when custom filepath is passed to `env.read_env`
+  ([#100](https://github.com/sloria/environs/issues/100)). Thanks [ribeaud](https://github.com/ribeaud) and [timoklimmer](https://github.com/sloria/environs/pull/157) for the help.
+
+Other changes:
+
+- _Backwards-incompatible_: As a result of the above fix, passing a directory to `env.read_env` is no longer allowed and will raise a `ValueError`.
+  Only file paths or file names should be passed.
+
 ## 7.4.0 (2020-04-18)
 
 - Add `subcast_key` argument to `env.dict` ([#151](https://github.com/sloria/environs/issues/151)).
