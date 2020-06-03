@@ -6,7 +6,7 @@ DJANGO_REQUIRES = ["dj-database-url", "dj-email-url", "django-cache-url"]
 EXTRAS_REQUIRE = {
     "django": DJANGO_REQUIRES,
     "tests": ["pytest"] + DJANGO_REQUIRES,
-    "lint": ["flake8==3.8.2", "flake8-bugbear==20.1.4", "mypy==0.770", "pre-commit~=2.4"],
+    "lint": ["flake8==3.8.2", "flake8-bugbear==20.1.4", "mypy==0.780", "pre-commit~=2.4"],
 }
 EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
 PYTHON_REQUIRES = ">=3.5.3"
