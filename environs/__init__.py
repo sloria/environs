@@ -268,6 +268,7 @@ class Env:
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
+        raise_error_if_not_found: _BoolType = False,
     ) -> None:
         """Read a .env file into os.environ.
 
@@ -288,6 +289,8 @@ class Env:
             if Path(path).is_dir():
                 raise ValueError("path must be a filename, not a directory.")
             start = Path(path)
+        
+        is_env_file_found = False
         # TODO: Remove str casts when we drop Python 3.5
         if recurse:
             start_dir, env_name = os.path.split(str(start))
@@ -296,10 +299,18 @@ class Env:
             for dirname in _walk_to_root(start_dir):
                 check_path = Path(dirname) / env_name
                 if check_path.exists():
+                    is_env_file_found = True
                     load_dotenv(str(check_path), verbose=verbose, override=override)
-                    return
+                    break
         else:
-            load_dotenv(str(start), verbose=verbose, override=override)
+            if start.exists():
+                is_env_file_found = True
+                load_dotenv(str(start), verbose=verbose, override=override)
+
+        if verbose:
+            print('environ: is_env_file_found={}'.format(is_env_file_found))
+        if raise_error_if_not_found and not is_env_file_found:
+            raise IOError('File not found: {}'.format(path or '.env'))
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
