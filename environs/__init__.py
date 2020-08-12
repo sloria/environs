@@ -289,7 +289,7 @@ class Env:
             if Path(path).is_dir():
                 raise ValueError("path must be a filename, not a directory.")
             start = Path(path)
-        
+
         is_env_file_found = False
         # TODO: Remove str casts when we drop Python 3.5
         if recurse:
@@ -308,9 +308,9 @@ class Env:
                 load_dotenv(str(start), verbose=verbose, override=override)
 
         if verbose:
-            print('environ: is_env_file_found={}'.format(is_env_file_found))
+            print("environ: is_env_file_found={}".format(is_env_file_found))
         if raise_error_if_not_found and not is_env_file_found:
-            raise IOError('File not found: {}'.format(path or '.env'))
+            raise OSError("File not found: {}".format(path or ".env"))
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
