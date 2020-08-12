@@ -289,7 +289,7 @@ class Env:
             if Path(path).is_dir():
                 raise ValueError("path must be a filename, not a directory.")
             start = Path(path)
-
+        
         is_env_file_found = False
         # TODO: Remove str casts when we drop Python 3.5
         if recurse:
@@ -300,14 +300,12 @@ class Env:
                 check_path = Path(dirname) / env_name
                 if check_path.exists():
                     is_env_file_found = True
-                    load_dotenv(str(check_path), verbose=verbose, override=override,
-                                raise_error_if_not_found=raise_error_if_not_found)
+                    load_dotenv(str(check_path), verbose=verbose, override=override)
                     break
         else:
             if start.exists():
                 is_env_file_found = True
-                load_dotenv(str(start), verbose=verbose, override=override,
-                            raise_error_if_not_found=raise_error_if_not_found)
+                load_dotenv(str(start), verbose=verbose, override=override)
 
         if verbose:
             print('environ: is_env_file_found={}'.format(is_env_file_found))
