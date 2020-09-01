@@ -123,6 +123,10 @@ class TestCasting:
     def test_dict_with_default_from_dict(self, set_env, env):
         assert env.dict("DICT", {"key1": "1"}) == {"key1": "1"}
 
+    def test_dict_with_equal(self, set_env, env):
+        set_env({"DICT": "expr1=1 < 2,expr2=(1+1) = 2"})
+        assert env.dict("DICT") == {"expr1": "1 < 2", "expr2": "(1+1) = 2"}
+
     def test_decimal_cast(self, set_env, env):
         set_env({"DECIMAL": "12.34"})
         assert env.decimal("DECIMAL") == Decimal("12.34")
@@ -664,3 +668,13 @@ class TestSubstituteEnvs:
 
         with pytest.raises(environs.EnvError, match='Environment variable "WORLD" not set'):
             env.str("HELLOWORLD")
+
+    def test_composite_types(self, env, set_env):
+        set_env({
+            "ALLOWED_USERS": "god,${USER},root",
+            "USER": "gnarvaja",
+            "MYCLASS_KARGS": "foo=bar,wget_params=${WGET_PARAMS}",
+            "WGET_PARAMS": '--header="Referer: https://radiocut.fm/"',
+        })
+        assert env.list("ALLOWED_USERS") == ["god", "gnarvaja", "root"]
+        assert env.dict("MYCLASS_KARGS") == {"foo": "bar", "wget_params": '--header="Referer: https://radiocut.fm/"'}

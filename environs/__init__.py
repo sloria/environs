@@ -157,7 +157,7 @@ def _preprocess_dict(
         (subcast_key(key.strip()) if subcast_key else key.strip()): (
             subcast(val.strip()) if subcast else val.strip()
         )
-        for key, val in (item.split("=") for item in value.split(",") if value)
+        for key, val in (item.split("=", 1) for item in value.split(",") if value)
     }
 
 
