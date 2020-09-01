@@ -20,6 +20,7 @@ __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
+_ENVVAR_PATTERN = re.compile(r'\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}')
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -250,9 +251,14 @@ class Env:
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 
-    def __init__(self, *, eager: _BoolType = True):
+    def __init__(self, *, eager: _BoolType = True, allow_proxy: _BoolType = True,
+                 substitute_envs: _BoolType = False):
         self.eager = eager
         self._sealed = False  # type: bool
+        self.allow_proxy = allow_proxy
+        self.substitute_envs = substitute_envs
+        # TODO: disallow setting both allow_proxy and substitute_envs?
+        # TODO: in future versions deprecate allow_proxy
         self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
         self._errors = collections.defaultdict(list)  # type: ErrorMapping
@@ -383,11 +389,41 @@ class Env:
         env_key = self._get_key(key, omit_prefix=proxied)
         value = os.environ.get(env_key, default)
         if hasattr(value, "strip"):
-            match = _PROXIED_PATTERN.match(value)
+            match = self.allow_proxy and _PROXIED_PATTERN.match(value)
             if match:  # Proxied variable
+                # TODO: DeprecationWarning?
                 proxied_key = match.groups()[0]
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
+            match = self.substitute_envs and _ENVVAR_PATTERN.match(value)
+            if match:  # Full match substitute_envs - special case keep default
+                proxied_key = match.groups()[0]
+                subs_default = match.groups()[1]
+                if subs_default is not None:
+                    default = subs_default[2:]
+                return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
+            match = self.substitute_envs and _ENVVAR_PATTERN.search(value)
+            if match:  # Multiple or in text match substitute_envs - General case - default lost
+                return self._substitute_envs(env_key, value)
         return env_key, value, None
+
+    def _substitute_envs(self, parsed_key, value):
+        ret = ""
+        prev_start = 0
+        for match in _ENVVAR_PATTERN.finditer(value):
+            env_key = match.group(1)
+            env_default = match.group(2)
+            if env_default is None:
+                env_default = ma.missing
+            else:
+                env_default = env_default[2:]
+            _, env_value, _ = self._get_from_environ(env_key, env_default, proxied=True)
+            if env_value is ma.missing:
+                return parsed_key, env_value, env_key
+            ret += value[prev_start:match.start()] + env_value
+            prev_start = match.end()
+        ret += value[prev_start:]
+
+        return parsed_key, ret, env_key
 
     def _get_key(self, key: _StrType, *, omit_prefix: _BoolType = False) -> _StrType:
         return self._prefix + key if self._prefix and not omit_prefix else key

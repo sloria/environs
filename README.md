@@ -19,6 +19,7 @@ It allows you to store configuration separate from your code, as per
   - [Reading a specific file](#reading-a-specific-file)
 - [Handling prefixes](#handling-prefixes)
 - [Proxied variables](#proxied-variables)
+- [Envvar substitutions](#substitute-envs)
 - [Validation](#validation)
 - [Deferred validation](#deferred-validation)
 - [Serialization](#serialization)
@@ -166,6 +167,21 @@ with env.prefixed("MYAPP_"):
     with env.prefixed("DB_"):
         db_host = env("HOST", "lolcathost")
         db_port = env.int("PORT", 10101)
+```
+
+## Envvar substitutions variables
+
+```python
+# export CONNECTION_URL=https://${USER:-sloria}:${PASSWORD}@${HOST:-localhost}/
+# export PASSWORD=secret
+# export YEAR=${CURRENT_YEAR:-2020}
+
+from environs import Env
+
+env = Env(substitute_envs=True)
+
+connection_url = env("CONNECTION_URL")  # =>'https://sloria:secret@localhost'
+year = env.int("YEAR")  # =>2020
 ```
 
 ## Proxied variables
