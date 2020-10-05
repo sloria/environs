@@ -20,7 +20,7 @@ __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
-_ENVVAR_PATTERN = re.compile(r"\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
+_ENVVAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -252,13 +252,13 @@ class Env:
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 
     def __init__(
-        self, *, eager: _BoolType = True, allow_proxy: _BoolType = True, substitute_envs: _BoolType = False
+        self, *, eager: _BoolType = True, allow_proxy: _BoolType = True, expand_vars: _BoolType = False
     ):
         self.eager = eager
         self._sealed = False  # type: bool
         self.allow_proxy = allow_proxy
-        self.substitute_envs = substitute_envs
-        # TODO: disallow setting both allow_proxy and substitute_envs?
+        self.expand_vars = expand_vars
+        # TODO: disallow setting both allow_proxy and expand_vars?
         # TODO: in future versions deprecate allow_proxy
         self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
@@ -395,19 +395,22 @@ class Env:
                 # TODO: DeprecationWarning?
                 proxied_key = match.groups()[0]
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
-            match = self.substitute_envs and _ENVVAR_PATTERN.match(value)
-            if match:  # Full match substitute_envs - special case keep default
+            match = self.expand_vars and _ENVVAR_PATTERN.match(value)
+            if match:  # Full match expand_vars - special case keep default
                 proxied_key = match.groups()[0]
                 subs_default = match.groups()[1]
                 if subs_default is not None:
                     default = subs_default[2:]
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
-            match = self.substitute_envs and _ENVVAR_PATTERN.search(value)
-            if match:  # Multiple or in text match substitute_envs - General case - default lost
-                return self._substitute_envs(env_key, value)
+            match = self.expand_vars and _ENVVAR_PATTERN.search(value)
+            if match:  # Multiple or in text match expand_vars - General case - default lost
+                return self._expand_vars(env_key, value)
+            # Remove escaped $
+            if self.expand_vars and r"\$" in value:
+                value = value.replace(r"\$", "$")
         return env_key, value, None
 
-    def _substitute_envs(self, parsed_key, value):
+    def _expand_vars(self, parsed_key, value):
         ret = ""
         prev_start = 0
         for match in _ENVVAR_PATTERN.finditer(value):

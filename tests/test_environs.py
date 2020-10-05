@@ -630,12 +630,12 @@ class TestDeferredValidation:
             env.https_url("URL")
 
 
-class TestSubstituteEnvs:
+class TestExpandVars:
     @pytest.fixture
     def env(self):
-        return environs.Env(substitute_envs=True)
+        return environs.Env(expand_vars=True)
 
-    def test_full_substitutions(self, env, set_env):
+    def test_full_expand_vars(self, env, set_env):
         set_env(
             {
                 "MAIN": "${SUBSTI}",
@@ -657,7 +657,7 @@ class TestSubstituteEnvs:
         with pytest.raises(environs.EnvError, match='Environment variable "MYPROXY" not set'):
             env.str("UNDEFINED_PROXY")
 
-    def test_multiple_substitutions(self, env, set_env):
+    def test_multiple_expands(self, env, set_env):
         set_env(
             {
                 "PGURL": "postgres://${USER:-sloria}:${PASSWORD:-secret}@localhost",
@@ -672,6 +672,20 @@ class TestSubstituteEnvs:
 
         with pytest.raises(environs.EnvError, match='Environment variable "WORLD" not set'):
             env.str("HELLOWORLD")
+
+    def test_recursive_expands(self, env, set_env):
+        set_env(
+            {
+                "PGURL": "postgres://${PGUSER:-sloria}:${PGPASS:-secret}@localhost",
+                "PGUSER": "${USER}",
+                "USER": "gnarvaja",
+            }
+        )
+        assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
+
+    def test_escaped_expand(self, env, set_env):
+        set_env({"ESCAPED_EXPAND": r"\${ESCAPED}", "ESCAPED": "fail"})
+        assert env.str("ESCAPED_EXPAND") == r"${ESCAPED}"
 
     def test_composite_types(self, env, set_env):
         set_env(
