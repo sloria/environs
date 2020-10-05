@@ -636,16 +636,18 @@ class TestSubstituteEnvs:
         return environs.Env(substitute_envs=True)
 
     def test_full_substitutions(self, env, set_env):
-        set_env({
-            "MAIN": "${SUBSTI}",
-            "MAIN_INT": "${SUBS_INT}",
-            "MAIN_DEF": "${SUBS_NOT_FOUND:-maindef}",
-            "MAIN_INT_DEF": "${SUBS_NOT_FOUND_I:-454}",
-            "SUBSTI": "substivalue",
-            "SUBS_INT": "48",
-            "USE_DEFAULT": "${FOOBAR}",
-            "UNDEFINED_PROXY": "${MYPROXY}",
-        })
+        set_env(
+            {
+                "MAIN": "${SUBSTI}",
+                "MAIN_INT": "${SUBS_INT}",
+                "MAIN_DEF": "${SUBS_NOT_FOUND:-maindef}",
+                "MAIN_INT_DEF": "${SUBS_NOT_FOUND_I:-454}",
+                "SUBSTI": "substivalue",
+                "SUBS_INT": "48",
+                "USE_DEFAULT": "${FOOBAR}",
+                "UNDEFINED_PROXY": "${MYPROXY}",
+            }
+        )
         assert env.str("MAIN") == "substivalue"
         assert env.int("MAIN_INT") == 48
         assert env.str("MAIN_DEF") == "maindef"
@@ -656,13 +658,15 @@ class TestSubstituteEnvs:
             env.str("UNDEFINED_PROXY")
 
     def test_multiple_substitutions(self, env, set_env):
-        set_env({
-            "PGURL": "postgres://${USER:-sloria}:${PASSWORD:-secret}@localhost",
-            "USER": "gnarvaja",
-            "HELLOCOUNTRY": "Hello ${COUNTRY}",
-            "COUNTRY": "Argentina",
-            "HELLOWORLD": "Hello ${WORLD}",
-        })
+        set_env(
+            {
+                "PGURL": "postgres://${USER:-sloria}:${PASSWORD:-secret}@localhost",
+                "USER": "gnarvaja",
+                "HELLOCOUNTRY": "Hello ${COUNTRY}",
+                "COUNTRY": "Argentina",
+                "HELLOWORLD": "Hello ${WORLD}",
+            }
+        )
         assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
         assert env.str("HELLOCOUNTRY") == "Hello Argentina"
 
@@ -670,11 +674,16 @@ class TestSubstituteEnvs:
             env.str("HELLOWORLD")
 
     def test_composite_types(self, env, set_env):
-        set_env({
-            "ALLOWED_USERS": "god,${USER},root",
-            "USER": "gnarvaja",
-            "MYCLASS_KARGS": "foo=bar,wget_params=${WGET_PARAMS}",
-            "WGET_PARAMS": '--header="Referer: https://radiocut.fm/"',
-        })
+        set_env(
+            {
+                "ALLOWED_USERS": "god,${USER},root",
+                "USER": "gnarvaja",
+                "MYCLASS_KARGS": "foo=bar,wget_params=${WGET_PARAMS}",
+                "WGET_PARAMS": '--header="Referer: https://radiocut.fm/"',
+            }
+        )
         assert env.list("ALLOWED_USERS") == ["god", "gnarvaja", "root"]
-        assert env.dict("MYCLASS_KARGS") == {"foo": "bar", "wget_params": '--header="Referer: https://radiocut.fm/"'}
+        assert env.dict("MYCLASS_KARGS") == {
+            "foo": "bar",
+            "wget_params": '--header="Referer: https://radiocut.fm/"',
+        }

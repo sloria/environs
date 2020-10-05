@@ -20,7 +20,7 @@ __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
-_ENVVAR_PATTERN = re.compile(r'\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}')
+_ENVVAR_PATTERN = re.compile(r"\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -251,8 +251,9 @@ class Env:
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 
-    def __init__(self, *, eager: _BoolType = True, allow_proxy: _BoolType = True,
-                 substitute_envs: _BoolType = False):
+    def __init__(
+        self, *, eager: _BoolType = True, allow_proxy: _BoolType = True, substitute_envs: _BoolType = False
+    ):
         self.eager = eager
         self._sealed = False  # type: bool
         self.allow_proxy = allow_proxy
@@ -419,7 +420,7 @@ class Env:
             _, env_value, _ = self._get_from_environ(env_key, env_default, proxied=True)
             if env_value is ma.missing:
                 return parsed_key, env_value, env_key
-            ret += value[prev_start:match.start()] + env_value
+            ret += value[prev_start : match.start()] + env_value
             prev_start = match.end()
         ret += value[prev_start:]
 
