@@ -20,7 +20,7 @@ __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
-_ENVVAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
+_EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -395,14 +395,14 @@ class Env:
                 # TODO: DeprecationWarning?
                 proxied_key = match.groups()[0]
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
-            match = self.expand_vars and _ENVVAR_PATTERN.match(value)
+            match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
             if match:  # Full match expand_vars - special case keep default
                 proxied_key = match.groups()[0]
                 subs_default = match.groups()[1]
                 if subs_default is not None:
                     default = subs_default[2:]
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
-            match = self.expand_vars and _ENVVAR_PATTERN.search(value)
+            match = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
             if match:  # Multiple or in text match expand_vars - General case - default lost
                 return self._expand_vars(env_key, value)
             # Remove escaped $
@@ -413,7 +413,7 @@ class Env:
     def _expand_vars(self, parsed_key, value):
         ret = ""
         prev_start = 0
-        for match in _ENVVAR_PATTERN.finditer(value):
+        for match in _EXPANDED_VAR_PATTERN.finditer(value):
             env_key = match.group(1)
             env_default = match.group(2)
             if env_default is None:
