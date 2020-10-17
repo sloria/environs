@@ -39,7 +39,6 @@ jobs:
 
       - py37-marshmallow3
 
-      - py38-marshmallow2
       - py38-marshmallow3
 
       - py39-marshmallow2
