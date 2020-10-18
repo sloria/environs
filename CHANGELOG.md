@@ -1,5 +1,11 @@
 # Changelog
 
+## 8.1.0 (unreleased)
+
+Other changes:
+
+- Test against Python 3.9.
+
 ## 8.0.0 (2020-05-27)
 
 Bug fixes:
