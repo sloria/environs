@@ -16,7 +16,7 @@ import marshmallow as ma
 from marshmallow.utils import _Missing
 from dotenv.main import load_dotenv, _walk_to_root
 
-__version__ = "8.1.0"
+__version__ = "9.0.0"
 __all__ = ["EnvError", "Env"]
 
 

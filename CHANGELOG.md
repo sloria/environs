@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.0.0 (unreleased)
+## 9.0.0 (2020-10-31)
 
 - _Backwards-incompatible_: Rename `subcast` param of `env.dict` to `subcast_values` for consistency with `subcast_keys`.
 - _Backwards-incompatible_: Remove variable proxying. Use variable expansion instead (see 8.1.0 release notes below)
