@@ -67,7 +67,7 @@ def _field2method(
         name: str,
         default: typing.Any = ma.missing,
         subcast: typing.Optional[Subcast] = None,
-        **kwargs
+        **kwargs,
     ) -> typing.Union[_T, _Missing]:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
@@ -113,7 +113,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         name: str,
         default: typing.Any = ma.missing,
         subcast: typing.Optional[typing.Type] = None,
-        **kwargs
+        **kwargs,
     ):
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
@@ -163,7 +163,7 @@ def _preprocess_dict(
     # TODO: Rename subcast to subcast_values and re-order arguments for next major release
     subcast: Subcast,
     subcast_key: typing.Optional[Subcast] = None,
-    **kwargs
+    **kwargs,
 ) -> typing.Mapping:
     if isinstance(value, Mapping):
         return value
@@ -235,7 +235,7 @@ class URLField(ma.fields.URL):
         value: str,
         attr: typing.Optional[str] = None,
         data: typing.Optional[typing.Mapping] = None,
-        **kwargs
+        **kwargs,
     ) -> ParseResult:
         ret = super().deserialize(value, attr, data, **kwargs)
         return urlparse(ret)
@@ -262,7 +262,7 @@ class LogLevelField(ma.fields.Int):
 class Env:
     """An environment variable reader."""
 
-    __call__ = _field2method(ma.fields.Field, "__call__")  # type: ParserMethod
+    __call__: ParserMethod = _field2method(ma.fields.Field, "__call__")
 
     int = _field2method(ma.fields.Int, "int")
     bool = _field2method(ma.fields.Bool, "bool")
@@ -285,16 +285,16 @@ class Env:
 
     def __init__(self, *, eager: _BoolType = True, expand_vars: _BoolType = False):
         self.eager = eager
-        self._sealed = False  # type: bool
+        self._sealed: bool = False
         self.expand_vars = expand_vars
-        self._fields = {}  # type: typing.Dict[_StrType, typing.Union[ma.fields.Field, type]]
-        self._values = {}  # type: typing.Dict[_StrType, typing.Any]
-        self._errors = collections.defaultdict(list)  # type: ErrorMapping
-        self._prefix = None  # type: typing.Optional[_StrType]
-        self.__custom_parsers__ = {}  # type: typing.Dict[_StrType, ParserMethod]
+        self._fields: typing.Dict[_StrType, typing.Union[ma.fields.Field, type]] = {}
+        self._values: typing.Dict[_StrType, typing.Any] = {}
+        self._errors: ErrorMapping = collections.defaultdict(list)
+        self._prefix: typing.Optional[_StrType] = None
+        self.__custom_parsers__: typing.Dict[_StrType, ParserMethod] = {}
 
     def __repr__(self) -> _StrType:
-        return "<{} {}>".format(self.__class__.__name__, self._values)
+        return f"<{self.__class__.__name__} {self._values}>"
 
     @staticmethod
     def read_env(
@@ -322,15 +322,14 @@ class Env:
             if Path(path).is_dir():
                 raise ValueError("path must be a filename, not a directory.")
             start = Path(path)
-        # TODO: Remove str casts when we drop Python 3.5
         if recurse:
-            start_dir, env_name = os.path.split(str(start))
+            start_dir, env_name = os.path.split(start)
             if not start_dir:  # Only a filename was given
                 start_dir = os.getcwd()
             for dirname in _walk_to_root(start_dir):
                 check_path = Path(dirname) / env_name
                 if check_path.exists():
-                    load_dotenv(str(check_path), verbose=verbose, override=override)
+                    load_dotenv(check_path, verbose=verbose, override=override)
                     return
         else:
             load_dotenv(str(start), verbose=verbose, override=override)
@@ -343,7 +342,7 @@ class Env:
             if old_prefix is None:
                 self._prefix = prefix
             else:
-                self._prefix = "{}{}".format(old_prefix, prefix)
+                self._prefix = f"{old_prefix}{prefix}"
             yield self
         finally:
             # explicitly reset the stored prefix on completion and exceptions
@@ -359,24 +358,20 @@ class Env:
         if self._errors:
             error_messages = dict(self._errors)
             self._errors = {}
-            raise EnvValidationError(
-                "Environment variables invalid: {}".format(error_messages), error_messages
-            )
+            raise EnvValidationError(f"Environment variables invalid: {error_messages}", error_messages)
 
     def __getattr__(self, name: _StrType):
         try:
             return functools.partial(self.__custom_parsers__[name], self)
         except KeyError as error:
-            raise AttributeError("{} has no attribute {}".format(self, name)) from error
+            raise AttributeError(f"{self} has no attribute {name}") from error
 
     def add_parser(self, name: _StrType, func: typing.Callable) -> None:
         """Register a new parser method with the name ``name``. ``func`` must
         receive the input value for an environment variable.
         """
         if hasattr(self, name):
-            raise ParserConflictError(
-                "Env already has a method with name '{}'. Use a different name.".format(name)
-            )
+            raise ParserConflictError(f"Env already has a method with name '{name}'. Use a different name.")
         self.__custom_parsers__[name] = _func2method(func, method_name=name)
         return None
 
