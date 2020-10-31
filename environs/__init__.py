@@ -76,11 +76,10 @@ def _field2method(
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing and field.missing is ma.missing:
-            message = "Environment variable not set."
             if self.eager:
-                raise EnvValidationError('Environment variable "{}" not set'.format(source_key), [message])
+                raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
             else:
-                self._errors[parsed_key].append(message)
+                self._errors[parsed_key].append("Environment variable not set.")
                 return ma.missing
         if raw_value or raw_value == "":
             value = raw_value
@@ -115,11 +114,10 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing:
             message = "Environment variable not set."
-            # TODO: Should be EnvValidationError for consistency with _field2method?
             if self.eager:
                 raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
             else:
-                self._errors[parsed_key].append(message)
+                self._errors[parsed_key].append("Environment variable not set.")
                 return ma.missing
         if raw_value or raw_value == "":
             value = raw_value
