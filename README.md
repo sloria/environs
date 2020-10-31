@@ -19,6 +19,7 @@ It allows you to store configuration separate from your code, as per
   - [Reading a specific file](#reading-a-specific-file)
 - [Handling prefixes](#handling-prefixes)
 - [Proxied variables](#proxied-variables)
+- [Variable expansion](#variable-expansion)
 - [Validation](#validation)
 - [Deferred validation](#deferred-validation)
 - [Serialization](#serialization)
@@ -168,7 +169,24 @@ with env.prefixed("MYAPP_"):
         db_port = env.int("PORT", 10101)
 ```
 
+## Variable expansion
+
+```python
+# export CONNECTION_URL=https://${USER:-sloria}:${PASSWORD}@${HOST:-localhost}/
+# export PASSWORD=secret
+# export YEAR=${CURRENT_YEAR:-2020}
+
+from environs import Env
+
+env = Env(expand_vars=True)
+
+connection_url = env("CONNECTION_URL")  # =>'https://sloria:secret@localhost'
+year = env.int("YEAR")  # =>2020
+```
+
 ## Proxied variables
+
+**Deprecated: use [Variable expansion](#variable-expansion) instead of proxied variables.**
 
 ```python
 # export MAILGUN_LOGIN=sloria
@@ -335,9 +353,9 @@ and `EMAIL_URL` environment variables, respectively.
 
 For more details on URL patterns, see the following projects that environs is using for converting URLs.
 
-* [dj-database-url](https://github.com/jacobian/dj-database-url)
-* [django-cache-url](https://github.com/epicserve/django-cache-url)
-* [dj-email-url](https://github.com/migonzalvar/dj-email-url)
+- [dj-database-url](https://github.com/jacobian/dj-database-url)
+- [django-cache-url](https://github.com/epicserve/django-cache-url)
+- [dj-email-url](https://github.com/migonzalvar/dj-email-url)
 
 Basic example:
 

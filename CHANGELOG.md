@@ -2,6 +2,35 @@
 
 ## 8.1.0 (unreleased)
 
+Features:
+
+- Add support for variable expansion, e.g. `MY_VAR=${MY_OTHER_VAR:-mydefault}` ([#168](https://github.com/sloria/environs/pull/168)).
+  Thanks [gnarvaja](https://github.com/gnarvaja) for the PR.
+
+Deprecations:
+
+- Variable proxying using the `{{VAR}}` syntax is deprecated
+  and will be removed in environs 9.0.0.
+  Use variable expansion using `${VAR}` instead.
+
+```bash
+# Before
+export MAILGUN_LOGIN=sloria
+export SMTP_LOGIN={{MAILGUN_LOGIN}}
+
+# After
+export MAILGUN_LOGIN=sloria
+export SMTP_LOGIN=${MAILGUN_LOGIN}
+```
+
+```python
+from environs import Env
+
+env = Env(expand_vars=True)
+
+SMTP_LOGIN = env.str("SMTP_LOGIN")  # => 'sloria'
+```
+
 Other changes:
 
 - Test against Python 3.9.

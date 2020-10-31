@@ -123,6 +123,10 @@ class TestCasting:
     def test_dict_with_default_from_dict(self, set_env, env):
         assert env.dict("DICT", {"key1": "1"}) == {"key1": "1"}
 
+    def test_dict_with_equal(self, set_env, env):
+        set_env({"DICT": "expr1=1 < 2,expr2=(1+1) = 2"})
+        assert env.dict("DICT") == {"expr1": "1 < 2", "expr2": "(1+1) = 2"}
+
     def test_decimal_cast(self, set_env, env):
         set_env({"DECIMAL": "12.34"})
         assert env.decimal("DECIMAL") == Decimal("12.34")
@@ -207,16 +211,21 @@ class TestProxiedVariables:
                 "SMTP_LOGIN_RPADDED": "{{MAILGUN_SMTP_LOGIN }}",
             }
         )
-        for key in ("MAILGUN_SMTP_LOGIN", "SMTP_LOGIN", "SMTP_LOGIN_LPADDED", "SMTP_LOGIN_RPADDED"):
-            assert env(key) == "sloria"
+        assert env("MAILGUN_SMTP_LOGIN") == "sloria"
+        assert env.dump()["MAILGUN_SMTP_LOGIN"] == "sloria"
+        for key in ("SMTP_LOGIN", "SMTP_LOGIN_LPADDED", "SMTP_LOGIN_RPADDED"):
+            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+                assert env(key) == "sloria"
             assert env.dump()[key] == "sloria"
 
     def test_reading_missing_proxied_variable(self, set_env, env):
         set_env({"SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}"})
         with pytest.raises(environs.EnvError) as excinfo:
-            env("SMTP_LOGIN")
+            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+                env("SMTP_LOGIN")
         assert excinfo.value.args[0] == 'Environment variable "MAILGUN_SMTP_LOGIN" not set'
-        assert env("SMTP_LOGIN", "default") == "default"
+        with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+            assert env("SMTP_LOGIN", "default") == "default"
 
     def test_reading_proxied_variable_in_prefix_scope(self, set_env, env):
         set_env(
@@ -230,10 +239,12 @@ class TestProxiedVariables:
         )
 
         with env.prefixed("SMTP_"):
-            assert env.str("LOGIN") == "szabolcs"
+            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+                assert env.str("LOGIN") == "szabolcs"
             assert env.str("PASSWORD") == "secret"
             with env.prefixed("NESTED_"):
-                assert env.str("LOGIN") == "szabolcs"
+                with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+                    assert env.str("LOGIN") == "szabolcs"
                 assert env.str("PASSWORD") == "nested-secret"
 
 
@@ -245,7 +256,9 @@ class TestEnvFileReading:
         env.read_env()
         assert env("STRING") == "foo"
         assert env.list("LIST") == ["wat", "wer", "wen"]
-        assert env("PROXIED") == "foo"
+        with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+            assert env("PROXIED") == "foo"
+        assert env("EXPANDED") == "foo"
 
     # Regression test for https://github.com/sloria/environs/issues/96
     def test_read_env_recurse(self, env):
@@ -624,3 +637,78 @@ class TestDeferredValidation:
         env.seal()
         with pytest.raises(environs.EnvSealedError, match="Env has already been sealed"):
             env.https_url("URL")
+
+
+class TestExpandVars:
+    @pytest.fixture
+    def env(self):
+        return environs.Env(expand_vars=True)
+
+    def test_full_expand_vars(self, env, set_env):
+        set_env(
+            {
+                "MAIN": "${SUBSTI}",
+                "MAIN_INT": "${SUBS_INT}",
+                "MAIN_DEF": "${SUBS_NOT_FOUND:-maindef}",
+                "MAIN_INT_DEF": "${SUBS_NOT_FOUND_I:-454}",
+                "MAIN_NEG_INT_DEF": "${SUBS_NOT_FOUND_I:--454}",
+                "SUBSTI": "substivalue",
+                "SUBS_INT": "48",
+                "USE_DEFAULT": "${FOOBAR}",
+                "UNDEFINED": "${MYVAR}",
+            }
+        )
+        assert env.str("MAIN") == "substivalue"
+        assert env.int("MAIN_INT") == 48
+        assert env.str("MAIN_DEF") == "maindef"
+        assert env.int("MAIN_INT_DEF") == 454
+        assert env.int("MAIN_NEG_INT_DEF") == -454
+        assert env.str("USE_DEFAULT", "main_default") == "main_default"
+
+        with pytest.raises(environs.EnvError, match='Environment variable "MYVAR" not set'):
+            env.str("UNDEFINED")
+
+    def test_multiple_expands(self, env, set_env):
+        set_env(
+            {
+                "PGURL": "postgres://${USER:-sloria}:${PASSWORD:-secret}@localhost",
+                "USER": "gnarvaja",
+                "HELLOCOUNTRY": "Hello ${COUNTRY}",
+                "COUNTRY": "Argentina",
+                "HELLOWORLD": "Hello ${WORLD}",
+            }
+        )
+        assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
+        assert env.str("HELLOCOUNTRY") == "Hello Argentina"
+
+        with pytest.raises(environs.EnvError, match='Environment variable "WORLD" not set'):
+            env.str("HELLOWORLD")
+
+    def test_recursive_expands(self, env, set_env):
+        set_env(
+            {
+                "PGURL": "postgres://${PGUSER:-sloria}:${PGPASS:-secret}@localhost",
+                "PGUSER": "${USER}",
+                "USER": "gnarvaja",
+            }
+        )
+        assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
+
+    def test_escaped_expand(self, env, set_env):
+        set_env({"ESCAPED_EXPAND": r"\${ESCAPED}", "ESCAPED": "fail"})
+        assert env.str("ESCAPED_EXPAND") == r"${ESCAPED}"
+
+    def test_composite_types(self, env, set_env):
+        set_env(
+            {
+                "ALLOWED_USERS": "god,${USER},root",
+                "USER": "gnarvaja",
+                "MYCLASS_KARGS": "foo=bar,wget_params=${WGET_PARAMS}",
+                "WGET_PARAMS": '--header="Referer: https://radiocut.fm/"',
+            }
+        )
+        assert env.list("ALLOWED_USERS") == ["god", "gnarvaja", "root"]
+        assert env.dict("MYCLASS_KARGS") == {
+            "foo": "bar",
+            "wget_params": '--header="Referer: https://radiocut.fm/"',
+        }

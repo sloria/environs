@@ -8,6 +8,7 @@ import os
 import re
 import typing
 import types
+import warnings
 from collections.abc import Mapping
 from urllib.parse import urlparse, ParseResult
 from pathlib import Path
@@ -20,6 +21,7 @@ __all__ = ["EnvError", "Env"]
 
 MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
+_EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -46,6 +48,10 @@ class EnvValidationError(EnvError):
 
 
 class EnvSealedError(TypeError, EnvError):
+    pass
+
+
+class RemovedInEnvirons9Warning(DeprecationWarning):
     pass
 
 
@@ -156,7 +162,7 @@ def _preprocess_dict(
         (subcast_key(key.strip()) if subcast_key else key.strip()): (
             subcast(val.strip()) if subcast else val.strip()
         )
-        for key, val in (item.split("=") for item in value.split(",") if value)
+        for key, val in (item.split("=", 1) for item in value.split(",") if value)
     }
 
 
@@ -250,9 +256,10 @@ class Env:
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 
-    def __init__(self, *, eager: _BoolType = True):
+    def __init__(self, *, eager: _BoolType = True, expand_vars: _BoolType = False):
         self.eager = eager
         self._sealed = False  # type: bool
+        self.expand_vars = expand_vars
         self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
         self._errors = collections.defaultdict(list)  # type: ErrorMapping
@@ -383,11 +390,49 @@ class Env:
         env_key = self._get_key(key, omit_prefix=proxied)
         value = os.environ.get(env_key, default)
         if hasattr(value, "strip"):
-            match = _PROXIED_PATTERN.match(value)
-            if match:  # Proxied variable
-                proxied_key = match.groups()[0]
+            # TODO: Remove proxying in environs 9
+            proxy_match = _PROXIED_PATTERN.match(value)
+            if proxy_match:  # Proxied variable
+                proxied_key = proxy_match.groups()[0]
+                warnings.warn(
+                    "Proxied variables are deprecated and will be removed in environs 9. "
+                    "Use variable expansion instead: ${{{proxied_key}}}".format(proxied_key=proxied_key),
+                    RemovedInEnvirons9Warning,
+                )
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
+            expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
+            if expand_match:  # Full match expand_vars - special case keep default
+                proxied_key = expand_match.groups()[0]
+                subs_default = expand_match.groups()[1]
+                if subs_default is not None:
+                    default = subs_default[2:]
+                return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
+            expand_search = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
+            if expand_search:  # Multiple or in text match expand_vars - General case - default lost
+                return self._expand_vars(env_key, value)
+            # Remove escaped $
+            if self.expand_vars and r"\$" in value:
+                value = value.replace(r"\$", "$")
         return env_key, value, None
+
+    def _expand_vars(self, parsed_key, value):
+        ret = ""
+        prev_start = 0
+        for match in _EXPANDED_VAR_PATTERN.finditer(value):
+            env_key = match.group(1)
+            env_default = match.group(2)
+            if env_default is None:
+                env_default = ma.missing
+            else:
+                env_default = env_default[2:]  # trim ':-' from default
+            _, env_value, _ = self._get_from_environ(env_key, env_default, proxied=True)
+            if env_value is ma.missing:
+                return parsed_key, env_value, env_key
+            ret += value[prev_start : match.start()] + env_value
+            prev_start = match.end()
+        ret += value[prev_start:]
+
+        return parsed_key, ret, env_key
 
     def _get_key(self, key: _StrType, *, omit_prefix: _BoolType = False) -> _StrType:
         return self._prefix + key if self._prefix and not omit_prefix else key
