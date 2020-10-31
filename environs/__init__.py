@@ -20,7 +20,6 @@ from dotenv.main import load_dotenv, _walk_to_root
 __version__ = "8.1.0"
 __all__ = ["EnvError", "Env"]
 
-MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
@@ -401,8 +400,7 @@ class Env:
         and strings).
         """
         schema = ma.Schema.from_dict(self._fields)()
-        dump_result = schema.dump(self._values)
-        return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result
+        return schema.dump(self._values)
 
     def _get_from_environ(
         self, key: _StrType, default: typing.Any, *, proxied: _BoolType = False
