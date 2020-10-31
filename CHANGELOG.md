@@ -12,7 +12,7 @@
 
 Features:
 
-- Add support for variable expansion, e.g. `MY_VAR=${MY_OTHER_VAR:-mydefault}` ([#168](https://github.com/sloria/environs/pull/168)).
+- Add support for variable expansion, e.g. `MY_VAR=${MY_OTHER_VAR:-mydefault}` ([#164](https://github.com/sloria/environs/issues/164)).
   Thanks [gnarvaja](https://github.com/gnarvaja) for the PR.
 
 Deprecations:
