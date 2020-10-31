@@ -40,6 +40,7 @@ Bug fixes:
 Other changes:
 
 - Test against Python 3.9.
+- Remove usage of implicit `typing.Optional` ([171](https://github.com/sloria/environs/issues/171)).
 
 ## 8.0.0 (2020-05-27)
 

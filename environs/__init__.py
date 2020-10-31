@@ -61,10 +61,14 @@ class ParserConflictError(ValueError):
 
 
 def _field2method(
-    field_or_factory: FieldOrFactory, method_name: str, *, preprocess: typing.Callable = None
+    field_or_factory: FieldOrFactory, method_name: str, *, preprocess: typing.Optional[typing.Callable] = None
 ) -> ParserMethod:
     def method(
-        self: "Env", name: str, default: typing.Any = ma.missing, subcast: Subcast = None, **kwargs
+        self: "Env",
+        name: str,
+        default: typing.Any = ma.missing,
+        subcast: typing.Optional[Subcast] = None,
+        **kwargs
     ) -> typing.Union[_T, _Missing]:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
@@ -106,7 +110,11 @@ def _field2method(
 
 def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     def method(
-        self: "Env", name: str, default: typing.Any = ma.missing, subcast: typing.Type = None, **kwargs
+        self: "Env",
+        name: str,
+        default: typing.Any = ma.missing,
+        subcast: typing.Optional[typing.Type] = None,
+        **kwargs
     ):
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
@@ -171,7 +179,7 @@ def _preprocess_dict(
     value: typing.Union[str, typing.Mapping],
     # TODO: Rename subcast to subcast_values and re-order arguments for next major release
     subcast: Subcast,
-    subcast_key: Subcast = None,
+    subcast_key: typing.Optional[Subcast] = None,
     **kwargs
 ) -> typing.Mapping:
     if isinstance(value, Mapping):
@@ -239,7 +247,13 @@ class URLField(ma.fields.URL):
 
     # Override deserialize rather than _deserialize because we need
     # to call urlparse *after* validation has occurred
-    def deserialize(self, value: str, attr: str = None, data: typing.Mapping = None, **kwargs) -> ParseResult:
+    def deserialize(
+        self,
+        value: str,
+        attr: typing.Optional[str] = None,
+        data: typing.Optional[typing.Mapping] = None,
+        **kwargs
+    ) -> ParseResult:
         ret = super().deserialize(value, attr, data, **kwargs)
         return urlparse(ret)
 
@@ -301,7 +315,7 @@ class Env:
 
     @staticmethod
     def read_env(
-        path: _StrType = None,
+        path: typing.Optional[_StrType] = None,
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
