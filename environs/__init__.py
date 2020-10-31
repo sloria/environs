@@ -8,6 +8,7 @@ import os
 import re
 import typing
 import types
+import warnings
 from collections.abc import Mapping
 from urllib.parse import urlparse, ParseResult
 from pathlib import Path
@@ -47,6 +48,10 @@ class EnvValidationError(EnvError):
 
 
 class EnvSealedError(TypeError, EnvError):
+    pass
+
+
+class RemovedInEnvirons9Warning(DeprecationWarning):
     pass
 
 
@@ -256,10 +261,9 @@ class Env:
     ):
         self.eager = eager
         self._sealed = False  # type: bool
+        # TODO: Remove allow_proxy in environs 9
         self.allow_proxy = allow_proxy
         self.expand_vars = expand_vars
-        # TODO: disallow setting both allow_proxy and expand_vars?
-        # TODO: in future versions deprecate allow_proxy
         self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
         self._errors = collections.defaultdict(list)  # type: ErrorMapping
@@ -392,8 +396,13 @@ class Env:
         if hasattr(value, "strip"):
             match = self.allow_proxy and _PROXIED_PATTERN.match(value)
             if match:  # Proxied variable
-                # TODO: DeprecationWarning?
                 proxied_key = match.groups()[0]
+                warnings.warn(
+                    "Proxied variables are deprecated and will be removed in environs 9. Use variable expansion instead: ${{{proxied_key}}}".format(
+                        proxied_key=proxied_key
+                    ),
+                    RemovedInEnvirons9Warning,
+                )
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
             match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
             if match:  # Full match expand_vars - special case keep default

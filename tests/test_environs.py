@@ -211,16 +211,21 @@ class TestProxiedVariables:
                 "SMTP_LOGIN_RPADDED": "{{MAILGUN_SMTP_LOGIN }}",
             }
         )
-        for key in ("MAILGUN_SMTP_LOGIN", "SMTP_LOGIN", "SMTP_LOGIN_LPADDED", "SMTP_LOGIN_RPADDED"):
-            assert env(key) == "sloria"
+        assert env("MAILGUN_SMTP_LOGIN") == "sloria"
+        assert env.dump()["MAILGUN_SMTP_LOGIN"] == "sloria"
+        for key in ("SMTP_LOGIN", "SMTP_LOGIN_LPADDED", "SMTP_LOGIN_RPADDED"):
+            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+                assert env(key) == "sloria"
             assert env.dump()[key] == "sloria"
 
     def test_reading_missing_proxied_variable(self, set_env, env):
         set_env({"SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}"})
         with pytest.raises(environs.EnvError) as excinfo:
-            env("SMTP_LOGIN")
+            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+                env("SMTP_LOGIN")
         assert excinfo.value.args[0] == 'Environment variable "MAILGUN_SMTP_LOGIN" not set'
-        assert env("SMTP_LOGIN", "default") == "default"
+        with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+            assert env("SMTP_LOGIN", "default") == "default"
 
     def test_reading_proxied_variable_in_prefix_scope(self, set_env, env):
         set_env(
@@ -234,10 +239,12 @@ class TestProxiedVariables:
         )
 
         with env.prefixed("SMTP_"):
-            assert env.str("LOGIN") == "szabolcs"
+            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+                assert env.str("LOGIN") == "szabolcs"
             assert env.str("PASSWORD") == "secret"
             with env.prefixed("NESTED_"):
-                assert env.str("LOGIN") == "szabolcs"
+                with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+                    assert env.str("LOGIN") == "szabolcs"
                 assert env.str("PASSWORD") == "nested-secret"
 
 
@@ -249,7 +256,9 @@ class TestEnvFileReading:
         env.read_env()
         assert env("STRING") == "foo"
         assert env.list("LIST") == ["wat", "wer", "wen"]
-        assert env("PROXIED") == "foo"
+        with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
+            assert env("PROXIED") == "foo"
+        assert env("EXPANDED") == "foo"
 
     # Regression test for https://github.com/sloria/environs/issues/96
     def test_read_env_recurse(self, env):
@@ -642,20 +651,22 @@ class TestExpandVars:
                 "MAIN_INT": "${SUBS_INT}",
                 "MAIN_DEF": "${SUBS_NOT_FOUND:-maindef}",
                 "MAIN_INT_DEF": "${SUBS_NOT_FOUND_I:-454}",
+                "MAIN_NEG_INT_DEF": "${SUBS_NOT_FOUND_I:--454}",
                 "SUBSTI": "substivalue",
                 "SUBS_INT": "48",
                 "USE_DEFAULT": "${FOOBAR}",
-                "UNDEFINED_PROXY": "${MYPROXY}",
+                "UNDEFINED": "${MYVAR}",
             }
         )
         assert env.str("MAIN") == "substivalue"
         assert env.int("MAIN_INT") == 48
         assert env.str("MAIN_DEF") == "maindef"
         assert env.int("MAIN_INT_DEF") == 454
+        assert env.int("MAIN_NEG_INT_DEF") == -454
         assert env.str("USE_DEFAULT", "main_default") == "main_default"
 
-        with pytest.raises(environs.EnvError, match='Environment variable "MYPROXY" not set'):
-            env.str("UNDEFINED_PROXY")
+        with pytest.raises(environs.EnvError, match='Environment variable "MYVAR" not set'):
+            env.str("UNDEFINED")
 
     def test_multiple_expands(self, env, set_env):
         set_env(

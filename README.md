@@ -186,6 +186,8 @@ year = env.int("YEAR")  # =>2020
 
 ## Proxied variables
 
+**Deprecated: use [Variable expansion](#variable-expansion) instead of proxied variables.**
+
 ```python
 # export MAILGUN_LOGIN=sloria
 # export SMTP_LOGIN={{MAILGUN_LOGIN}}
@@ -351,9 +353,9 @@ and `EMAIL_URL` environment variables, respectively.
 
 For more details on URL patterns, see the following projects that environs is using for converting URLs.
 
-* [dj-database-url](https://github.com/jacobian/dj-database-url)
-* [django-cache-url](https://github.com/epicserve/django-cache-url)
-* [dj-email-url](https://github.com/migonzalvar/dj-email-url)
+- [dj-database-url](https://github.com/jacobian/dj-database-url)
+- [django-cache-url](https://github.com/epicserve/django-cache-url)
+- [dj-email-url](https://github.com/migonzalvar/dj-email-url)
 
 Basic example:
 
