@@ -14,6 +14,7 @@ from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
 import marshmallow as ma
+from marshmallow.utils import _Missing
 from dotenv.main import load_dotenv, _walk_to_root
 
 __version__ = "8.0.0"
@@ -34,7 +35,7 @@ FieldFactory = typing.Callable[..., ma.fields.Field]
 Subcast = typing.Union[typing.Type, typing.Callable[..., _T]]
 FieldType = typing.Type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
-ParserMethod = typing.Callable[..., _T]
+ParserMethod = typing.Callable[..., typing.Union[_T, _Missing]]
 
 
 class EnvError(ValueError):
@@ -64,7 +65,7 @@ def _field2method(
 ) -> ParserMethod:
     def method(
         self: "Env", name: str, default: typing.Any = ma.missing, subcast: Subcast = None, **kwargs
-    ) -> _T:
+    ) -> typing.Union[_T, _Missing]:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         missing = kwargs.pop("missing", None) or default
@@ -113,7 +114,6 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         self._fields[parsed_key] = ma.fields.Field(**kwargs)
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing:
-            message = "Environment variable not set."
             if self.eager:
                 raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
             else:
