@@ -2,6 +2,8 @@
 
 ## 9.0.0 (unreleased)
 
+- _Backwards-incompatible_: Remove variable proxying. Use variable expansion instead (see 8.1.0 release notes below)
+  ([#175](https://github.com/sloria/environs/issues/175)).
 - _Backwards-incompatible_: Drop support for marshmallow 2 and Python 3.5,
   which are both EOL ([#174](https://github.com/sloria/environs/issues/174)).
 
