@@ -94,7 +94,7 @@ The following are all type-casting methods of `Env`:
 - `env.float`
 - `env.decimal`
 - `env.list` (accepts optional `subcast` keyword argument)
-- `env.dict` (accepts optional `subcast` keyword argument)
+- `env.dict` (accepts optional `subcast_keys` and `subcast_values` keyword arguments)
 - `env.json`
 - `env.datetime`
 - `env.date`
