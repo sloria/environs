@@ -1,5 +1,31 @@
 # Changelog
 
+## 8.1.0 (unreleased)
+
+Deprecations:
+
+- Variable proxying using the `{{VAR}}` syntax is deprecated
+  and will be removed in environs 9.0.0.
+  Use variable expansion using `${VAR}` instead.
+
+```bash
+# Before
+export MAILGUN_LOGIN=sloria
+export SMTP_LOGIN={{MAILGUN_LOGIN}}
+
+# After
+export MAILGUN_LOGIN=sloria
+export SMTP_LOGIN=${MAILGUN_LOGIN}
+```
+
+```python
+from environs import Env
+
+env = Env(expand_vars=True)
+
+SMTP_LOGIN = env.str("SMTP_LOGIN") # => 'sloria'
+```
+
 ## 8.0.0 (2020-05-27)
 
 Bug fixes:

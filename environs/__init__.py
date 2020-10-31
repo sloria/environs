@@ -425,7 +425,7 @@ class Env:
             if env_default is None:
                 env_default = ma.missing
             else:
-                env_default = env_default[2:]
+                env_default = env_default[2:]  # trim ':-' from default
             _, env_value, _ = self._get_from_environ(env_key, env_default, proxied=True)
             if env_value is ma.missing:
                 return parsed_key, env_value, env_key
