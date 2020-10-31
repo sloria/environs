@@ -1,6 +1,6 @@
 # Changelog
 
-## 8.1.0 (unreleased)
+## 8.1.0 (2020-10-31)
 
 Features:
 
