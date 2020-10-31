@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.0.0 (unreleased)
+
+- _Backwards-incompatible_: Drop support for marshmallow 2 ([#174](https://github.com/sloria/environs/issues/174)).
+
 ## 8.1.0 (2020-10-31)
 
 Features:

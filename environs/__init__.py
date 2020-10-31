@@ -20,7 +20,6 @@ from dotenv.main import load_dotenv, _walk_to_root
 __version__ = "8.1.0"
 __all__ = ["EnvError", "Env"]
 
-MARSHMALLOW_VERSION_INFO = tuple(int(part) for part in ma.__version__.split(".") if part.isdigit())
 _PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
@@ -146,22 +145,6 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
 
     method.__name__ = method_name
     return method
-
-
-# From webargs
-def _dict2schema(dct, schema_class=ma.Schema):
-    """Generate a `marshmallow.Schema` class given a dictionary of
-    `Fields <marshmallow.fields.Field>`.
-    """
-    if hasattr(schema_class, "from_dict"):  # marshmallow 3
-        return schema_class.from_dict(dct)
-    attrs = dct.copy()
-
-    class Meta:
-        strict = True
-
-    attrs["Meta"] = Meta
-    return type("", (schema_class,), attrs)
 
 
 def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.List:
@@ -304,7 +287,7 @@ class Env:
         self.eager = eager
         self._sealed = False  # type: bool
         self.expand_vars = expand_vars
-        self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
+        self._fields = {}  # type: typing.Dict[_StrType, typing.Union[ma.fields.Field, type]]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
         self._errors = collections.defaultdict(list)  # type: ErrorMapping
         self._prefix = None  # type: typing.Optional[_StrType]
@@ -416,9 +399,8 @@ class Env:
         """Dump parsed environment variables to a dictionary of simple data types (numbers
         and strings).
         """
-        schema = _dict2schema(self._fields)()
-        dump_result = schema.dump(self._values)
-        return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result
+        schema = ma.Schema.from_dict(self._fields)()
+        return schema.dump(self._values)
 
     def _get_from_environ(
         self, key: _StrType, default: typing.Any, *, proxied: _BoolType = False
