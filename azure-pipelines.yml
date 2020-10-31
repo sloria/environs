@@ -2,16 +2,16 @@ trigger:
   branches:
     include: [master, test-me-*]
   tags:
-    include: ['*']
+    include: ["*"]
 
 # Run builds nightly to catch incompatibilities with new marshmallow releases
 schedules:
-- cron: "0 0 * * *"
-  displayName: Daily midnight build
-  branches:
-    include:
-      - master
-  always: "true"
+  - cron: "0 0 * * *"
+    displayName: Daily midnight build
+    branches:
+      include:
+        - master
+    always: "true"
 
 resources:
   repositories:
@@ -22,34 +22,34 @@ resources:
       ref: refs/heads/sloria
 
 jobs:
-- template: job--python-tox.yml@sloria
-  parameters:
-    toxenvs:
-      - py38-marshmallow2
-      - py38-marshmallow3
-    os: windows
-- template: job--python-tox.yml@sloria
-  parameters:
-    toxenvs:
-      - lint
-      - py35-marshmallow2
-      - py35-marshmallow3
+  - template: job--python-tox.yml@sloria
+    parameters:
+      toxenvs:
+        - py39-marshmallow2
+        - py39-marshmallow3
+      os: windows
+  - template: job--python-tox.yml@sloria
+    parameters:
+      toxenvs:
+        - lint
+        - py35-marshmallow2
+        - py35-marshmallow3
 
-      - py36-marshmallow3
+        - py36-marshmallow3
 
-      - py37-marshmallow3
+        - py37-marshmallow3
 
-      - py38-marshmallow3
+        - py38-marshmallow3
 
-      - py39-marshmallow2
-      - py39-marshmallow3
+        - py39-marshmallow2
+        - py39-marshmallow3
 
-      - py39-marshmallowdev
-    os: linux
-- template: job--pypi-release.yml@sloria
-  parameters:
-    python: "3.9"
-    distributions: "sdist bdist_wheel"
-    dependsOn:
-      - tox_windows
-      - tox_linux
+        - py39-marshmallowdev
+      os: linux
+  - template: job--pypi-release.yml@sloria
+    parameters:
+      python: "3.9"
+      distributions: "sdist bdist_wheel"
+      dependsOn:
+        - tox_windows
+        - tox_linux
