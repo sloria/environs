@@ -107,7 +107,7 @@ class TestCasting:
 
     def test_dict_with_subcast(self, set_env, env):
         set_env({"DICT": "key1=1,key2=2"})
-        assert env.dict("DICT", subcast=int) == {"key1": 1, "key2": 2}
+        assert env.dict("DICT", subcast_values=int) == {"key1": 1, "key2": 2}
 
     def test_dict_without_subcast_key(self, set_env, env):
         set_env({"DICT": "1=value1,2=value2"})
