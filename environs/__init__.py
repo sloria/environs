@@ -391,25 +391,24 @@ class Env:
         value = os.environ.get(env_key, default)
         if hasattr(value, "strip"):
             # TODO: Remove proxying in environs 9
-            match = _PROXIED_PATTERN.match(value)
-            if match:  # Proxied variable
-                proxied_key = match.groups()[0]
+            proxy_match = _PROXIED_PATTERN.match(value)
+            if proxy_match:  # Proxied variable
+                proxied_key = proxy_match.groups()[0]
                 warnings.warn(
-                    "Proxied variables are deprecated and will be removed in environs 9. Use variable expansion instead: ${{{proxied_key}}}".format(
-                        proxied_key=proxied_key
-                    ),
+                    "Proxied variables are deprecated and will be removed in environs 9. "
+                    "Use variable expansion instead: ${{{proxied_key}}}".format(proxied_key=proxied_key),
                     RemovedInEnvirons9Warning,
                 )
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
-            match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
-            if match:  # Full match expand_vars - special case keep default
-                proxied_key = match.groups()[0]
-                subs_default = match.groups()[1]
+            expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
+            if expand_match:  # Full match expand_vars - special case keep default
+                proxied_key = expand_match.groups()[0]
+                subs_default = expand_match.groups()[1]
                 if subs_default is not None:
                     default = subs_default[2:]
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
-            match = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
-            if match:  # Multiple or in text match expand_vars - General case - default lost
+            expand_search = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
+            if expand_search:  # Multiple or in text match expand_vars - General case - default lost
                 return self._expand_vars(env_key, value)
             # Remove escaped $
             if self.expand_vars and r"\$" in value:
