@@ -9,7 +9,7 @@ EXTRAS_REQUIRE = {
     "lint": ["flake8==3.8.4", "flake8-bugbear==20.1.4", "mypy==0.790", "pre-commit~=2.4"],
 }
 EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
-PYTHON_REQUIRES = ">=3.5.3"
+PYTHON_REQUIRES = ">=3.6"
 
 
 def find_version(fname):
@@ -54,7 +54,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
