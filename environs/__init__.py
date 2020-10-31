@@ -8,7 +8,6 @@ import os
 import re
 import typing
 import types
-import warnings
 from collections.abc import Mapping
 from urllib.parse import urlparse, ParseResult
 from pathlib import Path
@@ -20,8 +19,6 @@ from dotenv.main import load_dotenv, _walk_to_root
 __version__ = "8.1.0"
 __all__ = ["EnvError", "Env"]
 
-_PROXIED_PATTERN = re.compile(r"\s*{{\s*(\S*)\s*}}\s*")
-_EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -37,6 +34,9 @@ FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable[..., typing.Union[_T, _Missing]]
 
 
+_EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
+
+
 class EnvError(ValueError):
     """Raised when an environment variable or if a required environment variable is unset."""
 
@@ -48,10 +48,6 @@ class EnvValidationError(EnvError):
 
 
 class EnvSealedError(TypeError, EnvError):
-    pass
-
-
-class RemovedInEnvirons9Warning(DeprecationWarning):
     pass
 
 
@@ -411,16 +407,6 @@ class Env:
         env_key = self._get_key(key, omit_prefix=proxied)
         value = os.environ.get(env_key, default)
         if hasattr(value, "strip"):
-            # TODO: Remove proxying in environs 9
-            proxy_match = _PROXIED_PATTERN.match(value)
-            if proxy_match:  # Proxied variable
-                proxied_key = proxy_match.groups()[0]
-                warnings.warn(
-                    "Proxied variables are deprecated and will be removed in environs 9. "
-                    "Use variable expansion instead: ${{{proxied_key}}}".format(proxied_key=proxied_key),
-                    RemovedInEnvirons9Warning,
-                )
-                return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
             expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
             if expand_match:  # Full match expand_vars - special case keep default
                 proxied_key = expand_match.groups()[0]

@@ -18,7 +18,6 @@ It allows you to store configuration separate from your code, as per
 - [Reading .env files](#reading-env-files)
   - [Reading a specific file](#reading-a-specific-file)
 - [Handling prefixes](#handling-prefixes)
-- [Proxied variables](#proxied-variables)
 - [Variable expansion](#variable-expansion)
 - [Validation](#validation)
 - [Deferred validation](#deferred-validation)
@@ -182,17 +181,6 @@ env = Env(expand_vars=True)
 
 connection_url = env("CONNECTION_URL")  # =>'https://sloria:secret@localhost'
 year = env.int("YEAR")  # =>2020
-```
-
-## Proxied variables
-
-**Deprecated: use [Variable expansion](#variable-expansion) instead of proxied variables.**
-
-```python
-# export MAILGUN_LOGIN=sloria
-# export SMTP_LOGIN={{MAILGUN_LOGIN}}
-
-smtp_login = env("SMTP_LOGIN")  # =>'sloria'
 ```
 
 ## Validation
@@ -420,7 +408,7 @@ environs will help you
 - validate envvars
 - parse list and dict values
 - parse dates, datetimes, and timedeltas
-- parse proxied variables
+- parse expanded variables
 - serialize your configuration to JSON, YAML, etc.
 
 ### Why another library?

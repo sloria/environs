@@ -201,53 +201,6 @@ class TestCasting:
         assert 'Environment variable "URL" invalid' in excinfo.value.args[0]
 
 
-class TestProxiedVariables:
-    def test_reading_proxied_variable(self, set_env, env):
-        set_env(
-            {
-                "MAILGUN_SMTP_LOGIN": "sloria",
-                "SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}",
-                "SMTP_LOGIN_LPADDED": "{{ MAILGUN_SMTP_LOGIN}}",
-                "SMTP_LOGIN_RPADDED": "{{MAILGUN_SMTP_LOGIN }}",
-            }
-        )
-        assert env("MAILGUN_SMTP_LOGIN") == "sloria"
-        assert env.dump()["MAILGUN_SMTP_LOGIN"] == "sloria"
-        for key in ("SMTP_LOGIN", "SMTP_LOGIN_LPADDED", "SMTP_LOGIN_RPADDED"):
-            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
-                assert env(key) == "sloria"
-            assert env.dump()[key] == "sloria"
-
-    def test_reading_missing_proxied_variable(self, set_env, env):
-        set_env({"SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}"})
-        with pytest.raises(environs.EnvError) as excinfo:
-            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
-                env("SMTP_LOGIN")
-        assert excinfo.value.args[0] == 'Environment variable "MAILGUN_SMTP_LOGIN" not set'
-        with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
-            assert env("SMTP_LOGIN", "default") == "default"
-
-    def test_reading_proxied_variable_in_prefix_scope(self, set_env, env):
-        set_env(
-            {
-                "MAILGUN_SMTP_LOGIN": "szabolcs",
-                "SMTP_LOGIN": "{{MAILGUN_SMTP_LOGIN}}",
-                "SMTP_PASSWORD": "secret",
-                "SMTP_NESTED_LOGIN": "{{SMTP_LOGIN}}",
-                "SMTP_NESTED_PASSWORD": "nested-secret",
-            }
-        )
-
-        with env.prefixed("SMTP_"):
-            with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
-                assert env.str("LOGIN") == "szabolcs"
-            assert env.str("PASSWORD") == "secret"
-            with env.prefixed("NESTED_"):
-                with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
-                    assert env.str("LOGIN") == "szabolcs"
-                assert env.str("PASSWORD") == "nested-secret"
-
-
 class TestEnvFileReading:
     def test_read_env(self, env):
         if "STRING" in os.environ:
@@ -256,8 +209,6 @@ class TestEnvFileReading:
         env.read_env()
         assert env("STRING") == "foo"
         assert env.list("LIST") == ["wat", "wer", "wen"]
-        with pytest.warns(DeprecationWarning, match="Proxied variables are deprecated"):
-            assert env("PROXIED") == "foo"
         assert env("EXPANDED") == "foo"
 
     # Regression test for https://github.com/sloria/environs/issues/96
