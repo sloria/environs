@@ -2,7 +2,7 @@
 
 [![Latest version](https://badgen.net/pypi/v/environs)](https://pypi.org/project/environs/)
 [![Build Status](https://dev.azure.com/sloria/sloria/_apis/build/status/sloria.environs?branchName=master)](https://dev.azure.com/sloria/sloria/_build/latest?definitionId=12&branchName=master)
-[![marshmallow 2/3 compatible](https://badgen.net/badge/marshmallow/2,3?list=1)](https://marshmallow.readthedocs.io/en/latest/upgrading.html)
+[![marshmallow 3 compatible](https://badgen.net/badge/marshmallow/3)](https://marshmallow.readthedocs.io/en/latest/upgrading.html)
 [![Black code style](https://badgen.net/badge/code%20style/black/000)](https://github.com/ambv/black)
 
 **environs** is a Python library for parsing environment variables.

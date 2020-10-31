@@ -148,22 +148,6 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     return method
 
 
-# From webargs
-def _dict2schema(dct, schema_class=ma.Schema):
-    """Generate a `marshmallow.Schema` class given a dictionary of
-    `Fields <marshmallow.fields.Field>`.
-    """
-    if hasattr(schema_class, "from_dict"):  # marshmallow 3
-        return schema_class.from_dict(dct)
-    attrs = dct.copy()
-
-    class Meta:
-        strict = True
-
-    attrs["Meta"] = Meta
-    return type("", (schema_class,), attrs)
-
-
 def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.List:
     inner_field = ma.Schema.TYPE_MAPPING[subcast] if subcast else ma.fields.Field
     return ma.fields.List(inner_field, **kwargs)
@@ -416,7 +400,7 @@ class Env:
         """Dump parsed environment variables to a dictionary of simple data types (numbers
         and strings).
         """
-        schema = _dict2schema(self._fields)()
+        schema = ma.Schema.from_dict(self._fields)()
         dump_result = schema.dump(self._values)
         return dump_result.data if MARSHMALLOW_VERSION_INFO[0] < 3 else dump_result
 
