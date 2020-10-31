@@ -31,6 +31,12 @@ env = Env(expand_vars=True)
 SMTP_LOGIN = env.str("SMTP_LOGIN")  # => 'sloria'
 ```
 
+Bug fixes:
+
+- Fix deferred validation behavior for `dj_db_url`, `dj_email_url`, `dj_cache_url`,
+  and custom parsers ([#121](https://github.com/sloria/environs/issues/121)).
+  Thanks [hukkinj1](https://github.com/hukkinj1) for reporting.
+
 Other changes:
 
 - Test against Python 3.9.
