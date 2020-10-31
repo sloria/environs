@@ -256,13 +256,9 @@ class Env:
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 
-    def __init__(
-        self, *, eager: _BoolType = True, allow_proxy: _BoolType = True, expand_vars: _BoolType = False
-    ):
+    def __init__(self, *, eager: _BoolType = True, expand_vars: _BoolType = False):
         self.eager = eager
         self._sealed = False  # type: bool
-        # TODO: Remove allow_proxy in environs 9
-        self.allow_proxy = allow_proxy
         self.expand_vars = expand_vars
         self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
@@ -394,7 +390,8 @@ class Env:
         env_key = self._get_key(key, omit_prefix=proxied)
         value = os.environ.get(env_key, default)
         if hasattr(value, "strip"):
-            match = self.allow_proxy and _PROXIED_PATTERN.match(value)
+            # TODO: Remove proxying in environs 9
+            match = _PROXIED_PATTERN.match(value)
             if match:  # Proxied variable
                 proxied_key = match.groups()[0]
                 warnings.warn(
