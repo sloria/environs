@@ -287,7 +287,7 @@ class Env:
         self.eager = eager
         self._sealed = False  # type: bool
         self.expand_vars = expand_vars
-        self._fields = {}  # type: typing.Dict[_StrType, ma.fields.Field]
+        self._fields = {}  # type: typing.Dict[_StrType, typing.Union[ma.fields.Field, type]]
         self._values = {}  # type: typing.Dict[_StrType, typing.Any]
         self._errors = collections.defaultdict(list)  # type: ErrorMapping
         self._prefix = None  # type: typing.Optional[_StrType]
