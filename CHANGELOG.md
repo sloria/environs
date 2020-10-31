@@ -26,6 +26,10 @@ env = Env(expand_vars=True)
 SMTP_LOGIN = env.str("SMTP_LOGIN") # => 'sloria'
 ```
 
+Other changes:
+
+- Test against Python 3.9.
+
 ## 8.0.0 (2020-05-27)
 
 Bug fixes:

@@ -24,7 +24,7 @@ pytest
 tox -e lint
 ```
 
-- (Optional) To run tests on Python 3.5, 3.6, and 3.7 virtual environments (must have each interpreter installed):
+- (Optional) To run tests on all supported Python 3 versions (must have each interpreter installed):
 
 ```
 tox
