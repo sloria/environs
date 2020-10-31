@@ -620,6 +620,19 @@ class TestDeferredValidation:
         assert "INT" in exc.error_messages
         assert "DTIME" in exc.error_messages
 
+    def test_deferred_required_validation(self, env):
+        env.int("STR")
+        env.int("INT")
+        env.datetime("DTIME")
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        exc = excinfo.value
+        assert exc.error_messages == {
+            "STR": ["Environment variable not set."],
+            "INT": ["Environment variable not set."],
+            "DTIME": ["Environment variable not set."],
+        }
+
     def test_cannot_add_after_seal(self, env, set_env):
         set_env({"STR": "foo", "INT": "42"})
         env.str("STR")
@@ -637,6 +650,72 @@ class TestDeferredValidation:
         env.seal()
         with pytest.raises(environs.EnvSealedError, match="Env has already been sealed"):
             env.https_url("URL")
+
+    # Regression tests for https://github.com/sloria/environs/issues/121
+    def test_dj_db_url_with_deferred_validation_missing(self, env):
+        env.dj_db_url("DATABASE_URL")
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+
+        exc = excinfo.value
+        assert exc.error_messages == {"DATABASE_URL": ["Environment variable not set."]}
+
+    def test_dj_db_url_with_deferred_validation_invalid(self, env, set_env):
+        set_env({"DATABASE_URL": "invalid://"})
+        env.dj_db_url("DATABASE_URL")
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        exc = excinfo.value
+        assert exc.error_messages == {"DATABASE_URL": ["Not a valid database URL."]}
+
+    def test_dj_email_url_with_deferred_validation_missing(self, env):
+        env.dj_email_url("EMAIL_URL")
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        exc = excinfo.value
+        assert exc.error_messages == {"EMAIL_URL": ["Environment variable not set."]}
+
+    def test_dj_cache_url_with_deferred_validation_missing(self, env):
+        env.dj_cache_url("CACHE_URL")
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+
+        exc = excinfo.value
+        assert exc.error_messages == {"CACHE_URL": ["Environment variable not set."]}
+
+    def test_dj_cache_url_with_deferred_validation_invalid(self, env, set_env):
+        set_env({"CACHE_URL": "invalid://"})
+        env.dj_cache_url("CACHE_URL")
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        exc = excinfo.value
+        assert exc.error_messages == {"CACHE_URL": ['Unknown backend: "invalid"']}
+
+    def test_custom_parser_with_deferred_validation_missing(self, env):
+        @env.parser_for("always_fail")
+        def always_fail(value):
+            raise environs.EnvError("Invalid!")
+
+        env.always_fail("MY_VAR")
+
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        exc = excinfo.value
+        assert exc.error_messages == {"MY_VAR": ["Environment variable not set."]}
+
+    def test_custom_parser_with_deferred_validation_invalid(self, env, set_env):
+        set_env({"MY_VAR": "foo"})
+
+        @env.parser_for("always_fail")
+        def always_fail(value):
+            raise environs.EnvError("Invalid!")
+
+        env.always_fail("MY_VAR")
+
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        exc = excinfo.value
+        assert exc.error_messages == {"MY_VAR": ["Invalid!"]}
 
 
 class TestExpandVars:

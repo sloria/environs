@@ -14,6 +14,7 @@ from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
 import marshmallow as ma
+from marshmallow.utils import _Missing
 from dotenv.main import load_dotenv, _walk_to_root
 
 __version__ = "8.0.0"
@@ -34,7 +35,7 @@ FieldFactory = typing.Callable[..., ma.fields.Field]
 Subcast = typing.Union[typing.Type, typing.Callable[..., _T]]
 FieldType = typing.Type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
-ParserMethod = typing.Callable[..., _T]
+ParserMethod = typing.Callable[..., typing.Union[_T, _Missing]]
 
 
 class EnvError(ValueError):
@@ -64,7 +65,7 @@ def _field2method(
 ) -> ParserMethod:
     def method(
         self: "Env", name: str, default: typing.Any = ma.missing, subcast: Subcast = None, **kwargs
-    ) -> _T:
+    ) -> typing.Union[_T, _Missing]:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         missing = kwargs.pop("missing", None) or default
@@ -76,11 +77,11 @@ def _field2method(
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing and field.missing is ma.missing:
-            message = "Environment variable not set."
             if self.eager:
-                raise EnvValidationError('Environment variable "{}" not set'.format(source_key), [message])
+                raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
             else:
-                self._errors[parsed_key].append(message)
+                self._errors[parsed_key].append("Environment variable not set.")
+                return ma.missing
         if raw_value or raw_value == "":
             value = raw_value
         else:
@@ -110,11 +111,29 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
-        if raw_value is ma.missing:
-            raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
-        value = func(raw_value, **kwargs)
         self._fields[parsed_key] = ma.fields.Field(**kwargs)
-        self._values[parsed_key] = value
+        source_key = proxied_key or parsed_key
+        if raw_value is ma.missing:
+            if self.eager:
+                raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
+            else:
+                self._errors[parsed_key].append("Environment variable not set.")
+                return ma.missing
+        if raw_value or raw_value == "":
+            value = raw_value
+        else:
+            value = ma.missing
+        try:
+            value = func(raw_value, **kwargs)
+        except (EnvError, ma.ValidationError) as error:
+            messages = error.messages if isinstance(error, ma.ValidationError) else [error.args[0]]
+            if self.eager:
+                raise EnvValidationError(
+                    'Environment variable "{}" invalid: {}'.format(source_key, error.args[0]), messages
+                ) from error
+            self._errors[parsed_key].extend(messages)
+        else:
+            self._values[parsed_key] = value
         return value
 
     method.__name__ = method_name
@@ -178,7 +197,10 @@ def _dj_db_url_parser(value: str, **kwargs) -> dict:
             "The dj_db_url parser requires the dj-database-url package. "
             "You can install it with: pip install dj-database-url"
         ) from error
-    return dj_database_url.parse(value, **kwargs)
+    try:
+        return dj_database_url.parse(value, **kwargs)
+    except Exception as error:
+        raise ma.ValidationError("Not a valid database URL.") from error
 
 
 def _dj_email_url_parser(value: str, **kwargs) -> dict:
@@ -189,7 +211,10 @@ def _dj_email_url_parser(value: str, **kwargs) -> dict:
             "The dj_email_url parser requires the dj-email-url package. "
             "You can install it with: pip install dj-email-url"
         ) from error
-    return dj_email_url.parse(value, **kwargs)
+    try:
+        return dj_email_url.parse(value, **kwargs)
+    except Exception as error:
+        raise ma.ValidationError("Not a valid email URL.") from error
 
 
 def _dj_cache_url_parser(value: str, **kwargs) -> dict:
@@ -200,7 +225,12 @@ def _dj_cache_url_parser(value: str, **kwargs) -> dict:
             "The dj_cache_url parser requires the django-cache-url package. "
             "You can install it with: pip install django-cache-url"
         ) from error
-    return django_cache_url.parse(value, **kwargs)
+    try:
+        return django_cache_url.parse(value, **kwargs)
+    except Exception as error:
+        # django_cache_url may raise Exception("Unknown backend...")
+        #   so use that error message in the validation error
+        raise ma.ValidationError(error.args[0]) from error
 
 
 class URLField(ma.fields.URL):
