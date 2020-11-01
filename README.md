@@ -103,6 +103,7 @@ The following are all type-casting methods of `Env`:
 - `env.uuid`
 - `env.log_level`
 - `env.path` (casts to a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html))
+- `env.enum` (casts to any given enum type in `type` keyword argument)
 
 ## Reading `.env` files
 
