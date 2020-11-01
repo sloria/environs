@@ -101,6 +101,10 @@ class TestCasting:
         set_env({"LIST": " 1,  2,3"})
         assert env.list("LIST", subcast=int) == [1, 2, 3]
 
+    def test_list_with_spaces_as_delimiter(self, set_env, env):
+        set_env({"LIST": "a b c"})
+        assert env.list("LIST", delimiter=" ") == ["a", "b", "c"]
+
     def test_dict(self, set_env, env):
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT") == {"key1": "1", "key2": "2"}
