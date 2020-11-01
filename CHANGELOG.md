@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.1.0 (unreleased)
+
+- When using deferred validation (`eager=False`), parser methods return `None`
+  for missing or invalid values.
+  _Note_: This may break code that depended on parser methods returning `marshmallow.missing`,
+  but this behavior was not documented nor tested and therefore is not considered public API.
+
 ## 9.0.0 (2020-10-31)
 
 - _Backwards-incompatible_: Rename `subcast` param of `env.dict` to `subcast_values` for consistency with `subcast_keys`.
