@@ -9,6 +9,7 @@ import re
 import typing
 import types
 from collections.abc import Mapping
+from enum import Enum
 from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
@@ -176,6 +177,16 @@ def _preprocess_json(value: str, **kwargs):
     return pyjson.loads(value)
 
 
+_EnumT = typing.TypeVar("_EnumT", bound=Enum)
+
+
+def _enum_parser(value, *, type: typing.Type[_EnumT], **kwargs) -> _EnumT:
+    try:
+        return type[value]
+    except Exception:
+        raise ma.ValidationError(f"Not a valid {type} enum.")
+
+
 def _dj_db_url_parser(value: str, **kwargs) -> dict:
     try:
         import dj_database_url
@@ -275,6 +286,7 @@ class Env:
     timedelta = _field2method(ma.fields.TimeDelta, "timedelta")
     uuid = _field2method(ma.fields.UUID, "uuid")
     url = _field2method(URLField, "url")
+    enum = _func2method(_enum_parser, "enum")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
