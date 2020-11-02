@@ -2,6 +2,14 @@
 
 ## 9.1.0 (unreleased)
 
+Features:
+
+- Add `delimiter` param to `env.list`
+  ([#184](https://github.com/sloria/environs/pull/184)).
+  Thanks [tomgrin10](https://github.com/tomgrin10?) for the PR.
+
+Other changes:
+
 - When using deferred validation (`eager=False`), parser methods return `None`
   for missing or invalid values.
   _Note_: This may break code that depended on parser methods returning `marshmallow.missing`,
