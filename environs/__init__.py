@@ -180,11 +180,20 @@ def _preprocess_json(value: str, **kwargs):
 _EnumT = typing.TypeVar("_EnumT", bound=Enum)
 
 
-def _enum_parser(value, *, type: typing.Type[_EnumT], **kwargs) -> _EnumT:
-    try:
-        return type[value]
-    except Exception:
-        raise ma.ValidationError(f"Not a valid {type} enum.")
+def _enum_parser(value, *, type: typing.Type[_EnumT], ignore_case: bool = False, **kwargs) -> _EnumT:
+    invalid_exc = ma.ValidationError(f"Not a valid '{type.__name__}' enum.")
+
+    if not ignore_case:
+        try:
+            return type[value]
+        except KeyError:
+            raise invalid_exc
+
+    for enum_value in type:
+        if enum_value.name.lower() == value.lower():
+            return enum_value
+
+    raise invalid_exc
 
 
 def _dj_db_url_parser(value: str, **kwargs) -> dict:

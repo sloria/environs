@@ -211,6 +211,20 @@ class TestCasting:
         set_env({"DAY": "SUNDAY"})
         assert env.enum("DAY", type=DayEnum) == DayEnum.SUNDAY
 
+    def test_enum_cast_ignore_case(self, set_env, env):
+        set_env({"DAY": "suNDay"})
+        assert env.enum("DAY", type=DayEnum, ignore_case=True) == DayEnum.SUNDAY
+
+    def test_invalid_enum(self, set_env, env):
+        set_env({"DAY": "suNDay"})
+        with pytest.raises(environs.EnvError):
+            assert env.enum("DAY", type=DayEnum)
+
+    def test_invalid_enum_ignore_case(self, set_env, env):
+        set_env({"DAY": "SonDAY"})
+        with pytest.raises(environs.EnvError):
+            assert env.enum("DAY", type=DayEnum, ignore_case=True)
+
 
 class TestEnvFileReading:
     def test_read_env(self, env):
