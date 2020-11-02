@@ -148,10 +148,12 @@ def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.L
     return ma.fields.List(inner_field, **kwargs)
 
 
-def _preprocess_list(value: typing.Union[str, typing.Iterable], **kwargs) -> typing.Iterable:
+def _preprocess_list(
+    value: typing.Union[str, typing.Iterable], *, delimiter: str = ",", **kwargs
+) -> typing.Iterable:
     if ma.utils.is_iterable_but_not_string(value):
         return value
-    return typing.cast(str, value).split(",") if value != "" else []
+    return typing.cast(str, value).split(delimiter) if value != "" else []
 
 
 def _preprocess_dict(
