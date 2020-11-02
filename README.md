@@ -281,14 +281,14 @@ domain = env.furl("DOMAIN")  # => furl('https://myapp.com')
 
 
 # Custom parsers can take extra keyword arguments
-@env.parser_for("enum")
-def enum_parser(value, choices):
+@env.parser_for("choice")
+def choice_parser(value, choices):
     if value not in choices:
         raise environs.EnvError("Invalid!")
     return value
 
 
-color = env.enum("COLOR", choices=["black"])  # => raises EnvError
+color = env.choice("COLOR", choices=["black"])  # => raises EnvError
 ```
 
 ## Usage with Flask
