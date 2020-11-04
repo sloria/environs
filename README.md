@@ -54,6 +54,7 @@ export SHIP_DATE='1984-06-25'
 export TTL=42
 export ENABLE_LOGIN=true
 export GITHUB_REPOS=webargs,konch,ped
+export GITHUB_REPO_PRIORITY="webargs=2,konch=3"
 export COORDINATES=23.3,50.0
 export LOG_LEVEL=DEBUG
 ```
@@ -82,6 +83,11 @@ enable_feature_x = env.bool("ENABLE_FEATURE_X", False)  # => False
 # parsing lists
 gh_repos = env.list("GITHUB_REPOS")  # => ['webargs', 'konch', 'ped']
 coords = env.list("COORDINATES", subcast=float)  # => [23.3, 50.0]
+
+# parsing dics
+gh_repos_priorities = env.dict(
+    "GITHUB_REPO_PRIORITY", subcast_values=int
+)  # => {'webargs': 2, 'konch': 3}
 ```
 
 ## Supported types
