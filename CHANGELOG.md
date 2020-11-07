@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.1.0 (unreleased)
+## 9.1.0 (2020-11-06)
 
 Features:
 
