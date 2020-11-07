@@ -84,7 +84,7 @@ enable_feature_x = env.bool("ENABLE_FEATURE_X", False)  # => False
 gh_repos = env.list("GITHUB_REPOS")  # => ['webargs', 'konch', 'ped']
 coords = env.list("COORDINATES", subcast=float)  # => [23.3, 50.0]
 
-# parsing dics
+# parsing dicts
 gh_repos_priorities = env.dict(
     "GITHUB_REPO_PRIORITY", subcast_values=int
 )  # => {'webargs': 2, 'konch': 3}
