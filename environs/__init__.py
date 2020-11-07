@@ -291,6 +291,7 @@ class Env:
     json = _field2method(ma.fields.Field, "json", preprocess=_preprocess_json)
     datetime = _field2method(ma.fields.DateTime, "datetime")
     date = _field2method(ma.fields.Date, "date")
+    time = _field2method(ma.fields.Time, "time")
     path = _field2method(PathField, "path")
     log_level = _field2method(LogLevelField, "log_level")
     timedelta = _field2method(ma.fields.TimeDelta, "timedelta")

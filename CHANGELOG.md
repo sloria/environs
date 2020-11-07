@@ -1,5 +1,11 @@
 # Changelog
 
+## 9.2.0 (unreleased)
+
+Features:
+
+- Add time parser ([#191](https://github.com/sloria/environs/issues/191)).
+
 ## 9.1.0 (2020-11-06)
 
 Features:
