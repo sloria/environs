@@ -14,7 +14,6 @@ from urllib.parse import urlparse, ParseResult
 from pathlib import Path
 
 import marshmallow as ma
-from marshmallow.utils import _Missing
 from dotenv.main import load_dotenv, _walk_to_root
 
 __version__ = "9.0.0"
@@ -32,7 +31,7 @@ FieldFactory = typing.Callable[..., ma.fields.Field]
 Subcast = typing.Union[typing.Type, typing.Callable[..., _T]]
 FieldType = typing.Type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
-ParserMethod = typing.Callable[..., typing.Union[_T, _Missing]]
+ParserMethod = typing.Callable
 
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
@@ -65,7 +64,7 @@ def _field2method(
         default: typing.Any = ma.missing,
         subcast: typing.Optional[Subcast] = None,
         **kwargs,
-    ) -> typing.Union[_T, _Missing]:
+    ) -> typing.Optional[_T]:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         missing = kwargs.pop("missing", None) or default
@@ -81,11 +80,11 @@ def _field2method(
                 raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
-                return ma.missing
+                return None
         if raw_value or raw_value == "":
             value = raw_value
         else:
-            value = field.missing
+            value = field.missing if field.missing is not ma.missing else None
         if preprocess:
             value = preprocess(value, subcast=subcast, **kwargs)
         try:
@@ -111,7 +110,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         default: typing.Any = ma.missing,
         subcast: typing.Optional[typing.Type] = None,
         **kwargs,
-    ):
+    ) -> typing.Optional[_T]:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
@@ -122,11 +121,11 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
                 raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
-                return ma.missing
+                return None
         if raw_value or raw_value == "":
             value = raw_value
         else:
-            value = ma.missing
+            value = None
         try:
             value = func(raw_value, **kwargs)
         except (EnvError, ma.ValidationError) as error:
@@ -149,10 +148,12 @@ def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.L
     return ma.fields.List(inner_field, **kwargs)
 
 
-def _preprocess_list(value: typing.Union[str, typing.Iterable], **kwargs) -> typing.Iterable:
+def _preprocess_list(
+    value: typing.Union[str, typing.Iterable], *, delimiter: str = ",", **kwargs
+) -> typing.Iterable:
     if ma.utils.is_iterable_but_not_string(value):
         return value
-    return typing.cast(str, value).split(",") if value != "" else []
+    return typing.cast(str, value).split(delimiter) if value != "" else []
 
 
 def _preprocess_dict(

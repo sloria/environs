@@ -25,7 +25,7 @@ jobs:
   - template: job--python-tox.yml@sloria
     parameters:
       toxenvs:
-        - py39-marshmallow3
+        - py38-marshmallow3
       os: windows
   - template: job--python-tox.yml@sloria
     parameters:
