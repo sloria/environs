@@ -109,6 +109,7 @@ The following are all type-casting methods of `Env`:
 - `env.uuid`
 - `env.log_level`
 - `env.path` (casts to a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html))
+- `env.enum` (casts to any given enum type specified in `type` keyword argument, accepts optional `ignore_case` keyword argument)
 
 ## Reading `.env` files
 
@@ -286,14 +287,14 @@ domain = env.furl("DOMAIN")  # => furl('https://myapp.com')
 
 
 # Custom parsers can take extra keyword arguments
-@env.parser_for("enum")
-def enum_parser(value, choices):
+@env.parser_for("choice")
+def choice_parser(value, choices):
     if value not in choices:
         raise environs.EnvError("Invalid!")
     return value
 
 
-color = env.enum("COLOR", choices=["black"])  # => raises EnvError
+color = env.choice("COLOR", choices=["black"])  # => raises EnvError
 ```
 
 ## Usage with Flask

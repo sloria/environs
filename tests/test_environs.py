@@ -5,6 +5,7 @@ import datetime as dt
 import urllib.parse
 import pathlib
 from decimal import Decimal
+from enum import Enum
 
 import dj_database_url
 import dj_email_url
@@ -33,6 +34,12 @@ def env():
 
 class FauxTestException(Exception):
     pass
+
+
+class DayEnum(Enum):
+    SUNDAY = 1
+    MONDAY = 2
+    TUESDAY = 3
 
 
 class TestCasting:
@@ -204,6 +211,24 @@ class TestCasting:
             env.url("URL")
         assert 'Environment variable "URL" invalid' in excinfo.value.args[0]
 
+    def test_enum_cast(self, set_env, env):
+        set_env({"DAY": "SUNDAY"})
+        assert env.enum("DAY", type=DayEnum) == DayEnum.SUNDAY
+
+    def test_enum_cast_ignore_case(self, set_env, env):
+        set_env({"DAY": "suNDay"})
+        assert env.enum("DAY", type=DayEnum, ignore_case=True) == DayEnum.SUNDAY
+
+    def test_invalid_enum(self, set_env, env):
+        set_env({"DAY": "suNDay"})
+        with pytest.raises(environs.EnvError):
+            assert env.enum("DAY", type=DayEnum)
+
+    def test_invalid_enum_ignore_case(self, set_env, env):
+        set_env({"DAY": "SonDAY"})
+        with pytest.raises(environs.EnvError):
+            assert env.enum("DAY", type=DayEnum, ignore_case=True)
+
 
 class TestEnvFileReading:
     def test_read_env(self, env):
@@ -320,17 +345,17 @@ class TestCustomTypes:
     def test_parser_function_can_take_extra_arguments(self, set_env, env):
         set_env({"ENV": "dev"})
 
-        @env.parser_for("enum")
-        def enum_parser(value, choices):
+        @env.parser_for("choice")
+        def choice_parser(value, choices):
             if value not in choices:
                 raise environs.EnvError("Invalid!")
             return value
 
-        assert env.enum("ENV", choices=["dev", "prod"]) == "dev"
+        assert env.choice("ENV", choices=["dev", "prod"]) == "dev"
 
         set_env({"ENV": "invalid"})
         with pytest.raises(environs.EnvError):
-            env.enum("ENV", choices=["dev", "prod"])
+            env.choice("ENV", choices=["dev", "prod"])
 
     def test_add_parser_from_field(self, set_env, env):
         class HTTPSURL(fields.Field):
