@@ -174,6 +174,10 @@ class TestCasting:
         set_env({"TIMEDELTA": "42"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
 
+    def test_time_cast(self, set_env, env):
+        set_env({"TIME": "10:30"})
+        assert env.time("TIME") == dt.time(hour=10, minute=30, second=0)
+
     def test_uuid_cast(self, set_env, env):
         uid = uuid.uuid1()
         set_env({"UUID": str(uid)})
