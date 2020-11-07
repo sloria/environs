@@ -7,7 +7,6 @@ import logging
 import os
 import re
 import typing
-import types
 from collections.abc import Mapping
 from enum import Enum
 from urllib.parse import urlparse, ParseResult
@@ -332,9 +331,10 @@ class Env:
         if path is None:
             # By default, start search from the same directory this function is called
             current_frame = inspect.currentframe()
-            if not current_frame:
+            if current_frame is None:
                 raise RuntimeError("Could not get current call frame.")
-            frame = typing.cast(types.FrameType, current_frame.f_back)
+            frame = current_frame.f_back
+            assert frame is not None
             caller_dir = Path(frame.f_code.co_filename).parent.resolve()
             start = caller_dir / ".env"
         else:
