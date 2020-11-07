@@ -104,6 +104,7 @@ The following are all type-casting methods of `Env`:
 - `env.json`
 - `env.datetime`
 - `env.date`
+- `env.time`
 - `env.timedelta` (assumes value is an integer in seconds)
 - `env.url`
 - `env.uuid`
