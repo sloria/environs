@@ -4,9 +4,11 @@
 
 Features:
 
+- Add `enum` parser ([#185](https://github.com/sloria/environs/pull/185)).
 - Add `delimiter` param to `env.list`
   ([#184](https://github.com/sloria/environs/pull/184)).
-  Thanks [tomgrin10](https://github.com/tomgrin10?) for the PR.
+
+Thanks [tomgrin10](https://github.com/tomgrin10?) for the PRs.
 
 Bug fixes:
 
