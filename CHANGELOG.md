@@ -8,6 +8,11 @@ Features:
   ([#184](https://github.com/sloria/environs/pull/184)).
   Thanks [tomgrin10](https://github.com/tomgrin10?) for the PR.
 
+Bug fixes:
+
+- Loosen `ParserMethod` typing ([#186 (comment)](https://github.com/sloria/environs/issues/186#issuecomment-723163520)).
+  Thanks [hukkinj1](https://github.com/hukkinj1) for the PR.
+
 Other changes:
 
 - When using deferred validation (`eager=False`), parser methods return `None`
