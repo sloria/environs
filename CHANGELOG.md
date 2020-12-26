@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.3.0 (unreleased)
+
+Deprecations:
+
+- Rename `subcast_key` argument of `env.dict` to `subcast_keys`
+  for consistency with `subcast_values`. `subcast_key` is deprecated.
+
 ## 9.2.0 (2020-11-07)
 
 Features:

@@ -116,17 +116,22 @@ class TestCasting:
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT") == {"key1": "1", "key2": "2"}
 
-    def test_dict_with_subcast(self, set_env, env):
+    def test_dict_with_subcast_values(self, set_env, env):
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT", subcast_values=int) == {"key1": 1, "key2": 2}
 
-    def test_dict_without_subcast_key(self, set_env, env):
+    def test_dict_without_subcast_keys(self, set_env, env):
         set_env({"DICT": "1=value1,2=value2"})
         assert env.dict("DICT") == {"1": "value1", "2": "value2"}
 
-    def test_dict_with_subcast_key(self, set_env, env):
+    def test_dict_with_subcast_keys(self, set_env, env):
         set_env({"DICT": "1=value1,2=value2"})
-        assert env.dict("DICT", subcast_key=int) == {1: "value1", 2: "value2"}
+        assert env.dict("DICT", subcast_keys=int) == {1: "value1", 2: "value2"}
+
+    def test_dict_with_subcast_key_deprecated(self, set_env, env):
+        set_env({"DICT": "1=value1,2=value2"})
+        with pytest.warns(DeprecationWarning):
+            assert env.dict("DICT", subcast_key=int) == {1: "value1", 2: "value2"}
 
     def test_dict_with_default_from_string(self, set_env, env):
         assert env.dict("DICT", "key1=1,key2=2") == {"key1": "1", "key2": "2"}

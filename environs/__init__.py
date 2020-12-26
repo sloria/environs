@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import typing
+import warnings
 from collections.abc import Mapping
 from enum import Enum
 from urllib.parse import urlparse, ParseResult
@@ -158,15 +159,20 @@ def _preprocess_list(
 def _preprocess_dict(
     value: typing.Union[str, typing.Mapping],
     *,
-    subcast_key: typing.Optional[Subcast] = None,
+    subcast_keys: typing.Optional[Subcast] = None,
+    subcast_key: typing.Optional[Subcast] = None,  # Deprecated
     subcast_values: typing.Optional[Subcast] = None,
     **kwargs,
 ) -> typing.Mapping:
     if isinstance(value, Mapping):
         return value
 
+    if subcast_key:
+        warnings.warn("`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning)
+    subcast_keys = subcast_keys or subcast_key
+
     return {
-        (subcast_key(key.strip()) if subcast_key else key.strip()): (
+        (subcast_keys(key.strip()) if subcast_keys else key.strip()): (
             subcast_values(val.strip()) if subcast_values else val.strip()
         )
         for key, val in (item.split("=", 1) for item in value.split(",") if value)
