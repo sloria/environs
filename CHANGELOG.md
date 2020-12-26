@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.3.0 (unreleased)
+## 9.3.0 (2020-12-26)
 
 Deprecations:
 
