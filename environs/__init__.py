@@ -72,19 +72,15 @@ def _field2method(
             field = field_or_factory(missing=missing, **kwargs)
         else:
             field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
-        parsed_key, raw_value, proxied_key = self._get_from_environ(name, ma.missing)
+        parsed_key, value, proxied_key = self._get_from_environ(name, field.missing)
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
-        if raw_value is ma.missing and field.missing is ma.missing:
+        if value is ma.missing:
             if self.eager:
                 raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
-        if raw_value or raw_value == "":
-            value = raw_value
-        else:
-            value = field.missing if field.missing is not ma.missing else None
         if preprocess:
             value = preprocess(value, subcast=subcast, **kwargs)
         try:
@@ -438,10 +434,12 @@ class Env:
         if hasattr(value, "strip"):
             expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
             if expand_match:  # Full match expand_vars - special case keep default
-                proxied_key = expand_match.groups()[0]
-                subs_default = expand_match.groups()[1]
+                proxied_key: _StrType = expand_match.groups()[0]
+                subs_default: typing.Optional[_StrType] = expand_match.groups()[1]
                 if subs_default is not None:
                     default = subs_default[2:]
+                elif value == default:  # if we have used default, don't use it recursively
+                    default = ma.missing
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
             expand_search = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
             if expand_search:  # Multiple or in text match expand_vars - General case - default lost
