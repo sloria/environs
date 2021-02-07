@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.3.1 (unreleased)
+
+Bug fixes:
+
+- Apply variable expansion to default values ([#204](https://github.com/sloria/environs/pull/204)).
+  Thanks [rjcohn](https://github.com/rjcohn) for the PR.
+
 ## 9.3.0 (2020-12-26)
 
 Deprecations:
