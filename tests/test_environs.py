@@ -47,6 +47,8 @@ class TestCasting:
         set_env({"STR": "foo", "INT": "42"})
         assert env("STR") == "foo"
         assert env("NOT_SET", "mydefault") == "mydefault"
+        with pytest.raises(environs.EnvError, match='Environment variable "NOT_SET" not set'):
+            assert env("NOT_SET")
 
     def test_call_with_default(self, env):
         assert env("NOT_SET", default="mydefault") == "mydefault"
@@ -760,6 +762,19 @@ class TestExpandVars:
             }
         )
         assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
+
+    def test_default_expands(self, env, set_env):
+        set_env(
+            {
+                "MAIN": "${SUBSTI}",
+                "SUBSTI": "substivalue",
+            }
+        )
+        assert env.str("NOT_SET", "${SUBSTI}") == "substivalue"
+        assert env.str("NOT_SET", "${MAIN}") == "substivalue"
+        assert env.str("NOT_SET", "${NOT_SET2:-set2}") == "set2"
+        with pytest.raises(environs.EnvError, match='Environment variable "NOT_SET2" not set'):
+            assert env.str("NOT_SET", "${NOT_SET2}")
 
     def test_escaped_expand(self, env, set_env):
         set_env({"ESCAPED_EXPAND": r"\${ESCAPED}", "ESCAPED": "fail"})
