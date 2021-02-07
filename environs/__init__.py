@@ -16,7 +16,7 @@ from pathlib import Path
 import marshmallow as ma
 from dotenv.main import load_dotenv, _walk_to_root
 
-__version__ = "9.3.0"
+__version__ = "9.3.1"
 __all__ = ["EnvError", "Env"]
 
 
