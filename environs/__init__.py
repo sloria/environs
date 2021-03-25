@@ -179,7 +179,7 @@ def _preprocess_json(value: str, **kwargs):
     try:
         return pyjson.loads(value)
     except pyjson.JSONDecodeError as error:
-        invalid_json = ma.ValidationError(f"Not a valid json.")
+        invalid_json = ma.ValidationError("Not a valid json.")
         raise invalid_json from error
 
 
