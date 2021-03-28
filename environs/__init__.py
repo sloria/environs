@@ -81,9 +81,9 @@ def _field2method(
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
-        if preprocess:
-            value = preprocess(value, subcast=subcast, **kwargs)
         try:
+            if preprocess:
+                value = preprocess(value, subcast=subcast, **kwargs)
             value = field.deserialize(value)
         except ma.ValidationError as error:
             if self.eager:
@@ -176,7 +176,10 @@ def _preprocess_dict(
 
 
 def _preprocess_json(value: str, **kwargs):
-    return pyjson.loads(value)
+    try:
+        return pyjson.loads(value)
+    except pyjson.JSONDecodeError as error:
+        raise ma.ValidationError("Not valid JSON.") from error
 
 
 _EnumT = typing.TypeVar("_EnumT", bound=Enum)
