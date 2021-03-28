@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.3.2 (unreleased)
+
+Bug fixes:
+
+- Handle JSON decoding errors when using `env.json` ([#212](https://github.com/sloria/environs/pull/212)).
+  Thanks [bvanelli](https://github.com/bvanelli) for the PR.
+
 ## 9.3.1 (2021-02-07)
 
 Bug fixes:
@@ -28,7 +35,7 @@ Features:
 - Add `delimiter` param to `env.list`
   ([#184](https://github.com/sloria/environs/pull/184)).
 
-Thanks [tomgrin10](https://github.com/tomgrin10?) for the PRs.
+Thanks [tomgrin10](https://github.com/tomgrin10) for the PRs.
 
 Bug fixes:
 

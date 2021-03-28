@@ -167,7 +167,7 @@ class TestCasting:
         set_env({"JSON": "foo"})
         with pytest.raises(environs.EnvError) as exc:
             env.json("JSON")
-        assert "Not a valid json." in exc.value.args[0]
+        assert "Not valid JSON." in exc.value.args[0]
 
     def test_datetime_cast(self, set_env, env):
         dtime = dt.datetime.utcnow()
