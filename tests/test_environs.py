@@ -474,9 +474,9 @@ class TestPrefix:
 
     def test_dump_with_prefixed(self, env):
         with env.prefixed("APP_"):
-            env.str("STR") == "foo"
-            env.int("INT") == 42
-            env("NOT_FOUND", "mydefault") == "mydefault"
+            assert env.str("STR") == "foo"
+            assert env.int("INT") == 42
+            assert env("NOT_FOUND", "mydefault") == "mydefault"
         assert env.dump() == {"APP_STR": "foo", "APP_INT": 42, "APP_NOT_FOUND": "mydefault"}
 
     def test_error_message_for_prefixed_var(self, env):
@@ -501,10 +501,10 @@ class TestNestedPrefix:
     def test_dump_with_nested_prefixed(self, env):
         with env.prefixed("APP_"):
             with env.prefixed("NESTED_"):
-                env.int("INT") == 42
-                env("NOT_FOUND", "mydefault") == "mydefault"
-            env.str("STR") == "foo"
-            env("NOT_FOUND", "mydefault") == "mydefault"
+                assert env.int("INT") == 42
+                assert env("NOT_FOUND", "mydefault") == "mydefault"
+            assert env.str("STR") == "foo"
+            assert env("NOT_FOUND", "mydefault") == "mydefault"
         assert env.dump() == {
             "APP_STR": "foo",
             "APP_NOT_FOUND": "mydefault",
@@ -542,10 +542,10 @@ class TestFailedNestedPrefix:
         def dump_with_nested_prefixed(env, fail=False):
             with env.prefixed("APP_"):
                 with env.prefixed("NESTED_"):
-                    env.int("INT") == 42
-                    env("NOT_FOUND", "mydefault") == "mydefault"
-                env.str("STR") == "foo"
-                env("NOT_FOUND", "mydefault") == "mydefault"
+                    assert env.int("INT") == 42
+                    assert env("NOT_FOUND", "mydefault") == "mydefault"
+                assert env.str("STR") == "foo"
+                assert env("NOT_FOUND", "mydefault") == "mydefault"
                 if fail:
                     raise FauxTestException
             assert env.dump() == {
