@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.4.0 (unreleased)
+
+Bug fixes:
+
+- Fix compatibility with marshmallow>=3.13.0 
+  so that no DeprecationWarnings are raised ([#224](https://github.com/sloria/environs/issues/224)).
+
 ## 9.3.2 (2021-03-28)
 
 Bug fixes:
