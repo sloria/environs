@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.4.0 (unreleased)
+## 9.3.3 (2021-08-08)
 
 Bug fixes:
 
