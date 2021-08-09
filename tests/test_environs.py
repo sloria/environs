@@ -11,6 +11,7 @@ import dj_database_url
 import dj_email_url
 import django_cache_url
 import pytest
+import marshmallow as ma
 from marshmallow import fields, validate
 
 import environs
@@ -155,7 +156,10 @@ class TestCasting:
         assert exc.value.args[0] == 'Environment variable "FOO" not set'
 
     def test_default_set(self, env):
-        assert env.str("FOO", missing="foo") == "foo"
+        if ma.__version_info__ >= (3, 13):
+            assert env.str("FOO", load_default="foo") == "foo"
+        else:
+            assert env.str("FOO", missing="foo") == "foo"
         # Passed positionally
         assert env.str("FOO", "foo") == "foo"
 

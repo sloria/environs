@@ -55,6 +55,9 @@ class ParserConflictError(ValueError):
     """Raised when adding a custom parser that conflicts with a built-in parser method."""
 
 
+_SUPPORTS_LOAD_DEFAULT = ma.__version_info__ >= (3, 13)
+
+
 def _field2method(
     field_or_factory: FieldOrFactory, method_name: str, *, preprocess: typing.Optional[typing.Callable] = None
 ) -> ParserMethod:
@@ -63,16 +66,43 @@ def _field2method(
         name: str,
         default: typing.Any = ma.missing,
         subcast: typing.Optional[Subcast] = None,
+        *,
+        # Subset of relevant marshmallow.Field kwargs
+        load_default: typing.Any = ma.missing,
+        missing: typing.Any = ma.missing,
+        validate: typing.Optional[
+            typing.Union[
+                typing.Callable[[typing.Any], typing.Any],
+                typing.Iterable[typing.Callable[[typing.Any], typing.Any]],
+            ]
+        ] = None,
+        required: bool = False,
+        allow_none: typing.Optional[bool] = None,
+        error_messages: typing.Optional[typing.Dict[str, str]] = None,
+        metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
         **kwargs,
     ) -> typing.Optional[_T]:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
-        missing = kwargs.pop("missing", None) or default
-        if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
-            field = field_or_factory(missing=missing, **kwargs)
+        field_kwargs = dict(
+            validate=validate,
+            required=required,
+            allow_none=allow_none,
+            error_messages=error_messages,
+            metadata=metadata,
+        )
+        if _SUPPORTS_LOAD_DEFAULT:
+            field_kwargs["load_default"] = load_default or default
         else:
-            field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
-        parsed_key, value, proxied_key = self._get_from_environ(name, field.missing)
+            field_kwargs["missing"] = missing or default
+        if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
+            # TODO: Remove `type: ignore` after https://github.com/python/mypy/issues/9676 is fixed
+            field = field_or_factory(**field_kwargs)  # type: ignore
+        else:
+            field = field_or_factory(subcast=subcast, **field_kwargs)
+        parsed_key, value, proxied_key = self._get_from_environ(
+            name, field.load_default if _SUPPORTS_LOAD_DEFAULT else field.missing
+        )
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
         if value is ma.missing:
@@ -110,7 +140,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
-        self._fields[parsed_key] = ma.fields.Field(**kwargs)
+        self._fields[parsed_key] = ma.fields.Field()
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing:
             if self.eager:

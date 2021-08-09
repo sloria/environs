@@ -31,6 +31,7 @@ jobs:
     parameters:
       toxenvs:
         - lint
+        - py36-marshmallowlowest
         - py36-marshmallow3
         - py37-marshmallow3
         - py38-marshmallow3
