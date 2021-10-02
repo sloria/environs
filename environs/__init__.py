@@ -294,6 +294,8 @@ class URLField(ma.fields.URL):
 
 class PathField(ma.fields.Str):
     def _deserialize(self, value, *args, **kwargs) -> Path:
+        if isinstance(value, Path):
+            return value
         ret = super()._deserialize(value, *args, **kwargs)
         return Path(ret)
 

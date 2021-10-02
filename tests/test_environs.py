@@ -210,6 +210,12 @@ class TestCasting:
         res = env.path("PTH")
         assert isinstance(res, pathlib.Path)
 
+    def test_path_default_value(self, env):
+        default_value = pathlib.Path("/home/sloria")
+        res = env.path("MISSING_ENV", default_value)
+        assert isinstance(res, pathlib.Path)
+        assert res == default_value
+
     def test_log_level_cast(self, set_env, env):
         set_env({"LOG_LEVEL": "WARNING", "LOG_LEVEL_INT": str(logging.WARNING), "LOG_LEVEL_LOWER": "info"})
         assert env.log_level("LOG_LEVEL_INT") == logging.WARNING
