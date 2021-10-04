@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.3.3 (2021-10-03)
+
+Bug fixes:
+
+- Allow default for `env.path` to be a `pathlib.Path` ([#228](https://github.com/sloria/environs/issues/228)).
+  Thanks [KochankovID](https://github.com/KochankovID) for the PR.
+
 ## 9.3.3 (2021-08-08)
 
 Bug fixes:
