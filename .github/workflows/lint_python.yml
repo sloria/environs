@@ -9,11 +9,11 @@ jobs:
       - run: pip install --upgrade pip wheel
       - run: pip install bandit black codespell flake8 flake8-2020 flake8-bugbear
                          flake8-comprehensions isort mypy pytest pyupgrade safety
-      - run: bandit --recursive .
-      - run: black --check . || true
+      - run: bandit --recursive --skip B101 .  # B101 is assert statements
+      - run: black --check .
       - run: codespell
-      - run: flake8 . --count --max-complexity=11 --max-line-length=110
-                      --show-source --statistics
+      - run: flake8 . --count --ignore=B408 --max-complexity=11
+                      --max-line-length=110 --show-source --statistics
       - run: isort --check-only --profile black . || true
       - run: pip install -r requirements.txt || pip install --editable .
       - run: mkdir --parents --verbose .mypy_cache
