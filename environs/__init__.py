@@ -97,7 +97,7 @@ def _field2method(
             field_kwargs["missing"] = missing or default
         if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
             # TODO: Remove `type: ignore` after https://github.com/python/mypy/issues/9676 is fixed
-            field = field_or_factory(**field_kwargs)  # type: ignore
+            field = field_or_factory(**field_kwargs, **kwargs)  # type: ignore
         else:
             field = field_or_factory(subcast=subcast, **field_kwargs)
         parsed_key, value, proxied_key = self._get_from_environ(
