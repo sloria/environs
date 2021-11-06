@@ -205,11 +205,10 @@ class TestCasting:
         res = env.url("URL")
         assert isinstance(res, urllib.parse.ParseResult)
 
-    def test_url_cast_with_kwargs(self, env, set_env):
+    def test_url_db_cast(self, env, set_env):
         mongodb_url = "mongodb://user:pass@mongo.example.local/db?authSource=admin"
         set_env({"MONGODB_URL": mongodb_url})
-        res = env.url("MONGODB_URL", schemes={"mongodb", "mongodb+srv"},
-                      require_tld=False)
+        res = env.url("MONGODB_URL", schemes={"mongodb", "mongodb+srv"}, require_tld=False)
         assert isinstance(res, urllib.parse.ParseResult)
 
     def test_path_cast(self, set_env, env):
