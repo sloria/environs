@@ -1,17 +1,17 @@
+import datetime as dt
 import logging
 import os
-import uuid
-import datetime as dt
-import urllib.parse
 import pathlib
+import urllib.parse
+import uuid
 from decimal import Decimal
 from enum import Enum
 
 import dj_database_url
 import dj_email_url
 import django_cache_url
-import pytest
 import marshmallow as ma
+import pytest
 from marshmallow import fields, validate
 
 import environs
@@ -203,6 +203,12 @@ class TestCasting:
     def test_url_cast(self, set_env, env):
         set_env({"URL": "http://stevenloria.com/projects/?foo=42"})
         res = env.url("URL")
+        assert isinstance(res, urllib.parse.ParseResult)
+
+    def test_url_db_cast(self, env, set_env):
+        mongodb_url = "mongodb://user:pass@mongo.example.local/db?authSource=admin"
+        set_env({"MONGODB_URL": mongodb_url})
+        res = env.url("MONGODB_URL", schemes={"mongodb", "mongodb+srv"}, require_tld=False)
         assert isinstance(res, urllib.parse.ParseResult)
 
     def test_path_cast(self, set_env, env):
