@@ -1,5 +1,11 @@
 # Changelog
 
+## 9.4.0 (unreleased)
+
+Other changes:
+
+- Test against Python 3.10.
+
 ## 9.3.5 (2021-11-14)
 
 Bug fixes:
