@@ -32,8 +32,8 @@ jobs:
       toxenvs:
         - lint
         - py36-marshmallowlowest
-        - py10-marshmallow3
-        - py10-marshmallowdev
+        - py310-marshmallow3
+        - py310-marshmallowdev
       os: linux
   - template: job--pypi-release.yml@sloria
     parameters:
