@@ -209,7 +209,10 @@ def _preprocess_json(value: typing.Union[str, typing.Mapping, typing.List], **kw
     try:
         if isinstance(value, str):
             return pyjson.loads(value)
-        return value
+        elif isinstance(value, dict) or isinstance(value, list) or value is None:
+            return value
+        else:
+            raise ma.ValidationError("Not valid JSON.")
     except pyjson.JSONDecodeError as error:
         raise ma.ValidationError("Not valid JSON.") from error
 
