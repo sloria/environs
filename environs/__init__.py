@@ -28,7 +28,7 @@ _IntType = int
 ErrorMapping = typing.Mapping[str, typing.List[str]]
 ErrorList = typing.List[str]
 FieldFactory = typing.Callable[..., ma.fields.Field]
-Subcast = typing.Union[typing.Type, typing.Callable[..., _T]]
+Subcast = typing.Union[typing.Type, typing.Callable[..., _T], ma.fields.Field]
 FieldType = typing.Type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable
@@ -99,7 +99,8 @@ def _field2method(
             # TODO: Remove `type: ignore` after https://github.com/python/mypy/issues/9676 is fixed
             field = field_or_factory(**field_kwargs, **kwargs)  # type: ignore
         else:
-            field = field_or_factory(subcast=subcast, **field_kwargs)
+            parsed_subcast = _make_subcast(subcast)
+            field = field_or_factory(subcast=parsed_subcast, **field_kwargs)
         parsed_key, value, proxied_key = self._get_from_environ(
             name, field.load_default if _SUPPORTS_LOAD_DEFAULT else field.missing
         )
@@ -169,8 +170,25 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     return method
 
 
+def _make_subcast(subcast):
+    if subcast in ma.Schema.TYPE_MAPPING:
+        inner_field = ma.Schema.TYPE_MAPPING[subcast]
+    elif isinstance(subcast, type) and issubclass(subcast, ma.fields.Field):
+        inner_field = subcast
+    elif callable(subcast):
+
+        class CustomField(ma.fields.Field):
+            def _deserialize(self, value, *args, **kwargs):
+                return subcast(value)
+
+        inner_field = CustomField
+    else:
+        inner_field = ma.fields.Field
+    return inner_field
+
+
 def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.List:
-    inner_field = ma.Schema.TYPE_MAPPING[subcast] if subcast else ma.fields.Field
+    inner_field = _make_subcast(subcast)
     return ma.fields.List(inner_field, **kwargs)
 
 
@@ -195,12 +213,11 @@ def _preprocess_dict(
 
     if subcast_key:
         warnings.warn("`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning)
-    subcast_keys = subcast_keys or subcast_key
+    subcast_keys_instance: ma.fields.Field = _make_subcast(subcast_keys or subcast_key)(**kwargs)
+    subcast_values_instance: ma.fields.Field = _make_subcast(subcast_values)(**kwargs)
 
     return {
-        (subcast_keys(key.strip()) if subcast_keys else key.strip()): (
-            subcast_values(val.strip()) if subcast_values else val.strip()
-        )
+        subcast_keys_instance.deserialize(key.strip()): subcast_values_instance.deserialize(val.strip())
         for key, val in (item.split("=", 1) for item in value.split(",") if value)
     }
 
