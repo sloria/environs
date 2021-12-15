@@ -1,5 +1,53 @@
 # Changelog
 
+## 9.4.0 (unreleased)
+
+Other changes:
+
+- Test against Python 3.10.
+
+## 9.3.5 (2021-11-14)
+
+Bug fixes:
+
+- Fix `env.url` and other parsers that take field keyword arguments ([#227](https://github.com/sloria/environs/issues/227)).
+  Thanks [KochankovID](https://github.com/KochankovID) for the PR.
+
+## 9.3.4 (2021-10-03)
+
+Bug fixes:
+
+- Allow default for `env.path` to be a `pathlib.Path` ([#228](https://github.com/sloria/environs/issues/228)).
+  Thanks [KochankovID](https://github.com/KochankovID) for the PR.
+
+## 9.3.3 (2021-08-08)
+
+Bug fixes:
+
+- Fix compatibility with marshmallow>=3.13.0 
+  so that no DeprecationWarnings are raised ([#224](https://github.com/sloria/environs/issues/224)).
+
+## 9.3.2 (2021-03-28)
+
+Bug fixes:
+
+- Handle JSON decoding errors when using `env.json` ([#212](https://github.com/sloria/environs/pull/212)).
+  Thanks [bvanelli](https://github.com/bvanelli) for the PR.
+
+## 9.3.1 (2021-02-07)
+
+Bug fixes:
+
+- Apply variable expansion to default values ([#204](https://github.com/sloria/environs/pull/204)).
+  Thanks [rjcohn](https://github.com/rjcohn) for the PR.
+
+## 9.3.0 (2020-12-26)
+
+Deprecations:
+
+- Rename `subcast_key` argument of `env.dict` to `subcast_keys`
+  for consistency with `subcast_values`. `subcast_key` is deprecated.
+
 ## 9.2.0 (2020-11-07)
 
 Features:
@@ -14,7 +62,7 @@ Features:
 - Add `delimiter` param to `env.list`
   ([#184](https://github.com/sloria/environs/pull/184)).
 
-Thanks [tomgrin10](https://github.com/tomgrin10?) for the PRs.
+Thanks [tomgrin10](https://github.com/tomgrin10) for the PRs.
 
 Bug fixes:
 

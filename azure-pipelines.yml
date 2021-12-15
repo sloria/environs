@@ -25,17 +25,15 @@ jobs:
   - template: job--python-tox.yml@sloria
     parameters:
       toxenvs:
-        - py38-marshmallow3
+        - py310-marshmallow3
       os: windows
   - template: job--python-tox.yml@sloria
     parameters:
       toxenvs:
         - lint
-        - py36-marshmallow3
-        - py37-marshmallow3
-        - py38-marshmallow3
-        - py39-marshmallow3
-        - py39-marshmallowdev
+        - py36-marshmallowlowest
+        - py310-marshmallow3
+        - py310-marshmallowdev
       os: linux
   - template: job--pypi-release.yml@sloria
     parameters:

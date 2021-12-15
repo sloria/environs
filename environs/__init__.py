@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import typing
+import warnings
 from collections.abc import Mapping
 from enum import Enum
 from urllib.parse import urlparse, ParseResult
@@ -15,7 +16,7 @@ from pathlib import Path
 import marshmallow as ma
 from dotenv.main import load_dotenv, _walk_to_root
 
-__version__ = "9.2.0"
+__version__ = "9.3.5"
 __all__ = ["EnvError", "Env"]
 
 
@@ -54,6 +55,9 @@ class ParserConflictError(ValueError):
     """Raised when adding a custom parser that conflicts with a built-in parser method."""
 
 
+_SUPPORTS_LOAD_DEFAULT = ma.__version_info__ >= (3, 13)
+
+
 def _field2method(
     field_or_factory: FieldOrFactory, method_name: str, *, preprocess: typing.Optional[typing.Callable] = None
 ) -> ParserMethod:
@@ -62,31 +66,54 @@ def _field2method(
         name: str,
         default: typing.Any = ma.missing,
         subcast: typing.Optional[Subcast] = None,
+        *,
+        # Subset of relevant marshmallow.Field kwargs
+        load_default: typing.Any = ma.missing,
+        missing: typing.Any = ma.missing,
+        validate: typing.Optional[
+            typing.Union[
+                typing.Callable[[typing.Any], typing.Any],
+                typing.Iterable[typing.Callable[[typing.Any], typing.Any]],
+            ]
+        ] = None,
+        required: bool = False,
+        allow_none: typing.Optional[bool] = None,
+        error_messages: typing.Optional[typing.Dict[str, str]] = None,
+        metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
         **kwargs,
     ) -> typing.Optional[_T]:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
-        missing = kwargs.pop("missing", None) or default
-        if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
-            field = field_or_factory(missing=missing, **kwargs)
+        field_kwargs = dict(
+            validate=validate,
+            required=required,
+            allow_none=allow_none,
+            error_messages=error_messages,
+            metadata=metadata,
+        )
+        if _SUPPORTS_LOAD_DEFAULT:
+            field_kwargs["load_default"] = load_default or default
         else:
-            field = field_or_factory(subcast=subcast, missing=missing, **kwargs)
-        parsed_key, raw_value, proxied_key = self._get_from_environ(name, ma.missing)
+            field_kwargs["missing"] = missing or default
+        if isinstance(field_or_factory, type) and issubclass(field_or_factory, ma.fields.Field):
+            # TODO: Remove `type: ignore` after https://github.com/python/mypy/issues/9676 is fixed
+            field = field_or_factory(**field_kwargs, **kwargs)  # type: ignore
+        else:
+            field = field_or_factory(subcast=subcast, **field_kwargs)
+        parsed_key, value, proxied_key = self._get_from_environ(
+            name, field.load_default if _SUPPORTS_LOAD_DEFAULT else field.missing
+        )
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
-        if raw_value is ma.missing and field.missing is ma.missing:
+        if value is ma.missing:
             if self.eager:
                 raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
-        if raw_value or raw_value == "":
-            value = raw_value
-        else:
-            value = field.missing if field.missing is not ma.missing else None
-        if preprocess:
-            value = preprocess(value, subcast=subcast, **kwargs)
         try:
+            if preprocess:
+                value = preprocess(value, subcast=subcast, **kwargs)
             value = field.deserialize(value)
         except ma.ValidationError as error:
             if self.eager:
@@ -113,7 +140,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         if self._sealed:
             raise EnvSealedError("Env has already been sealed. New values cannot be parsed.")
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
-        self._fields[parsed_key] = ma.fields.Field(**kwargs)
+        self._fields[parsed_key] = ma.fields.Field()
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing:
             if self.eager:
@@ -158,15 +185,20 @@ def _preprocess_list(
 def _preprocess_dict(
     value: typing.Union[str, typing.Mapping],
     *,
-    subcast_key: typing.Optional[Subcast] = None,
+    subcast_keys: typing.Optional[Subcast] = None,
+    subcast_key: typing.Optional[Subcast] = None,  # Deprecated
     subcast_values: typing.Optional[Subcast] = None,
     **kwargs,
 ) -> typing.Mapping:
     if isinstance(value, Mapping):
         return value
 
+    if subcast_key:
+        warnings.warn("`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning)
+    subcast_keys = subcast_keys or subcast_key
+
     return {
-        (subcast_key(key.strip()) if subcast_key else key.strip()): (
+        (subcast_keys(key.strip()) if subcast_keys else key.strip()): (
             subcast_values(val.strip()) if subcast_values else val.strip()
         )
         for key, val in (item.split("=", 1) for item in value.split(",") if value)
@@ -174,9 +206,12 @@ def _preprocess_dict(
 
 
 def _preprocess_json(value: typing.Union[str, typing.Mapping, typing.List], **kwargs):
-    if isinstance(value, str):
-        return pyjson.loads(value)
-    return value
+    try:
+        if isinstance(value, str):
+            return pyjson.loads(value)
+        return value
+    except pyjson.JSONDecodeError as error:
+        raise ma.ValidationError("Not valid JSON.") from error
 
 
 _EnumT = typing.TypeVar("_EnumT", bound=Enum)
@@ -261,6 +296,8 @@ class URLField(ma.fields.URL):
 
 class PathField(ma.fields.Str):
     def _deserialize(self, value, *args, **kwargs) -> Path:
+        if isinstance(value, Path):
+            return value
         ret = super()._deserialize(value, *args, **kwargs)
         return Path(ret)
 
@@ -434,10 +471,12 @@ class Env:
         if hasattr(value, "strip"):
             expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
             if expand_match:  # Full match expand_vars - special case keep default
-                proxied_key = expand_match.groups()[0]
-                subs_default = expand_match.groups()[1]
+                proxied_key: _StrType = expand_match.groups()[0]
+                subs_default: typing.Optional[_StrType] = expand_match.groups()[1]
                 if subs_default is not None:
                     default = subs_default[2:]
+                elif value == default:  # if we have used default, don't use it recursively
+                    default = ma.missing
                 return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
             expand_search = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
             if expand_search:  # Multiple or in text match expand_vars - General case - default lost

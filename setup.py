@@ -1,12 +1,12 @@
 import re
 from setuptools import setup
 
-INSTALL_REQUIRES = ["marshmallow>=2.7.0", "python-dotenv"]
+INSTALL_REQUIRES = ["marshmallow>=3.0.0", "python-dotenv"]
 DJANGO_REQUIRES = ["dj-database-url", "dj-email-url", "django-cache-url"]
 EXTRAS_REQUIRE = {
     "django": DJANGO_REQUIRES,
     "tests": ["pytest"] + DJANGO_REQUIRES,
-    "lint": ["flake8==3.8.4", "flake8-bugbear==20.11.1", "mypy==0.790", "pre-commit~=2.4"],
+    "lint": ["flake8==4.0.1", "flake8-bugbear==21.9.2", "mypy==0.910", "pre-commit~=2.4"],
 }
 EXTRAS_REQUIRE["dev"] = EXTRAS_REQUIRE["tests"] + EXTRAS_REQUIRE["lint"] + ["tox"]
 PYTHON_REQUIRES = ">=3.6"
@@ -58,6 +58,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Typing :: Typed",
     ],
     project_urls={

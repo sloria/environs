@@ -1,15 +1,16 @@
+import datetime as dt
 import logging
 import os
-import uuid
-import datetime as dt
-import urllib.parse
 import pathlib
+import urllib.parse
+import uuid
 from decimal import Decimal
 from enum import Enum
 
 import dj_database_url
 import dj_email_url
 import django_cache_url
+import marshmallow as ma
 import pytest
 from marshmallow import fields, validate
 
@@ -47,6 +48,8 @@ class TestCasting:
         set_env({"STR": "foo", "INT": "42"})
         assert env("STR") == "foo"
         assert env("NOT_SET", "mydefault") == "mydefault"
+        with pytest.raises(environs.EnvError, match='Environment variable "NOT_SET" not set'):
+            assert env("NOT_SET")
 
     def test_call_with_default(self, env):
         assert env("NOT_SET", default="mydefault") == "mydefault"
@@ -116,17 +119,22 @@ class TestCasting:
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT") == {"key1": "1", "key2": "2"}
 
-    def test_dict_with_subcast(self, set_env, env):
+    def test_dict_with_subcast_values(self, set_env, env):
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT", subcast_values=int) == {"key1": 1, "key2": 2}
 
-    def test_dict_without_subcast_key(self, set_env, env):
+    def test_dict_without_subcast_keys(self, set_env, env):
         set_env({"DICT": "1=value1,2=value2"})
         assert env.dict("DICT") == {"1": "value1", "2": "value2"}
 
-    def test_dict_with_subcast_key(self, set_env, env):
+    def test_dict_with_subcast_keys(self, set_env, env):
         set_env({"DICT": "1=value1,2=value2"})
-        assert env.dict("DICT", subcast_key=int) == {1: "value1", 2: "value2"}
+        assert env.dict("DICT", subcast_keys=int) == {1: "value1", 2: "value2"}
+
+    def test_dict_with_subcast_key_deprecated(self, set_env, env):
+        set_env({"DICT": "1=value1,2=value2"})
+        with pytest.warns(DeprecationWarning):
+            assert env.dict("DICT", subcast_key=int) == {1: "value1", 2: "value2"}
 
     def test_dict_with_default_from_string(self, set_env, env):
         assert env.dict("DICT", "key1=1,key2=2") == {"key1": "1", "key2": "2"}
@@ -148,13 +156,22 @@ class TestCasting:
         assert exc.value.args[0] == 'Environment variable "FOO" not set'
 
     def test_default_set(self, env):
-        assert env.str("FOO", missing="foo") == "foo"
+        if ma.__version_info__ >= (3, 13):
+            assert env.str("FOO", load_default="foo") == "foo"
+        else:
+            assert env.str("FOO", missing="foo") == "foo"
         # Passed positionally
         assert env.str("FOO", "foo") == "foo"
 
     def test_json_cast(self, set_env, env):
         set_env({"JSON": '{"foo": "bar", "baz": [1, 2, 3]}'})
         assert env.json("JSON") == {"foo": "bar", "baz": [1, 2, 3]}
+
+    def test_invalid_json_raises_error(self, set_env, env):
+        set_env({"JSON": "foo"})
+        with pytest.raises(environs.EnvError) as exc:
+            env.json("JSON")
+        assert "Not valid JSON." in exc.value.args[0]
 
     def test_datetime_cast(self, set_env, env):
         dtime = dt.datetime.utcnow()
@@ -188,10 +205,22 @@ class TestCasting:
         res = env.url("URL")
         assert isinstance(res, urllib.parse.ParseResult)
 
+    def test_url_db_cast(self, env, set_env):
+        mongodb_url = "mongodb://user:pass@mongo.example.local/db?authSource=admin"
+        set_env({"MONGODB_URL": mongodb_url})
+        res = env.url("MONGODB_URL", schemes={"mongodb", "mongodb+srv"}, require_tld=False)
+        assert isinstance(res, urllib.parse.ParseResult)
+
     def test_path_cast(self, set_env, env):
         set_env({"PTH": "/home/sloria"})
         res = env.path("PTH")
         assert isinstance(res, pathlib.Path)
+
+    def test_path_default_value(self, env):
+        default_value = pathlib.Path("/home/sloria")
+        res = env.path("MISSING_ENV", default_value)
+        assert isinstance(res, pathlib.Path)
+        assert res == default_value
 
     def test_log_level_cast(self, set_env, env):
         set_env({"LOG_LEVEL": "WARNING", "LOG_LEVEL_INT": str(logging.WARNING), "LOG_LEVEL_LOWER": "info"})
@@ -461,9 +490,9 @@ class TestPrefix:
 
     def test_dump_with_prefixed(self, env):
         with env.prefixed("APP_"):
-            env.str("STR") == "foo"
-            env.int("INT") == 42
-            env("NOT_FOUND", "mydefault") == "mydefault"
+            assert env.str("STR") == "foo"
+            assert env.int("INT") == 42
+            assert env("NOT_FOUND", "mydefault") == "mydefault"
         assert env.dump() == {"APP_STR": "foo", "APP_INT": 42, "APP_NOT_FOUND": "mydefault"}
 
     def test_error_message_for_prefixed_var(self, env):
@@ -488,10 +517,10 @@ class TestNestedPrefix:
     def test_dump_with_nested_prefixed(self, env):
         with env.prefixed("APP_"):
             with env.prefixed("NESTED_"):
-                env.int("INT") == 42
-                env("NOT_FOUND", "mydefault") == "mydefault"
-            env.str("STR") == "foo"
-            env("NOT_FOUND", "mydefault") == "mydefault"
+                assert env.int("INT") == 42
+                assert env("NOT_FOUND", "mydefault") == "mydefault"
+            assert env.str("STR") == "foo"
+            assert env("NOT_FOUND", "mydefault") == "mydefault"
         assert env.dump() == {
             "APP_STR": "foo",
             "APP_NOT_FOUND": "mydefault",
@@ -529,10 +558,10 @@ class TestFailedNestedPrefix:
         def dump_with_nested_prefixed(env, fail=False):
             with env.prefixed("APP_"):
                 with env.prefixed("NESTED_"):
-                    env.int("INT") == 42
-                    env("NOT_FOUND", "mydefault") == "mydefault"
-                env.str("STR") == "foo"
-                env("NOT_FOUND", "mydefault") == "mydefault"
+                    assert env.int("INT") == 42
+                    assert env("NOT_FOUND", "mydefault") == "mydefault"
+                assert env.str("STR") == "foo"
+                assert env("NOT_FOUND", "mydefault") == "mydefault"
                 if fail:
                     raise FauxTestException
             assert env.dump() == {
@@ -755,6 +784,19 @@ class TestExpandVars:
             }
         )
         assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
+
+    def test_default_expands(self, env, set_env):
+        set_env(
+            {
+                "MAIN": "${SUBSTI}",
+                "SUBSTI": "substivalue",
+            }
+        )
+        assert env.str("NOT_SET", "${SUBSTI}") == "substivalue"
+        assert env.str("NOT_SET", "${MAIN}") == "substivalue"
+        assert env.str("NOT_SET", "${NOT_SET2:-set2}") == "set2"
+        with pytest.raises(environs.EnvError, match='Environment variable "NOT_SET2" not set'):
+            assert env.str("NOT_SET", "${NOT_SET2}")
 
     def test_escaped_expand(self, env, set_env):
         set_env({"ESCAPED_EXPAND": r"\${ESCAPED}", "ESCAPED": "fail"})
