@@ -2,6 +2,10 @@
 
 ## 9.4.0 (unreleased)
 
+Bug fixes:
+
+- Address warning about passing metadata in newer versions of marshmallow.
+
 Other changes:
 
 - Test against Python 3.10.
