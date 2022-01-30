@@ -31,7 +31,7 @@ jobs:
     parameters:
       toxenvs:
         - lint
-        - py36-marshmallowlowest
+        - py37-marshmallowlowest
         - py310-marshmallow3
         - py310-marshmallowdev
       os: linux
