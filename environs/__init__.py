@@ -1,7 +1,7 @@
 import collections
 import contextlib
-import inspect
 import functools
+import inspect
 import json as pyjson
 import logging
 import os
@@ -10,11 +10,11 @@ import typing
 import warnings
 from collections.abc import Mapping
 from enum import Enum
-from urllib.parse import urlparse, ParseResult
 from pathlib import Path
+from urllib.parse import ParseResult, urlparse
 
 import marshmallow as ma
-from dotenv.main import load_dotenv, _walk_to_root
+from dotenv.main import _walk_to_root, load_dotenv
 
 __version__ = "9.4.0"
 __all__ = ["EnvError", "Env"]
@@ -104,7 +104,7 @@ def _field2method(
             # TODO: Remove `type: ignore` after https://github.com/python/mypy/issues/9676 is fixed
             field = field_or_factory(**field_kwargs, **kwargs)  # type: ignore
         else:
-            parsed_subcast = _make_subcast(subcast)
+            parsed_subcast = _make_subcast_field(subcast)
             field = field_or_factory(subcast=parsed_subcast, **field_kwargs)
         parsed_key, value, proxied_key = self._get_from_environ(
             name, field.load_default if _SUPPORTS_LOAD_DEFAULT else field.missing
@@ -175,25 +175,26 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     return method
 
 
-def _make_subcast(subcast):
-    if subcast in ma.Schema.TYPE_MAPPING:
+def _make_subcast_field(subcast: typing.Optional[Subcast]) -> typing.Type[ma.fields.Field]:
+    if isinstance(subcast, type) and subcast in ma.Schema.TYPE_MAPPING:
         inner_field = ma.Schema.TYPE_MAPPING[subcast]
     elif isinstance(subcast, type) and issubclass(subcast, ma.fields.Field):
         inner_field = subcast
     elif callable(subcast):
 
-        class CustomField(ma.fields.Field):
+        class SubcastField(ma.fields.Field):
             def _deserialize(self, value, *args, **kwargs):
-                return subcast(value)
+                func = typing.cast(typing.Callable[..., _T], subcast)
+                return func(value)
 
-        inner_field = CustomField
+        inner_field = SubcastField
     else:
         inner_field = ma.fields.Field
     return inner_field
 
 
 def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.List:
-    inner_field = _make_subcast(subcast)
+    inner_field = _make_subcast_field(subcast)
     return ma.fields.List(inner_field, **kwargs)
 
 
@@ -218,8 +219,8 @@ def _preprocess_dict(
 
     if subcast_key:
         warnings.warn("`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning)
-    subcast_keys_instance: ma.fields.Field = _make_subcast(subcast_keys or subcast_key)(**kwargs)
-    subcast_values_instance: ma.fields.Field = _make_subcast(subcast_values)(**kwargs)
+    subcast_keys_instance: ma.fields.Field = _make_subcast_field(subcast_keys or subcast_key)(**kwargs)
+    subcast_values_instance: ma.fields.Field = _make_subcast_field(subcast_values)(**kwargs)
 
     return {
         subcast_keys_instance.deserialize(key.strip()): subcast_values_instance.deserialize(val.strip())
