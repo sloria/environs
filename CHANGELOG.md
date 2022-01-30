@@ -1,5 +1,11 @@
 # Changelog
 
+## 9.6.0 (unreleased)
+
+Other changes:
+
+- Drop support for EOL Python 3.6.
+
 ## 9.5.0 (2022-01-30)
 
 Features:
