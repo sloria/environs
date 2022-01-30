@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.5.0 (unreleased)
+## 9.5.0 (2022-01-30)
 
 Features:
 
