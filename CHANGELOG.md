@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.5.0 (unreleased)
+
+Features:
+
+- Allow callables or custom marshmallow fields to be passed to `subcast`, `subcast_keys`, and `subcast_values`. ([#241](https://github.com/sloria/environs/pull/241)).
+  Thanks [bvanelli](https://github.com/bvanelli) for the PR.
+
 ## 9.4.0 (2022-01-04)
 
 Bug fixes:
@@ -28,7 +35,7 @@ Bug fixes:
 
 Bug fixes:
 
-- Fix compatibility with marshmallow>=3.13.0 
+- Fix compatibility with marshmallow>=3.13.0
   so that no DeprecationWarnings are raised ([#224](https://github.com/sloria/environs/issues/224)).
 
 ## 9.3.2 (2021-03-28)
