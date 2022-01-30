@@ -16,7 +16,7 @@ from pathlib import Path
 import marshmallow as ma
 from dotenv.main import load_dotenv, _walk_to_root
 
-__version__ = "9.3.5"
+__version__ = "9.4.0"
 __all__ = ["EnvError", "Env"]
 
 
@@ -59,7 +59,11 @@ _SUPPORTS_LOAD_DEFAULT = ma.__version_info__ >= (3, 13)
 
 
 def _field2method(
-    field_or_factory: FieldOrFactory, method_name: str, *, preprocess: typing.Optional[typing.Callable] = None
+    field_or_factory: FieldOrFactory,
+    method_name: str,
+    *,
+    preprocess: typing.Optional[typing.Callable] = None,
+    preprocess_kwarg_names: typing.Sequence[str] = tuple(),
 ) -> ParserMethod:
     def method(
         self: "Env",
@@ -91,6 +95,7 @@ def _field2method(
             error_messages=error_messages,
             metadata=metadata,
         )
+        preprocess_kwargs = {name: kwargs.pop(name) for name in preprocess_kwarg_names if name in kwargs}
         if _SUPPORTS_LOAD_DEFAULT:
             field_kwargs["load_default"] = load_default or default
         else:
@@ -114,7 +119,7 @@ def _field2method(
                 return None
         try:
             if preprocess:
-                value = preprocess(value, subcast=subcast, **kwargs)
+                value = preprocess(value, **preprocess_kwargs)
             value = field.deserialize(value)
         except ma.ValidationError as error:
             if self.eager:
@@ -339,8 +344,15 @@ class Env:
     str = _field2method(ma.fields.Str, "str")
     float = _field2method(ma.fields.Float, "float")
     decimal = _field2method(ma.fields.Decimal, "decimal")
-    list = _field2method(_make_list_field, "list", preprocess=_preprocess_list)
-    dict = _field2method(ma.fields.Dict, "dict", preprocess=_preprocess_dict)
+    list = _field2method(
+        _make_list_field, "list", preprocess=_preprocess_list, preprocess_kwarg_names=("subcast", "delimiter")
+    )
+    dict = _field2method(
+        ma.fields.Dict,
+        "dict",
+        preprocess=_preprocess_dict,
+        preprocess_kwarg_names=("subcast", "subcast_keys", "subcast_key", "subcast_values"),
+    )
     json = _field2method(ma.fields.Field, "json", preprocess=_preprocess_json)
     datetime = _field2method(ma.fields.DateTime, "datetime")
     date = _field2method(ma.fields.Date, "date")

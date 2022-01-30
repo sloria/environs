@@ -1,6 +1,10 @@
 # Changelog
 
-## 9.4.0 (unreleased)
+## 9.4.0 (2022-01-04)
+
+Bug fixes:
+
+- Address warning about passing metadata in newer versions of marshmallow.
 
 Other changes:
 
