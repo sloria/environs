@@ -113,7 +113,7 @@ def _field2method(
         source_key = proxied_key or parsed_key
         if value is ma.missing:
             if self.eager:
-                raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
+                raise EnvError(f'Environment variable "{proxied_key or parsed_key}" not set')
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
@@ -124,7 +124,7 @@ def _field2method(
         except ma.ValidationError as error:
             if self.eager:
                 raise EnvValidationError(
-                    'Environment variable "{}" invalid: {}'.format(source_key, error.args[0]), error.messages
+                    f'Environment variable "{source_key}" invalid: {error.args[0]}', error.messages
                 ) from error
             self._errors[parsed_key].extend(error.messages)
         else:
@@ -150,7 +150,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing:
             if self.eager:
-                raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
+                raise EnvError(f'Environment variable "{proxied_key or parsed_key}" not set')
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
@@ -164,7 +164,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
             messages = error.messages if isinstance(error, ma.ValidationError) else [error.args[0]]
             if self.eager:
                 raise EnvValidationError(
-                    'Environment variable "{}" invalid: {}'.format(source_key, error.args[0]), messages
+                    f'Environment variable "{source_key}" invalid: {error.args[0]}', messages
                 ) from error
             self._errors[parsed_key].extend(messages)
         else:
