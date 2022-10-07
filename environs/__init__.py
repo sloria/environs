@@ -381,13 +381,13 @@ class Env:
     def __repr__(self) -> _StrType:
         return f"<{self.__class__.__name__} {self._values}>"
 
-    @staticmethod
     def read_env(
+        self: "Env",
         path: typing.Optional[_StrType] = None,
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
-    ) -> None:
+    ) -> "Env":
         """Read a .env file into os.environ.
 
         If .env is not found in the directory from which this method is called,
@@ -416,9 +416,10 @@ class Env:
                 check_path = Path(dirname) / env_name
                 if check_path.exists():
                     load_dotenv(check_path, verbose=verbose, override=override)
-                    return
+                    return self
         else:
             load_dotenv(str(start), verbose=verbose, override=override)
+        return self
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
