@@ -33,11 +33,6 @@ def env():
     return environs.Env()
 
 
-@pytest.fixture(scope="function")
-def file_aware_env():
-    return environs.FileAwareEnv()
-
-
 class FauxTestException(Exception):
     pass
 
