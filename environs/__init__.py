@@ -535,3 +535,33 @@ class Env:
 
     def _get_key(self, key: _StrType, *, omit_prefix: _BoolType = False) -> _StrType:
         return self._prefix + key if self._prefix and not omit_prefix else key
+
+
+class FileAwareEnv(Env):
+    def _get_from_environ(
+        self, key: _StrType, default: typing.Any, *, proxied: _BoolType = False
+    ) -> typing.Tuple[_StrType, typing.Any, typing.Optional[_StrType]]:
+        env_key = self._get_key(key, omit_prefix=proxied)
+        file_key = key + "_FILE"
+        if file_location := os.environ.get(file_key, None):
+            value = Path(file_location).read_text()
+        else:
+            value = os.environ.get(env_key, default)
+        if hasattr(value, "strip"):
+            expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
+            if expand_match:  # Full match expand_vars - special case keep default
+                proxied_key: _StrType = expand_match.groups()[0]
+                subs_default: typing.Optional[_StrType] = expand_match.groups()[1]
+                if subs_default is not None:
+                    default = subs_default[2:]
+                elif value == default:  # if we have used default, don't use it recursively
+                    default = ma.missing
+                return (key, self._get_from_environ(proxied_key, default, proxied=True)[1], proxied_key)
+            expand_search = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
+            if expand_search:  # Multiple or in text match expand_vars - General case - default lost
+                return self._expand_vars(env_key, value)
+            # Remove escaped $
+            if self.expand_vars and r"\$" in value:
+                value = value.replace(r"\$", "$")
+        return env_key, value, None
+

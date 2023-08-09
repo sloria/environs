@@ -33,6 +33,11 @@ def env():
     return environs.Env()
 
 
+@pytest.fixture(scope="function")
+def file_aware_env():
+    return environs.FileAwareEnv()
+
+
 class FauxTestException(Exception):
     pass
 
@@ -837,3 +842,18 @@ class TestExpandVars:
             "foo": "bar",
             "wget_params": '--header="Referer: https://radiocut.fm/"',
         }
+
+
+class TestFileAwareEnv:
+    @pytest.fixture
+    def env(self):
+        return environs.FileAwareEnv(expand_vars=True)
+
+    def test_full_expand_vars(self, env, set_env):
+        set_env(
+            {
+                "MAIN": "legacy_value",
+                "MAIN_FILE": HERE / "subfolder/.another.env",
+            }
+        )
+        assert env.str("MAIN") == "CUSTOM_STRING=bar\n"
