@@ -219,7 +219,9 @@ def _preprocess_dict(
         return value
 
     if subcast_key:
-        warnings.warn("`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning)
+        warnings.warn(
+            "`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning, stacklevel=2
+        )
     subcast_keys_instance: ma.fields.Field = _make_subcast_field(subcast_keys or subcast_key)(**kwargs)
     subcast_values_instance: ma.fields.Field = _make_subcast_field(subcast_values)(**kwargs)
 
