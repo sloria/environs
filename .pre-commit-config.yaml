@@ -19,12 +19,8 @@ repos:
   hooks:
   - id: blacken-docs
     additional_dependencies: [black==22.10.0]
-# Use a local hook to run mypy because the official hook runs mypy in a venv
-# that doesn't have dependencies or their type annotations installed.
-- repo: local
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.6.1
   hooks:
-    - id: mypy
-      name: mypy
-      entry: mypy
-      language: system
-      types: [python]
+  - id: mypy
+    additional_dependencies: ["marshmallow>=3,<4"]
