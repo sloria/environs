@@ -12,7 +12,7 @@ jobs:
         include:
           - { name: "3.8", python: "3.8", tox: py38-marshmallow3 }
           - { name: "3.11", python: "3.11", tox: py311-marshmallow3 }
-          - { name: "lowest", python: "3.8", tox: py38-lowest }
+          - { name: "lowest", python: "3.8", tox: py38-marshmallowlowest }
           - { name: "dev", python: "3.11", tox: py311-marshmallowdev }
     steps:
       - uses: actions/checkout@v3.1.0
