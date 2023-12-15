@@ -1,10 +1,11 @@
 # Changelog
 
-## 9.6.0 (unreleased)
+## 10.0.0 (unreleased)
 
 Other changes:
 
-- Drop support for EOL Python 3.6.
+- _Backwards-incompatible_: Drop support for EOL Python 3.6 and 3.7.
+- Test against Python 3.11.
 
 ## 9.5.0 (2022-01-30)
 
