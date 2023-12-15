@@ -113,7 +113,7 @@ def _field2method(
         source_key = proxied_key or parsed_key
         if value is ma.missing:
             if self.eager:
-                raise EnvError(f'Environment variable "{proxied_key or parsed_key:!r}" not set')
+                raise EnvError(f'Environment variable "{proxied_key or parsed_key}" not set')
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
