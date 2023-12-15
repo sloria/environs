@@ -6,6 +6,7 @@ Other changes:
 
 - _Backwards-incompatible_: Drop support for EOL Python 3.6 and 3.7.
 - Test against Python 3.11.
+- Migrate to setup.cfg. Thanks [deronnax](https://github.com/deronnax) for the PR.
 
 ## 9.5.0 (2022-01-30)
 
