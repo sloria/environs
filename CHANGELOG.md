@@ -1,6 +1,10 @@
 # Changelog
 
-## 10.0.0 (unreleased)
+## 10.0.0 (2023-12-15)
+
+Features:
+
+- Add `delimiter` argument to `env.dict` ([#277](https://github.com/sloria/environs/pull/277)). Thanks [gregoiredx](https://github.com/gregoiredx) for the PR.
 
 Other changes:
 
