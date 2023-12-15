@@ -113,7 +113,7 @@ def _field2method(
         source_key = proxied_key or parsed_key
         if value is ma.missing:
             if self.eager:
-                raise EnvError(f'Environment variable "{proxied_key or parsed_key}" not set')
+                raise EnvError(f'Environment variable "{proxied_key or parsed_key:!r}" not set')
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
@@ -219,7 +219,9 @@ def _preprocess_dict(
         return value
 
     if subcast_key:
-        warnings.warn("`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning)
+        warnings.warn(
+            "`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning, stacklevel=2
+        )
     subcast_keys_instance: ma.fields.Field = _make_subcast_field(subcast_keys or subcast_key)(**kwargs)
     subcast_values_instance: ma.fields.Field = _make_subcast_field(subcast_values)(**kwargs)
 
