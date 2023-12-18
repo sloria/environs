@@ -560,7 +560,6 @@ class TestFailedNestedPrefix:
         set_env({"APP_STR": "foo", "APP_NESTED_INT": "42"})
 
     def test_failed_nested_prefixed(self, env):
-
         # define repeated prefixed steps
         def nested_prefixed(env, fail=False):
             with env.prefixed("APP_"):
@@ -578,7 +577,6 @@ class TestFailedNestedPrefix:
             nested_prefixed(env, fail=False)
 
     def test_failed_dump_with_nested_prefixed(self, env):
-
         # define repeated prefixed steps
         def dump_with_nested_prefixed(env, fail=False):
             with env.prefixed("APP_"):
