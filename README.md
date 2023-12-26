@@ -278,6 +278,7 @@ env.dump()
 
 from furl import furl
 
+
 # Register a new parser method for paths
 @env.parser_for("furl")
 def furl_parser(value):
