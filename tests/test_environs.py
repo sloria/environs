@@ -119,6 +119,10 @@ class TestCasting:
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT") == {"key1": "1", "key2": "2"}
 
+    def test_dict_with_spaces_as_delimiter(self, set_env, env):
+        set_env({"DICT": "key1=1 key2=2"})
+        assert env.dict("DICT", delimiter=" ") == {"key1": "1", "key2": "2"}
+
     def test_dict_with_subcast_values(self, set_env, env):
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT", subcast_values=int) == {"key1": 1, "key2": 2}
@@ -135,6 +139,27 @@ class TestCasting:
         set_env({"DICT": "1=value1,2=value2"})
         with pytest.warns(DeprecationWarning):
             assert env.dict("DICT", subcast_key=int) == {1: "value1", 2: "value2"}
+
+    def test_custom_subcast_list(self, set_env, env):
+        class CustomTuple(ma.fields.Field):
+            def _deserialize(self, value: str, *args, **kwargs):
+                return tuple(value[1:-1].split(":"))
+
+        def custom_tuple(value: str):
+            return tuple(value[1:-1].split(":"))
+
+        set_env({"LIST": "(127.0.0.1:26380),(127.0.0.1:26379)"})
+        assert env.list("LIST", subcast=CustomTuple) == [("127.0.0.1", "26380"), ("127.0.0.1", "26379")]
+        assert env.list("LIST", subcast=custom_tuple) == [("127.0.0.1", "26380"), ("127.0.0.1", "26379")]
+
+    def test_custom_subcast_keys_values(self, set_env, env):
+        def custom_tuple(value: str):
+            return tuple(value.split(":"))
+
+        set_env({"DICT": "1:1=foo:bar"})
+        assert env.dict("DICT", subcast_keys=custom_tuple, subcast_values=custom_tuple) == {
+            ("1", "1"): ("foo", "bar")
+        }
 
     def test_dict_with_default_from_string(self, set_env, env):
         assert env.dict("DICT", "key1=1,key2=2") == {"key1": "1", "key2": "2"}
@@ -542,7 +567,6 @@ class TestFailedNestedPrefix:
         set_env({"APP_STR": "foo", "APP_NESTED_INT": "42"})
 
     def test_failed_nested_prefixed(self, env):
-
         # define repeated prefixed steps
         def nested_prefixed(env, fail=False):
             with env.prefixed("APP_"):
@@ -560,7 +584,6 @@ class TestFailedNestedPrefix:
             nested_prefixed(env, fail=False)
 
     def test_failed_dump_with_nested_prefixed(self, env):
-
         # define repeated prefixed steps
         def dump_with_nested_prefixed(env, fail=False):
             with env.prefixed("APP_"):

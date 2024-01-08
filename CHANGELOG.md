@@ -1,6 +1,29 @@
 # Changelog
 
-## 9.4.0 (unreleased)
+## 10.0.0 (2023-12-15)
+
+Features:
+
+- Add `delimiter` argument to `env.dict` ([#277](https://github.com/sloria/environs/pull/277)). Thanks [gregoiredx](https://github.com/gregoiredx) for the PR.
+
+Other changes:
+
+- _Backwards-incompatible_: Drop support for EOL Python 3.6 and 3.7.
+- Test against Python 3.11.
+- Migrate to setup.cfg. Thanks [deronnax](https://github.com/deronnax) for the PR.
+
+## 9.5.0 (2022-01-30)
+
+Features:
+
+- Allow callables or custom marshmallow fields to be passed to `subcast`, `subcast_keys`, and `subcast_values`. ([#241](https://github.com/sloria/environs/pull/241)).
+  Thanks [bvanelli](https://github.com/bvanelli) for the PR.
+
+## 9.4.0 (2022-01-04)
+
+Bug fixes:
+
+- Address warning about passing metadata in newer versions of marshmallow.
 
 Other changes:
 
@@ -24,7 +47,7 @@ Bug fixes:
 
 Bug fixes:
 
-- Fix compatibility with marshmallow>=3.13.0 
+- Fix compatibility with marshmallow>=3.13.0
   so that no DeprecationWarnings are raised ([#224](https://github.com/sloria/environs/issues/224)).
 
 ## 9.3.2 (2021-03-28)
@@ -203,6 +226,7 @@ Features:
 import environs
 
 env = environs.Env()
+
 
 # Below conflicts with built-in `url` method.
 # In <6.0.0, this would override the built-in method.

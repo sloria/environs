@@ -1,7 +1,7 @@
 import collections
 import contextlib
-import inspect
 import functools
+import inspect
 import json as pyjson
 import logging
 import os
@@ -10,13 +10,13 @@ import typing
 import warnings
 from collections.abc import Mapping
 from enum import Enum
-from urllib.parse import urlparse, ParseResult
 from pathlib import Path
+from urllib.parse import ParseResult, urlparse
 
 import marshmallow as ma
-from dotenv.main import load_dotenv, _walk_to_root
+from dotenv.main import _walk_to_root, load_dotenv
 
-__version__ = "9.3.5"
+__version__ = "10.0.0"
 __all__ = ["EnvError", "Env"]
 
 
@@ -28,7 +28,7 @@ _IntType = int
 ErrorMapping = typing.Mapping[str, typing.List[str]]
 ErrorList = typing.List[str]
 FieldFactory = typing.Callable[..., ma.fields.Field]
-Subcast = typing.Union[typing.Type, typing.Callable[..., _T]]
+Subcast = typing.Union[typing.Type, typing.Callable[..., _T], ma.fields.Field]
 FieldType = typing.Type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable
@@ -59,7 +59,11 @@ _SUPPORTS_LOAD_DEFAULT = ma.__version_info__ >= (3, 13)
 
 
 def _field2method(
-    field_or_factory: FieldOrFactory, method_name: str, *, preprocess: typing.Optional[typing.Callable] = None
+    field_or_factory: FieldOrFactory,
+    method_name: str,
+    *,
+    preprocess: typing.Optional[typing.Callable] = None,
+    preprocess_kwarg_names: typing.Sequence[str] = tuple(),
 ) -> ParserMethod:
     def method(
         self: "Env",
@@ -91,6 +95,7 @@ def _field2method(
             error_messages=error_messages,
             metadata=metadata,
         )
+        preprocess_kwargs = {name: kwargs.pop(name) for name in preprocess_kwarg_names if name in kwargs}
         if _SUPPORTS_LOAD_DEFAULT:
             field_kwargs["load_default"] = load_default or default
         else:
@@ -99,7 +104,8 @@ def _field2method(
             # TODO: Remove `type: ignore` after https://github.com/python/mypy/issues/9676 is fixed
             field = field_or_factory(**field_kwargs, **kwargs)  # type: ignore
         else:
-            field = field_or_factory(subcast=subcast, **field_kwargs)
+            parsed_subcast = _make_subcast_field(subcast)
+            field = field_or_factory(subcast=parsed_subcast, **field_kwargs)
         parsed_key, value, proxied_key = self._get_from_environ(
             name, field.load_default if _SUPPORTS_LOAD_DEFAULT else field.missing
         )
@@ -107,18 +113,18 @@ def _field2method(
         source_key = proxied_key or parsed_key
         if value is ma.missing:
             if self.eager:
-                raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
+                raise EnvError(f'Environment variable "{proxied_key or parsed_key}" not set')
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
         try:
             if preprocess:
-                value = preprocess(value, subcast=subcast, **kwargs)
+                value = preprocess(value, **preprocess_kwargs)
             value = field.deserialize(value)
         except ma.ValidationError as error:
             if self.eager:
                 raise EnvValidationError(
-                    'Environment variable "{}" invalid: {}'.format(source_key, error.args[0]), error.messages
+                    f'Environment variable "{source_key}" invalid: {error.args[0]}', error.messages
                 ) from error
             self._errors[parsed_key].extend(error.messages)
         else:
@@ -144,7 +150,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing:
             if self.eager:
-                raise EnvError('Environment variable "{}" not set'.format(proxied_key or parsed_key))
+                raise EnvError(f'Environment variable "{proxied_key or parsed_key}" not set')
             else:
                 self._errors[parsed_key].append("Environment variable not set.")
                 return None
@@ -158,7 +164,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
             messages = error.messages if isinstance(error, ma.ValidationError) else [error.args[0]]
             if self.eager:
                 raise EnvValidationError(
-                    'Environment variable "{}" invalid: {}'.format(source_key, error.args[0]), messages
+                    f'Environment variable "{source_key}" invalid: {error.args[0]}', messages
                 ) from error
             self._errors[parsed_key].extend(messages)
         else:
@@ -169,8 +175,26 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     return method
 
 
+def _make_subcast_field(subcast: typing.Optional[Subcast]) -> typing.Type[ma.fields.Field]:
+    if isinstance(subcast, type) and subcast in ma.Schema.TYPE_MAPPING:
+        inner_field = ma.Schema.TYPE_MAPPING[subcast]
+    elif isinstance(subcast, type) and issubclass(subcast, ma.fields.Field):
+        inner_field = subcast
+    elif callable(subcast):
+
+        class SubcastField(ma.fields.Field):
+            def _deserialize(self, value, *args, **kwargs):
+                func = typing.cast(typing.Callable[..., _T], subcast)
+                return func(value)
+
+        inner_field = SubcastField
+    else:
+        inner_field = ma.fields.Field
+    return inner_field
+
+
 def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.List:
-    inner_field = ma.Schema.TYPE_MAPPING[subcast] if subcast else ma.fields.Field
+    inner_field = _make_subcast_field(subcast)
     return ma.fields.List(inner_field, **kwargs)
 
 
@@ -188,20 +212,22 @@ def _preprocess_dict(
     subcast_keys: typing.Optional[Subcast] = None,
     subcast_key: typing.Optional[Subcast] = None,  # Deprecated
     subcast_values: typing.Optional[Subcast] = None,
+    delimiter: str = ",",
     **kwargs,
 ) -> typing.Mapping:
     if isinstance(value, Mapping):
         return value
 
     if subcast_key:
-        warnings.warn("`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning)
-    subcast_keys = subcast_keys or subcast_key
+        warnings.warn(
+            "`subcast_key` is deprecated. Use `subcast_keys` instead.", DeprecationWarning, stacklevel=2
+        )
+    subcast_keys_instance: ma.fields.Field = _make_subcast_field(subcast_keys or subcast_key)(**kwargs)
+    subcast_values_instance: ma.fields.Field = _make_subcast_field(subcast_values)(**kwargs)
 
     return {
-        (subcast_keys(key.strip()) if subcast_keys else key.strip()): (
-            subcast_values(val.strip()) if subcast_values else val.strip()
-        )
-        for key, val in (item.split("=", 1) for item in value.split(",") if value)
+        subcast_keys_instance.deserialize(key.strip()): subcast_values_instance.deserialize(val.strip())
+        for key, val in (item.split("=", 1) for item in value.split(delimiter) if value)
     }
 
 
@@ -327,8 +353,15 @@ class Env:
     str = _field2method(ma.fields.Str, "str")
     float = _field2method(ma.fields.Float, "float")
     decimal = _field2method(ma.fields.Decimal, "decimal")
-    list = _field2method(_make_list_field, "list", preprocess=_preprocess_list)
-    dict = _field2method(ma.fields.Dict, "dict", preprocess=_preprocess_dict)
+    list = _field2method(
+        _make_list_field, "list", preprocess=_preprocess_list, preprocess_kwarg_names=("subcast", "delimiter")
+    )
+    dict = _field2method(
+        ma.fields.Dict,
+        "dict",
+        preprocess=_preprocess_dict,
+        preprocess_kwarg_names=("subcast", "subcast_keys", "subcast_key", "subcast_values", "delimiter"),
+    )
     json = _field2method(ma.fields.Field, "json", preprocess=_preprocess_json)
     datetime = _field2method(ma.fields.DateTime, "datetime")
     date = _field2method(ma.fields.Date, "date")
