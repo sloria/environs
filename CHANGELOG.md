@@ -7,6 +7,10 @@ Features:
 - Allow `default` for `env.json` to be a `dict` or `list` ([#240](https://github.com/sloria/environs/pull/240)).
   Thanks [tomgrin10](https://github.com/tomgrin10) and [bvanelli](https://github.com/bvanelli) for the PRs.
 
+Other changes:
+
+- Test against Python 3.12.
+
 ## 10.0.0 (2023-12-15)
 
 Features:
