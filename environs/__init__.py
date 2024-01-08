@@ -231,9 +231,14 @@ def _preprocess_dict(
     }
 
 
-def _preprocess_json(value: str, **kwargs):
+def _preprocess_json(value: typing.Union[str, typing.Mapping, typing.List], **kwargs):
     try:
-        return pyjson.loads(value)
+        if isinstance(value, str):
+            return pyjson.loads(value)
+        elif isinstance(value, dict) or isinstance(value, list) or value is None:
+            return value
+        else:
+            raise ma.ValidationError("Not valid JSON.")
     except pyjson.JSONDecodeError as error:
         raise ma.ValidationError("Not valid JSON.") from error
 
