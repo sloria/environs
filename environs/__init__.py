@@ -16,7 +16,7 @@ from urllib.parse import ParseResult, urlparse
 import marshmallow as ma
 from dotenv.main import _walk_to_root, load_dotenv
 
-__version__ = "10.1.0"
+__version__ = "10.2.0"
 __all__ = ["EnvError", "Env"]
 
 
