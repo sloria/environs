@@ -300,10 +300,15 @@ class TestEnvFileReading:
         if "STRING" in os.environ:
             os.environ.pop("STRING")
         assert env("STRING", "default") == "default"  # sanity check
-        env.read_env()
+        result = env.read_env()
+        assert result is True
         assert env("STRING") == "foo"
         assert env.list("LIST") == ["wat", "wer", "wen"]
         assert env("EXPANDED") == "foo"
+
+    def test_read_env_returns_false_if_file_not_found(self, env):
+        result = env.read_env(HERE / ".does_not_exist", verbose=True)
+        assert result is False
 
     # Regression test for https://github.com/sloria/environs/issues/96
     def test_read_env_recurse(self, env):
