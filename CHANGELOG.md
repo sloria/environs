@@ -1,5 +1,12 @@
 # Changelog
 
+## 10.2.0 (unreleased)
+
+Features:
+
+- `env.read_env` returns `False` if file not found ([#294](https://github.com/sloria/environs/issues/294)).
+  Thanks [rptaylor](https://github.com/rptaylor) for the suggestion.
+
 ## 10.1.0 (2024-01-08)
 
 Features:
