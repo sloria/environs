@@ -7,6 +7,11 @@ Features:
 - `Env.__repr__` and `Env.__str__` no longer display environment variables, to prevent accidental exfiltration of sensitive data ([#292](https://github.com/sloria/environs/issues/292)).
   Thanks [mro-rhansen2](https://github.com/mro-rhansen2) for the suggestion.
 
+Bug fixes:
+
+- Fix passing `None` as default to `env.list` ([#298](https://github.com/sloria/environs/issues/298)).
+  Thanks [lucas-bremond](https://github.com/lucas-bremond) for reporting.
+
 ## 10.2.0 (2024-01-09)
 
 Features:
