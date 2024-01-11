@@ -1,6 +1,6 @@
 # Changelog
 
-## 10.3.0 (unreleased)
+## 10.3.0 (2024-01-11)
 
 Features:
 
