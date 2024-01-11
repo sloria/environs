@@ -1,5 +1,12 @@
 # Changelog
 
+## 10.3.0 (unreleased)
+
+Features:
+
+- `Env.__repr__` and `Env.__str__` no longer display environment variables, to prevent accidental exfiltration of sensitive data ([#292](https://github.com/sloria/environs/issues/292)).
+  Thanks [mro-rhansen2](https://github.com/mro-rhansen2) for the suggestion.
+
 ## 10.2.0 (2024-01-09)
 
 Features:

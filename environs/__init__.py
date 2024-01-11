@@ -387,7 +387,7 @@ class Env:
         self.__custom_parsers__: typing.Dict[_StrType, ParserMethod] = {}
 
     def __repr__(self) -> _StrType:
-        return f"<{self.__class__.__name__} {self._values}>"
+        return f"<{self.__class__.__name__}(eager={self.eager}, expand_vars={self.expand_vars})>"
 
     @staticmethod
     def read_env(

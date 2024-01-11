@@ -487,15 +487,17 @@ class TestDumping:
 
 
 def test_repr(set_env, env):
+    env = environs.Env(eager=True, expand_vars=True)
     set_env({"FOO": "foo", "BAR": "42"})
     env.str("FOO")
-    assert repr(env) == "<Env {}>".format({"FOO": "foo"})
+    assert repr(env) == "<Env(eager=True, expand_vars=True)>"
 
 
 def test_str(set_env, env):
+    env = environs.Env(eager=True, expand_vars=True)
     set_env({"FOO": "foo", "BAR": "42"})
     env.str("FOO")
-    assert repr(env) == "<Env {}>".format({"FOO": "foo"})
+    assert str(env) == "<Env(eager=True, expand_vars=True)>"
 
 
 def test_env_isolation(set_env):
