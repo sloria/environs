@@ -201,7 +201,7 @@ def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.L
 def _preprocess_list(
     value: typing.Union[str, typing.Iterable], *, delimiter: str = ",", **kwargs
 ) -> typing.Iterable:
-    if ma.utils.is_iterable_but_not_string(value):
+    if ma.utils.is_iterable_but_not_string(value) or value is None:
         return value
     return typing.cast(str, value).split(delimiter) if value != "" else []
 

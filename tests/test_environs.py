@@ -82,11 +82,15 @@ class TestCasting:
         set_env({"LIST": "1,2,3"})
         assert env.list("LIST") == ["1", "2", "3"]
 
-    def test_list_with_default_from_string(self, set_env, env):
+    def test_list_with_default_from_string(self, env):
         assert env.list("LIST", "1,2") == ["1", "2"]
 
-    def test_list_with_default_from_list(self, set_env, env):
+    def test_list_with_default_from_list(self, env):
         assert env.list("LIST", ["1"]) == ["1"]
+
+    # https://github.com/sloria/environs/issues/298
+    def test_list_with_default_none(self, env):
+        assert env.list("LIST", default=None) is None
 
     def test_list_with_subcast(self, set_env, env):
         set_env({"LIST": "1,2,3"})
