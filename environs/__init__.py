@@ -503,7 +503,7 @@ class Env:
         proxy env key.
         """
         env_key = self._get_key(key, omit_prefix=proxied)
-        value = os.environ.get(env_key, default)
+        value = self._get_value(env_key, default)
         if hasattr(value, "strip"):
             expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
             if expand_match:  # Full match expand_vars - special case keep default
@@ -543,3 +543,20 @@ class Env:
 
     def _get_key(self, key: _StrType, *, omit_prefix: _BoolType = False) -> _StrType:
         return self._prefix + key if self._prefix and not omit_prefix else key
+
+    @staticmethod
+    def _get_value(env_key, default):
+        return os.environ.get(env_key, default)
+
+
+class FileAwareEnv(Env):
+    """An environment variable reader that supports reading values from files."""
+
+    @staticmethod
+    def _get_value(env_key, default):
+        file_key = env_key + "_FILE"
+        if file_location := os.environ.get(file_key, None):
+            return Path(file_location).read_text()
+        else:
+            return os.environ.get(env_key, default)
+
