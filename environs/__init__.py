@@ -1,8 +1,8 @@
 import collections
 import contextlib
 import functools
-import inspect
 import importlib.metadata
+import inspect
 import json as pyjson
 import logging
 import os

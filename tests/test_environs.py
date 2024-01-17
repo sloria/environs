@@ -10,11 +10,10 @@ from enum import Enum
 import dj_database_url
 import dj_email_url
 import django_cache_url
+import environs
 import marshmallow as ma
 import pytest
 from marshmallow import fields, validate
-
-import environs
 
 HERE = pathlib.Path(__file__).parent
 
@@ -48,7 +47,9 @@ class TestCasting:
         set_env({"STR": "foo", "INT": "42"})
         assert env("STR") == "foo"
         assert env("NOT_SET", "mydefault") == "mydefault"
-        with pytest.raises(environs.EnvError, match='Environment variable "NOT_SET" not set'):
+        with pytest.raises(
+            environs.EnvError, match='Environment variable "NOT_SET" not set'
+        ):
             assert env("NOT_SET")
 
     def test_call_with_default(self, env):
@@ -69,7 +70,9 @@ class TestCasting:
 
     def test_invalid_int(self, set_env, env):
         set_env({"INT": "invalid"})
-        with pytest.raises(environs.EnvError, match='Environment variable "INT" invalid') as excinfo:
+        with pytest.raises(
+            environs.EnvError, match='Environment variable "INT" invalid'
+        ) as excinfo:
             env.int("INT")
         exc = excinfo.value
         assert "Not a valid integer." in exc.error_messages
@@ -153,17 +156,23 @@ class TestCasting:
             return tuple(value[1:-1].split(":"))
 
         set_env({"LIST": "(127.0.0.1:26380),(127.0.0.1:26379)"})
-        assert env.list("LIST", subcast=CustomTuple) == [("127.0.0.1", "26380"), ("127.0.0.1", "26379")]
-        assert env.list("LIST", subcast=custom_tuple) == [("127.0.0.1", "26380"), ("127.0.0.1", "26379")]
+        assert env.list("LIST", subcast=CustomTuple) == [
+            ("127.0.0.1", "26380"),
+            ("127.0.0.1", "26379"),
+        ]
+        assert env.list("LIST", subcast=custom_tuple) == [
+            ("127.0.0.1", "26380"),
+            ("127.0.0.1", "26379"),
+        ]
 
     def test_custom_subcast_keys_values(self, set_env, env):
         def custom_tuple(value: str):
             return tuple(value.split(":"))
 
         set_env({"DICT": "1:1=foo:bar"})
-        assert env.dict("DICT", subcast_keys=custom_tuple, subcast_values=custom_tuple) == {
-            ("1", "1"): ("foo", "bar")
-        }
+        assert env.dict(
+            "DICT", subcast_keys=custom_tuple, subcast_values=custom_tuple
+        ) == {("1", "1"): ("foo", "bar")}
 
     def test_dict_with_default_from_string(self, set_env, env):
         assert env.dict("DICT", "key1=1,key2=2") == {"key1": "1", "key2": "2"}
@@ -244,7 +253,9 @@ class TestCasting:
     def test_url_db_cast(self, env, set_env):
         mongodb_url = "mongodb://user:pass@mongo.example.local/db?authSource=admin"
         set_env({"MONGODB_URL": mongodb_url})
-        res = env.url("MONGODB_URL", schemes={"mongodb", "mongodb+srv"}, require_tld=False)
+        res = env.url(
+            "MONGODB_URL", schemes={"mongodb", "mongodb+srv"}, require_tld=False
+        )
         assert isinstance(res, urllib.parse.ParseResult)
 
     def test_path_cast(self, set_env, env):
@@ -259,7 +270,13 @@ class TestCasting:
         assert res == default_value
 
     def test_log_level_cast(self, set_env, env):
-        set_env({"LOG_LEVEL": "WARNING", "LOG_LEVEL_INT": str(logging.WARNING), "LOG_LEVEL_LOWER": "info"})
+        set_env(
+            {
+                "LOG_LEVEL": "WARNING",
+                "LOG_LEVEL_INT": str(logging.WARNING),
+                "LOG_LEVEL_LOWER": "info",
+            }
+        )
         assert env.log_level("LOG_LEVEL_INT") == logging.WARNING
         assert env.log_level("LOG_LEVEL") == logging.WARNING
         assert env.log_level("LOG_LEVEL_LOWER") == logging.INFO
@@ -335,7 +352,9 @@ class TestEnvFileReading:
         env.read_env(HERE / "subfolder" / ".custom.env", recurse=True)
         assert env("CUSTOM_STRING") == "foo"
 
-    @pytest.mark.parametrize("path", [".custom.env", (HERE / "subfolder" / ".custom.env")])
+    @pytest.mark.parametrize(
+        "path", [".custom.env", (HERE / "subfolder" / ".custom.env")]
+    )
     def test_read_env_recurse_start_from_subfolder(self, env, path, monkeypatch):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
@@ -536,11 +555,17 @@ class TestPrefix:
             assert env.str("STR") == "foo"
             assert env.int("INT") == 42
             assert env("NOT_FOUND", "mydefault") == "mydefault"
-        assert env.dump() == {"APP_STR": "foo", "APP_INT": 42, "APP_NOT_FOUND": "mydefault"}
+        assert env.dump() == {
+            "APP_STR": "foo",
+            "APP_INT": 42,
+            "APP_NOT_FOUND": "mydefault",
+        }
 
     def test_error_message_for_prefixed_var(self, env):
         with env.prefixed("APP_"):
-            with pytest.raises(environs.EnvError, match='Environment variable "APP_INT" invalid'):
+            with pytest.raises(
+                environs.EnvError, match='Environment variable "APP_INT" invalid'
+            ):
                 env.int("INT", validate=lambda val: val < 42)
 
 
@@ -690,7 +715,9 @@ class TestDeferredValidation:
         set_env({"STR": "foo", "INT": "42"})
         env.str("STR")
         env.seal()
-        with pytest.raises(environs.EnvSealedError, match="Env has already been sealed"):
+        with pytest.raises(
+            environs.EnvSealedError, match="Env has already been sealed"
+        ):
             env.int("INT")
 
     def test_custom_parser_not_called_after_seal(self, env, set_env):
@@ -701,7 +728,9 @@ class TestDeferredValidation:
             return "https://" + value
 
         env.seal()
-        with pytest.raises(environs.EnvSealedError, match="Env has already been sealed"):
+        with pytest.raises(
+            environs.EnvSealedError, match="Env has already been sealed"
+        ):
             env.https_url("URL")
 
     # Regression tests for https://github.com/sloria/environs/issues/121
@@ -797,7 +826,9 @@ class TestExpandVars:
         assert env.int("MAIN_NEG_INT_DEF") == -454
         assert env.str("USE_DEFAULT", "main_default") == "main_default"
 
-        with pytest.raises(environs.EnvError, match='Environment variable "MYVAR" not set'):
+        with pytest.raises(
+            environs.EnvError, match='Environment variable "MYVAR" not set'
+        ):
             env.str("UNDEFINED")
 
     def test_multiple_expands(self, env, set_env):
@@ -813,7 +844,9 @@ class TestExpandVars:
         assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
         assert env.str("HELLOCOUNTRY") == "Hello Argentina"
 
-        with pytest.raises(environs.EnvError, match='Environment variable "WORLD" not set'):
+        with pytest.raises(
+            environs.EnvError, match='Environment variable "WORLD" not set'
+        ):
             env.str("HELLOWORLD")
 
     def test_recursive_expands(self, env, set_env):
@@ -836,7 +869,9 @@ class TestExpandVars:
         assert env.str("NOT_SET", "${SUBSTI}") == "substivalue"
         assert env.str("NOT_SET", "${MAIN}") == "substivalue"
         assert env.str("NOT_SET", "${NOT_SET2:-set2}") == "set2"
-        with pytest.raises(environs.EnvError, match='Environment variable "NOT_SET2" not set'):
+        with pytest.raises(
+            environs.EnvError, match='Environment variable "NOT_SET2" not set'
+        ):
             assert env.str("NOT_SET", "${NOT_SET2}")
 
     def test_escaped_expand(self, env, set_env):

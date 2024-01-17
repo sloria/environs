@@ -4,7 +4,6 @@ import pathlib
 import marshmallow as ma
 from environs import Env
 
-
 os.environ["STATIC_PATH"] = "app/static"
 
 
