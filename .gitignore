@@ -54,3 +54,6 @@ README.html
 .mypy_cache
 
 !tests/.env
+
+# ruff
+.ruff_cache

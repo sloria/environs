@@ -3,7 +3,6 @@ from pprint import pprint
 
 from environs import Env
 
-
 os.environ["GITHUB_USER"] = "sloria"
 os.environ["API_KEY"] = "123abc"
 os.environ["SHIP_DATE"] = "1984-06-25"

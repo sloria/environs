@@ -1,8 +1,8 @@
 import os
 
+from environs import Env
 from furl import furl as Furl
 from yarl import URL
-from environs import Env
 
 ##### This is the beginning of the plugin code #####
 
