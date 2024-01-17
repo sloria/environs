@@ -10,10 +10,11 @@ from enum import Enum
 import dj_database_url
 import dj_email_url
 import django_cache_url
-import environs
 import marshmallow as ma
 import pytest
 from marshmallow import fields, validate
+
+import environs
 
 HERE = pathlib.Path(__file__).parent
 
