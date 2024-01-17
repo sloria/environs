@@ -1,7 +1,8 @@
 import os
 
-from environs import Env, EnvError
 from marshmallow.validate import Email, Length, OneOf
+
+from environs import Env, EnvError
 
 os.environ["TTL"] = "-2"
 os.environ["NODE_ENV"] = "invalid"

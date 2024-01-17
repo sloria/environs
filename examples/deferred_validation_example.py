@@ -1,8 +1,9 @@
 import os
 from pprint import pprint
 
-from environs import Env, EnvValidationError
 from marshmallow.validate import Email, Length, OneOf, Range
+
+from environs import Env, EnvValidationError
 
 os.environ["TTL"] = "-2"
 os.environ["NODE_ENV"] = "invalid"
