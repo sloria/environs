@@ -1,5 +1,12 @@
 # Changelog
 
+## 11.0.0 (unreleased)
+
+Other changes:
+
+- _Backwards-incompatible_: Remove `environs.__version__` variable.
+  Use `importlib.metadata.version("environs")` instead.
+
 ## 10.3.0 (2024-01-11)
 
 Features:

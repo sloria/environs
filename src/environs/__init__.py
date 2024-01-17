@@ -1,7 +1,6 @@
 import collections
 import contextlib
 import functools
-import importlib.metadata
 import inspect
 import json as pyjson
 import logging
@@ -17,15 +16,11 @@ from urllib.parse import ParseResult, urlparse
 import marshmallow as ma
 from dotenv.main import _walk_to_root, load_dotenv
 
-# TODO: Deprecate
-__version__ = importlib.metadata.version("environs")
 __all__ = ["EnvError", "Env"]
-
 
 _T = typing.TypeVar("_T")
 _StrType = str
 _BoolType = bool
-_IntType = int
 
 ErrorMapping = typing.Mapping[str, typing.List[str]]
 ErrorList = typing.List[str]
