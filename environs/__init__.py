@@ -40,7 +40,9 @@ _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
 
 class EnvError(ValueError):
-    """Raised when an environment variable or if a required environment variable is unset."""
+    """Raised when an environment variable or
+    if a required environment variable is unset.
+    """
 
 
 class EnvValidationError(EnvError):
@@ -56,7 +58,9 @@ class EnvSealedError(TypeError, EnvError):
 
 
 class ParserConflictError(ValueError):
-    """Raised when adding a custom parser that conflicts with a built-in parser method."""
+    """Raised when adding a custom parser that conflicts
+    with a built-in parser method.
+    """
 
 
 _SUPPORTS_LOAD_DEFAULT = ma.__version_info__ >= (3, 13)
@@ -428,7 +432,7 @@ class Env:
         self.__custom_parsers__: typing.Dict[_StrType, ParserMethod] = {}
 
     def __repr__(self) -> _StrType:
-        return f"<{self.__class__.__name__}(eager={self.eager}, expand_vars={self.expand_vars})>"
+        return f"<{self.__class__.__name__}(eager={self.eager}, expand_vars={self.expand_vars})>"  # noqa: E501
 
     @staticmethod
     def read_env(
@@ -530,12 +534,14 @@ class Env:
     def add_parser_from_field(
         self, name: _StrType, field_cls: typing.Type[ma.fields.Field]
     ):
-        """Register a new parser method with name ``name``, given a marshmallow ``Field``."""
+        """Register a new parser method with name ``name``,
+        given a marshmallow ``Field``.
+        """
         self.__custom_parsers__[name] = _field2method(field_cls, method_name=name)
 
     def dump(self) -> typing.Mapping[_StrType, typing.Any]:
-        """Dump parsed environment variables to a dictionary of simple data types (numbers
-        and strings).
+        """Dump parsed environment variables to a dictionary of simple data types
+        (numbers and strings).
         """
         schema = ma.Schema.from_dict(self._fields)()
         return schema.dump(self._values)
@@ -543,13 +549,15 @@ class Env:
     def _get_from_environ(
         self, key: _StrType, default: typing.Any, *, proxied: _BoolType = False
     ) -> typing.Tuple[_StrType, typing.Any, typing.Optional[_StrType]]:
-        """Access a value from os.environ. Handles proxied variables, e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
+        """Access a value from os.environ. Handles proxied variables,
+        e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
 
-        Returns a tuple (envvar_key, envvar_value, proxied_key). The ``envvar_key`` will be different from
-        the passed key for proxied variables. proxied_key will be None if the envvar isn't proxied.
+        Returns a tuple (envvar_key, envvar_value, proxied_key). The ``envvar_key``
+        will be different from the passed key for proxied variables. proxied_key
+        will be None if the envvar isn't proxied.
 
-        The ``proxied`` flag is recursively passed if a proxy lookup is required to get a
-        proxy env key.
+        The ``proxied`` flag is recursively passed if a proxy lookup is required
+        to get a proxy env key.
         """
         env_key = self._get_key(key, omit_prefix=proxied)
         value = os.environ.get(env_key, default)

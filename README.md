@@ -3,7 +3,6 @@
 [![Latest version](https://badgen.net/pypi/v/environs)](https://pypi.org/project/environs/)
 [![Build Status](https://github.com/sloria/environs/actions/workflows/build-release.yml/badge.svg)](https://github.com/sloria/environs/actions/workflows/build-release.yml)
 [![marshmallow 3 compatible](https://badgen.net/badge/marshmallow/3)](https://marshmallow.readthedocs.io/en/latest/upgrading.html)
-[![Black code style](https://badgen.net/badge/code%20style/black/000)](https://github.com/ambv/black)
 
 **environs** is a Python library for parsing environment variables.
 It allows you to store configuration separate from your code, as per
