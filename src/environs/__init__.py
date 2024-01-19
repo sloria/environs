@@ -72,7 +72,6 @@ def _field2method(
         *,
         # Subset of relevant marshmallow.Field kwargs
         load_default: typing.Any = ma.missing,
-        missing: typing.Any = ma.missing,
         validate: typing.Optional[
             typing.Union[
                 typing.Callable[[typing.Any], typing.Any],
