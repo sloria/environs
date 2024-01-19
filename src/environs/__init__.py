@@ -7,7 +7,6 @@ import logging
 import os
 import re
 import typing
-import warnings
 from collections.abc import Mapping
 from enum import Enum
 from pathlib import Path
@@ -233,23 +232,13 @@ def _preprocess_dict(
     value: typing.Union[str, typing.Mapping],
     *,
     subcast_keys: typing.Optional[Subcast] = None,
-    subcast_key: typing.Optional[Subcast] = None,  # Deprecated
     subcast_values: typing.Optional[Subcast] = None,
     delimiter: str = ",",
     **kwargs,
 ) -> typing.Mapping:
     if isinstance(value, Mapping):
         return value
-
-    if subcast_key:
-        warnings.warn(
-            "`subcast_key` is deprecated. Use `subcast_keys` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-    subcast_keys_instance: ma.fields.Field = _make_subcast_field(
-        subcast_keys or subcast_key
-    )(**kwargs)
+    subcast_keys_instance: ma.fields.Field = _make_subcast_field(subcast_keys)(**kwargs)
     subcast_values_instance: ma.fields.Field = _make_subcast_field(subcast_values)(
         **kwargs
     )
