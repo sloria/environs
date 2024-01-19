@@ -57,9 +57,6 @@ class ParserConflictError(ValueError):
     """
 
 
-_SUPPORTS_LOAD_DEFAULT = ma.__version_info__ >= (3, 13)
-
-
 def _field2method(
     field_or_factory: FieldOrFactory,
     method_name: str,
@@ -96,26 +93,22 @@ def _field2method(
             validate=validate,
             required=required,
             allow_none=allow_none,
+            load_default=load_default or default,
             error_messages=error_messages,
             metadata=metadata,
         )
         preprocess_kwargs = {
             name: kwargs.pop(name) for name in preprocess_kwarg_names if name in kwargs
         }
-        if _SUPPORTS_LOAD_DEFAULT:
-            field_kwargs["load_default"] = load_default or default
-        else:
-            field_kwargs["missing"] = missing or default
         if isinstance(field_or_factory, type) and issubclass(
             field_or_factory, ma.fields.Field
         ):
-            # TODO: Remove `type: ignore` after https://github.com/python/mypy/issues/9676 is fixed
-            field = field_or_factory(**field_kwargs, **kwargs)  # type: ignore
+            field = field_or_factory(**field_kwargs, **kwargs)
         else:
             parsed_subcast = _make_subcast_field(subcast)
             field = field_or_factory(subcast=parsed_subcast, **field_kwargs)
         parsed_key, value, proxied_key = self._get_from_environ(
-            name, field.load_default if _SUPPORTS_LOAD_DEFAULT else field.missing
+            name, field.load_default
         )
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
