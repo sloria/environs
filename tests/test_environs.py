@@ -143,11 +143,6 @@ class TestCasting:
         set_env({"DICT": "1=value1,2=value2"})
         assert env.dict("DICT", subcast_keys=int) == {1: "value1", 2: "value2"}
 
-    def test_dict_with_subcast_key_deprecated(self, set_env, env):
-        set_env({"DICT": "1=value1,2=value2"})
-        with pytest.warns(DeprecationWarning):
-            assert env.dict("DICT", subcast_key=int) == {1: "value1", 2: "value2"}
-
     def test_custom_subcast_list(self, set_env, env):
         class CustomTuple(ma.fields.Field):
             def _deserialize(self, value: str, *args, **kwargs):
@@ -220,7 +215,7 @@ class TestCasting:
         assert "Not valid JSON." in exc.value.args[0]
 
     def test_datetime_cast(self, set_env, env):
-        dtime = dt.datetime.utcnow()
+        dtime = dt.datetime.now(dt.timezone.utc)
         set_env({"DTIME": dtime.isoformat()})
         result = env.datetime("DTIME")
         assert type(result) is dt.datetime
@@ -468,7 +463,7 @@ class TestCustomTypes:
 
 class TestDumping:
     def test_dump(self, set_env, env):
-        dtime = dt.datetime.utcnow()
+        dtime = dt.datetime.now(dt.timezone.utc)
         set_env(
             {
                 "STR": "foo",
