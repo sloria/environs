@@ -5,6 +5,7 @@
 Other changes:
 
 - Remove `subcast_key` argument of `env.dict`. Use `subcast_keys` instead.
+- Bump minimum required marshmallow version to 3.13.0.
 - _Backwards-incompatible_: Remove `environs.__version__` variable.
   Use `importlib.metadata.version("environs")` instead.
 
