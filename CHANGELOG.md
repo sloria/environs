@@ -4,6 +4,7 @@
 
 Other changes:
 
+- Remove `subcast_key` argument of `env.dict`. Use `subcast_keys` instead.
 - _Backwards-incompatible_: Remove `environs.__version__` variable.
   Use `importlib.metadata.version("environs")` instead.
 
