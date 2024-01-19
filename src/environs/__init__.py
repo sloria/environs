@@ -143,7 +143,6 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         self: "Env",
         name: str,
         default: typing.Any = ma.missing,
-        subcast: typing.Optional[typing.Type] = None,
         **kwargs,
     ) -> typing.Optional[_T]:
         if self._sealed:
