@@ -1,11 +1,10 @@
 name: build
 on:
   push:
-    branches:
-      - master
-    tags:
-      - "*"
+    branches: ["main"]
+    tags: ["*"]
   pull_request:
+
 jobs:
   tests:
     name: ${{ matrix.name }}
@@ -20,26 +19,29 @@ jobs:
           - { name: "dev", python: "3.12", tox: py312-marshmallowdev }
     steps:
       - uses: actions/checkout@v4.0.0
-      - uses: actions/setup-python@v4.7.0
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install --upgrade pip
       - run: python -m pip install tox
       - run: python -m tox -e${{ matrix.tox }}
   build:
-    if: startsWith(github.ref, 'refs/tags')
+    name: Build package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.0.0
-      - uses: actions/setup-python@v4.7.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install pypa/build
-        run: python3 -m pip install build --user
+        run: python -m pip install build
       - name: Build a binary wheel and a source tarball
-        run: python3 -m build
+        run: python -m build
+      - name: Install twine
+        run: python -m pip install twine
+      - name: Check build
+        run: python -m twine check --strict dist/*
       - name: Store the distribution packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
@@ -50,10 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.0.0
-      - uses: actions/setup-python@v4.7.0
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: python -m pip install --upgrade pip
       - run: python -m pip install tox
       - run: python -m tox -e lint
   publish-to-pypi:
@@ -68,7 +69,7 @@ jobs:
       id-token: write
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
