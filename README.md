@@ -10,11 +10,14 @@ It allows you to store configuration separate from your code, as per
 
 ## Contents
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 - [Features](#features)
 - [Install](#install)
 - [Basic usage](#basic-usage)
 - [Supported types](#supported-types)
-- [Reading .env files](#reading-env-files)
+- [Reading `.env` files](#reading-env-files)
   - [Reading a specific file](#reading-a-specific-file)
 - [Handling prefixes](#handling-prefixes)
 - [Variable expansion](#variable-expansion)
@@ -24,11 +27,13 @@ It allows you to store configuration separate from your code, as per
 - [Defining custom parser behavior](#defining-custom-parser-behavior)
 - [Usage with Flask](#usage-with-flask)
 - [Usage with Django](#usage-with-django)
-- [Why...?](#why)
+- [Why\...?](#why%5C)
   - [Why envvars?](#why-envvars)
-  - [Why not os.environ?](#why-not-osenviron)
+  - [Why not `os.environ`?](#why-not-osenviron)
   - [Why another library?](#why-another-library)
 - [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Features
 
