@@ -16,5 +16,11 @@ repos:
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.8.0
   hooks:
-  - id: mypy
-    additional_dependencies: ["marshmallow>=3,<4"]
+    - id: mypy
+      additional_dependencies: ["marshmallow>=3,<4"]
+- repo: https://github.com/thlorenz/doctoc.git
+  rev: v2.2.0
+  hooks:
+    - id: doctoc
+      name: Add TOC for Markdown and RST files
+      files: README\.md
