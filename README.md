@@ -23,6 +23,7 @@ It allows you to store configuration separate from your code, as per
 - [Variable expansion](#variable-expansion)
 - [Validation](#validation)
 - [Deferred validation](#deferred-validation)
+- [URL schemes](#url-schemes)
 - [Serialization](#serialization)
 - [Defining custom parser behavior](#defining-custom-parser-behavior)
 - [Usage with Flask](#usage-with-flask)
@@ -256,6 +257,16 @@ env.seal()
 ```
 
 `env.seal()` validates all parsed variables and prevents further parsing (calling a parser method will raise an error).
+
+## URL schemes
+
+`env.url()` supports non-standard URL schemes via the `schemes` argument.
+
+```python
+REDIS_URL = env.url(
+    "REDIS_URL", "redis://redis:6379", schemes=["redis"], require_tld=False
+)
+```
 
 ## Serialization
 
