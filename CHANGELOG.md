@@ -2,6 +2,10 @@
 
 ## 11.0.0 (unreleased)
 
+Fixes:
+
+- Prevent `DeprecationWarning` getting raised by marshmallow 3.21.0 (:issue:`333`).
+
 Other changes:
 
 - Remove `subcast_key` argument of `env.dict`. Use `subcast_keys` instead.
