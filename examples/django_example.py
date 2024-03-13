@@ -6,6 +6,7 @@ To run this example:
 
     DEBUG=true SECRET_KEY=myprecious python examples/django_example.py
 """
+
 import os
 from pprint import pprint
 
