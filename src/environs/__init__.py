@@ -17,12 +17,12 @@ from typing import (
     Iterator,
     List,
     Optional,
-    Tuple,
-    Union,
-    TypeVar,
-    Type,
-    cast,
     Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
 )
 from urllib.parse import ParseResult, urlparse
 
@@ -54,9 +54,9 @@ class EnvError(ValueError):
 
 class EnvValidationError(EnvError):
     def __init__(
-            self,
-            message: str,
-            error_messages: Union[ErrorList, ErrorMapping],
+        self,
+        message: str,
+        error_messages: Union[ErrorList, ErrorMapping],
     ):
         self.error_messages = error_messages
         super().__init__(message)
@@ -73,31 +73,31 @@ class ParserConflictError(ValueError):
 
 
 def _field2method(
-        field_or_factory: FieldOrFactory,
-        method_name: str,
-        *,
-        preprocess: Optional[Callable] = None,
-        preprocess_kwarg_names: Sequence[str] = tuple(),
+    field_or_factory: FieldOrFactory,
+    method_name: str,
+    *,
+    preprocess: Optional[Callable] = None,
+    preprocess_kwarg_names: Sequence[str] = tuple(),
 ) -> ParserMethod:
     def method(
-            self: "Env",
-            name: str,
-            default: Any = ma.missing,
-            subcast: Optional[Subcast] = None,
-            *,
-            # Subset of relevant marshmallow.Field kwargs
-            load_default: Any = ma.missing,
-            validate: Optional[
-                Union[
-                    Callable[[Any], Any],
-                    Iterable[Callable[[Any], Any]],
-                ]
-            ] = None,
-            required: bool = False,
-            allow_none: Optional[bool] = None,
-            error_messages: Optional[Dict[str, str]] = None,
-            metadata: Optional[Mapping[str, Any]] = None,
-            **kwargs,
+        self: "Env",
+        name: str,
+        default: Any = ma.missing,
+        subcast: Optional[Subcast] = None,
+        *,
+        # Subset of relevant marshmallow.Field kwargs
+        load_default: Any = ma.missing,
+        validate: Optional[
+            Union[
+                Callable[[Any], Any],
+                Iterable[Callable[[Any], Any]],
+            ]
+        ] = None,
+        required: bool = False,
+        allow_none: Optional[bool] = None,
+        error_messages: Optional[Dict[str, str]] = None,
+        metadata: Optional[Mapping[str, Any]] = None,
+        **kwargs,
     ) -> Optional[_T]:
         if self._sealed:
             raise EnvSealedError(
@@ -115,14 +115,16 @@ def _field2method(
             name: kwargs.pop(name) for name in preprocess_kwarg_names if name in kwargs
         }
         if isinstance(field_or_factory, type) and issubclass(
-                field_or_factory, ma.fields.Field,
+            field_or_factory,
+            ma.fields.Field,
         ):
             field = field_or_factory(**field_kwargs, **kwargs)
         else:
             parsed_subcast = _make_subcast_field(subcast)
             field = field_or_factory(subcast=parsed_subcast, **field_kwargs)
         parsed_key, value, proxied_key = self._get_from_environ(
-            name, field.load_default,
+            name,
+            field.load_default,
         )
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
@@ -155,10 +157,10 @@ def _field2method(
 
 def _func2method(func: Callable, method_name: str) -> ParserMethod:
     def method(
-            self: "Env",
-            name: str,
-            default: Any = ma.missing,
-            **kwargs,
+        self: "Env",
+        name: str,
+        default: Any = ma.missing,
+        **kwargs,
     ) -> Optional[_T]:
         if self._sealed:
             raise EnvSealedError(
@@ -202,7 +204,7 @@ def _func2method(func: Callable, method_name: str) -> ParserMethod:
 
 
 def _make_subcast_field(
-        subcast: Optional[Subcast],
+    subcast: Optional[Subcast],
 ) -> Type[ma.fields.Field]:
     if isinstance(subcast, type) and subcast in ma.Schema.TYPE_MAPPING:
         inner_field = ma.Schema.TYPE_MAPPING[subcast]
@@ -227,7 +229,7 @@ def _make_list_field(*, subcast: Optional[type], **kwargs) -> ma.fields.List:
 
 
 def _preprocess_list(
-        value: Union[str, Iterable], *, delimiter: str = ",", **kwargs
+    value: Union[str, Iterable], *, delimiter: str = ",", **kwargs
 ) -> None | list[str] | list[Any]:
     if ma.utils.is_iterable_but_not_string(value) or value is None:
         return value
@@ -235,12 +237,12 @@ def _preprocess_list(
 
 
 def _preprocess_dict(
-        value: Union[str, Mapping],
-        *,
-        subcast_keys: Optional[Subcast] = None,
-        subcast_values: Optional[Subcast] = None,
-        delimiter: str = ",",
-        **kwargs,
+    value: Union[str, Mapping],
+    *,
+    subcast_keys: Optional[Subcast] = None,
+    subcast_values: Optional[Subcast] = None,
+    delimiter: str = ",",
+    **kwargs,
 ) -> Mapping:
     if isinstance(value, Mapping):
         return value
@@ -339,11 +341,11 @@ class URLField(ma.fields.URL):
     # Override deserialize rather than _deserialize because we need
     # to call urlparse *after* validation has occurred
     def deserialize(
-            self,
-            value: str,
-            attr: Optional[str] = None,
-            data: Optional[Mapping] = None,
-            **kwargs,
+        self,
+        value: str,
+        attr: Optional[str] = None,
+        data: Optional[Mapping] = None,
+        **kwargs,
     ) -> ParseResult:
         ret = super().deserialize(value, attr, data, **kwargs)
         return urlparse(ret)
@@ -426,10 +428,10 @@ class Env:
 
     @staticmethod
     def read_env(
-            path: Optional[_StrType] = None,
-            recurse: _BoolType = True,
-            verbose: _BoolType = False,
-            override: _BoolType = False,
+        path: Optional[_StrType] = None,
+        recurse: _BoolType = True,
+        verbose: _BoolType = False,
+        override: _BoolType = False,
     ) -> _BoolType:
         """Read a .env file into os.environ.
 
@@ -509,7 +511,8 @@ class Env:
         return None
 
     def parser_for(
-            self, name: _StrType,
+        self,
+        name: _StrType,
     ) -> Callable[[Callable], Callable]:
         """Decorator that registers a new parser method with the name ``name``.
         The decorated function must receive the input value for an environment variable.
@@ -522,9 +525,9 @@ class Env:
         return decorator
 
     def add_parser_from_field(
-            self,
-            name: _StrType,
-            field_cls: Type[ma.fields.Field],
+        self,
+        name: _StrType,
+        field_cls: Type[ma.fields.Field],
     ):
         """Register a new parser method with name ``name``,
         given a marshmallow ``Field``.
@@ -539,11 +542,11 @@ class Env:
         return schema.dump(self._values)
 
     def _get_from_environ(
-            self,
-            key: _StrType,
-            default: Any,
-            *,
-            proxied: _BoolType = False,
+        self,
+        key: _StrType,
+        default: Any,
+        *,
+        proxied: _BoolType = False,
     ) -> Tuple[_StrType, Any, Optional[_StrType]]:
         """Access a value from os.environ. Handles proxied variables,
         e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
@@ -565,7 +568,7 @@ class Env:
                 if subs_default is not None:
                     default = subs_default[2:]
                 elif (
-                        value == default
+                    value == default
                 ):  # if we have used default, don't use it recursively
                     default = ma.missing
                 return (
@@ -575,7 +578,7 @@ class Env:
                 )
             expand_search = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
             if (
-                    expand_search
+                expand_search
             ):  # Multiple or in text match expand_vars - General case - default lost
                 return self._expand_vars(env_key, value)
             # Remove escaped $
@@ -596,7 +599,7 @@ class Env:
             _, env_value, _ = self._get_from_environ(env_key, env_default, proxied=True)
             if env_value is ma.missing:
                 return parsed_key, env_value, env_key
-            ret += value[prev_start: match.start()] + env_value
+            ret += value[prev_start : match.start()] + env_value
             prev_start = match.end()
         ret += value[prev_start:]
 
