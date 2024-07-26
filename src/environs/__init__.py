@@ -8,9 +8,23 @@ import os
 import re
 import typing
 from collections.abc import Mapping
+from datetime import (
+    date as _date,
+)
+from datetime import (
+    datetime as _datetime,
+)
+from datetime import (
+    time as _time,
+)
+from datetime import (
+    timedelta as _timedelta,
+)
+from decimal import Decimal
 from enum import Enum
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
+from uuid import UUID
 
 import marshmallow as ma
 from dotenv.main import _walk_to_root, load_dotenv
@@ -27,7 +41,38 @@ FieldFactory = typing.Callable[..., ma.fields.Field]
 Subcast = typing.Union[typing.Type, typing.Callable[..., _T], ma.fields.Field]
 FieldType = typing.Type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
-ParserMethod = typing.Callable
+
+
+_int = int
+_bool = bool
+_str = str
+_float = float
+_list = typing.List[typing.Any]
+_dict = typing.Dict[str, typing.Any]
+
+
+class ParserMethod(typing.Generic[_T]):
+    """Duck typing, do not use"""
+
+    def __call__(  # type: ignore[empty-body]
+        self,
+        name: str,
+        default: typing.Any = ma.missing,
+        subcast: typing.Optional[Subcast] = None,
+        *,
+        # Subset of relevant marshmallow.Field kwargs
+        load_default: typing.Any = ma.missing,
+        validate: typing.Union[
+            typing.Callable[[typing.Any], typing.Any],
+            typing.Iterable[typing.Callable[[typing.Any], typing.Any]],
+            None,
+        ] = None,
+        required: bool = False,
+        allow_none: typing.Optional[bool] = None,
+        error_messages: typing.Optional[typing.Dict[str, str]] = None,
+        metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
+        **kwargs,
+    ) -> _T: ...
 
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
@@ -135,7 +180,7 @@ def _field2method(
         return value
 
     method.__name__ = method_name
-    return method
+    return method  # type: ignore[return-value]
 
 
 def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
@@ -183,7 +228,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
         return value
 
     method.__name__ = method_name
-    return method
+    return method  # type: ignore[return-value]
 
 
 def _make_subcast_field(
@@ -357,20 +402,20 @@ class LogLevelField(ma.fields.Int):
 class Env:
     """An environment variable reader."""
 
-    __call__: ParserMethod = _field2method(ma.fields.Field, "__call__")
+    __call__: ParserMethod[str] = _field2method(ma.fields.Field, "__call__")
 
-    int = _field2method(ma.fields.Int, "int")
-    bool = _field2method(ma.fields.Bool, "bool")
-    str = _field2method(ma.fields.Str, "str")
-    float = _field2method(ma.fields.Float, "float")
-    decimal = _field2method(ma.fields.Decimal, "decimal")
-    list = _field2method(
+    int: ParserMethod[_int] = _field2method(ma.fields.Int, "int")
+    bool: ParserMethod[_bool] = _field2method(ma.fields.Bool, "bool")
+    str: ParserMethod[_str] = _field2method(ma.fields.Str, "str")
+    float: ParserMethod[_float] = _field2method(ma.fields.Float, "float")
+    decimal: ParserMethod[Decimal] = _field2method(ma.fields.Decimal, "decimal")
+    list: ParserMethod[_list] = _field2method(
         _make_list_field,
         "list",
         preprocess=_preprocess_list,
         preprocess_kwarg_names=("subcast", "delimiter"),
     )
-    dict = _field2method(
+    dict: ParserMethod[_dict] = _field2method(
         ma.fields.Dict,
         "dict",
         preprocess=_preprocess_dict,
@@ -382,19 +427,29 @@ class Env:
             "delimiter",
         ),
     )
-    json = _field2method(ma.fields.Field, "json", preprocess=_preprocess_json)
-    datetime = _field2method(ma.fields.DateTime, "datetime")
-    date = _field2method(ma.fields.Date, "date")
-    time = _field2method(ma.fields.Time, "time")
-    path = _field2method(PathField, "path")
-    log_level = _field2method(LogLevelField, "log_level")
-    timedelta = _field2method(ma.fields.TimeDelta, "timedelta")
-    uuid = _field2method(ma.fields.UUID, "uuid")
-    url = _field2method(URLField, "url")
-    enum = _func2method(_enum_parser, "enum")
-    dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
-    dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
-    dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
+    json: ParserMethod[_dict] = _field2method(
+        ma.fields.Field, "json", preprocess=_preprocess_json
+    )
+    datetime: ParserMethod[_datetime] = _field2method(ma.fields.DateTime, "datetime")
+    date: ParserMethod[_date] = _field2method(ma.fields.Date, "date")
+    time: ParserMethod[_time] = _field2method(ma.fields.Time, "time")
+    path: ParserMethod[Path] = _field2method(PathField, "path")
+    log_level: ParserMethod[_int] = _field2method(LogLevelField, "log_level")
+    timedelta: ParserMethod[_timedelta] = _field2method(
+        ma.fields.TimeDelta, "timedelta"
+    )
+    uuid: ParserMethod[UUID] = _field2method(ma.fields.UUID, "uuid")
+    url: ParserMethod[_str] = _field2method(URLField, "url")
+    enum: ParserMethod[Enum] = _func2method(_enum_parser, "enum")
+    dj_db_url: ParserMethod[typing.Dict[_str, _str]] = _func2method(
+        _dj_db_url_parser, "dj_db_url"
+    )
+    dj_email_url: ParserMethod[typing.Dict[_str, _str]] = _func2method(
+        _dj_email_url_parser, "dj_email_url"
+    )
+    dj_cache_url: ParserMethod[typing.Dict[_str, _str]] = _func2method(
+        _dj_cache_url_parser, "dj_cache_url"
+    )
 
     def __init__(self, *, eager: _BoolType = True, expand_vars: _BoolType = False):
         self.eager = eager
