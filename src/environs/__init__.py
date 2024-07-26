@@ -105,7 +105,9 @@ def _field2method(
             field = field_or_factory(**field_kwargs, **kwargs)
         else:
             parsed_subcast = _make_subcast_field(subcast)
-            field = field_or_factory(subcast=parsed_subcast, **field_kwargs)
+            field = typing.cast(FieldFactory, field_or_factory)(
+                subcast=parsed_subcast, **field_kwargs
+            )
         parsed_key, value, proxied_key = self._get_from_environ(
             name, field.load_default
         )
