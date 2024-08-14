@@ -106,7 +106,7 @@ def _field2method(
     *,
     preprocess: typing.Optional[typing.Callable] = None,
     preprocess_kwarg_names: typing.Sequence[str] = tuple(),
-) -> _ParserMethod:
+):
     def method(
         self: "Env",
         name: str,
@@ -178,10 +178,10 @@ def _field2method(
         return value
 
     method.__name__ = method_name
-    return method  # type: ignore[return-value]
+    return method
 
 
-def _func2method(func: typing.Callable, method_name: str) -> _ParserMethod:
+def _func2method(func: typing.Callable, method_name: str):
     def method(
         self: "Env",
         name: str,
@@ -226,7 +226,7 @@ def _func2method(func: typing.Callable, method_name: str) -> _ParserMethod:
         return value
 
     method.__name__ = method_name
-    return method  # type: ignore[return-value]
+    return method
 
 
 def _make_subcast_field(
