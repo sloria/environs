@@ -54,23 +54,21 @@ _dict = typing.Dict[str, typing.Any]
 class _ParserMethod(typing.Generic[_T]):
     """Duck typing, do not use"""
 
-    def __call__(  # type: ignore[empty-body]
+    @typing.overload  # type: ignore[no-overload-impl]
+    def __call__(
         self,
         name: str,
-        default: typing.Any = ma.missing,
+        default: None,
         subcast: typing.Optional[Subcast] = None,
-        *,
-        # Subset of relevant marshmallow.Field kwargs
-        load_default: typing.Any = ma.missing,
-        validate: typing.Union[
-            typing.Callable[[typing.Any], typing.Any],
-            typing.Iterable[typing.Callable[[typing.Any], typing.Any]],
-            None,
-        ] = None,
-        required: bool = False,
-        allow_none: typing.Optional[bool] = None,
-        error_messages: typing.Optional[typing.Dict[str, str]] = None,
-        metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
+        **kwargs,
+    ) -> typing.Optional[_T]: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: typing.Union[ma.utils._Missing, _T] = ma.missing,
+        subcast: typing.Optional[Subcast] = None,
         **kwargs,
     ) -> _T: ...
 
