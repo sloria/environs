@@ -51,7 +51,7 @@ _list = typing.List[typing.Any]
 _dict = typing.Dict[str, typing.Any]
 
 
-class ParserMethod(typing.Generic[_T]):
+class _ParserMethod(typing.Generic[_T]):
     """Duck typing, do not use"""
 
     def __call__(  # type: ignore[empty-body]
@@ -108,7 +108,7 @@ def _field2method(
     *,
     preprocess: typing.Optional[typing.Callable] = None,
     preprocess_kwarg_names: typing.Sequence[str] = tuple(),
-) -> ParserMethod:
+) -> _ParserMethod:
     def method(
         self: "Env",
         name: str,
@@ -183,7 +183,7 @@ def _field2method(
     return method  # type: ignore[return-value]
 
 
-def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
+def _func2method(func: typing.Callable, method_name: str) -> _ParserMethod:
     def method(
         self: "Env",
         name: str,
@@ -402,20 +402,20 @@ class LogLevelField(ma.fields.Int):
 class Env:
     """An environment variable reader."""
 
-    __call__: ParserMethod[str] = _field2method(ma.fields.Field, "__call__")
+    __call__: _ParserMethod[str] = _field2method(ma.fields.Field, "__call__")
 
-    int: ParserMethod[_int] = _field2method(ma.fields.Int, "int")
-    bool: ParserMethod[_bool] = _field2method(ma.fields.Bool, "bool")
-    str: ParserMethod[_str] = _field2method(ma.fields.Str, "str")
-    float: ParserMethod[_float] = _field2method(ma.fields.Float, "float")
-    decimal: ParserMethod[Decimal] = _field2method(ma.fields.Decimal, "decimal")
-    list: ParserMethod[_list] = _field2method(
+    int: _ParserMethod[_int] = _field2method(ma.fields.Int, "int")
+    bool: _ParserMethod[_bool] = _field2method(ma.fields.Bool, "bool")
+    str: _ParserMethod[_str] = _field2method(ma.fields.Str, "str")
+    float: _ParserMethod[_float] = _field2method(ma.fields.Float, "float")
+    decimal: _ParserMethod[Decimal] = _field2method(ma.fields.Decimal, "decimal")
+    list: _ParserMethod[_list] = _field2method(
         _make_list_field,
         "list",
         preprocess=_preprocess_list,
         preprocess_kwarg_names=("subcast", "delimiter"),
     )
-    dict: ParserMethod[_dict] = _field2method(
+    dict: _ParserMethod[_dict] = _field2method(
         ma.fields.Dict,
         "dict",
         preprocess=_preprocess_dict,
@@ -427,27 +427,27 @@ class Env:
             "delimiter",
         ),
     )
-    json: ParserMethod[_dict] = _field2method(
+    json: _ParserMethod[_dict] = _field2method(
         ma.fields.Field, "json", preprocess=_preprocess_json
     )
-    datetime: ParserMethod[_datetime] = _field2method(ma.fields.DateTime, "datetime")
-    date: ParserMethod[_date] = _field2method(ma.fields.Date, "date")
-    time: ParserMethod[_time] = _field2method(ma.fields.Time, "time")
-    path: ParserMethod[Path] = _field2method(PathField, "path")
-    log_level: ParserMethod[_int] = _field2method(LogLevelField, "log_level")
-    timedelta: ParserMethod[_timedelta] = _field2method(
+    datetime: _ParserMethod[_datetime] = _field2method(ma.fields.DateTime, "datetime")
+    date: _ParserMethod[_date] = _field2method(ma.fields.Date, "date")
+    time: _ParserMethod[_time] = _field2method(ma.fields.Time, "time")
+    path: _ParserMethod[Path] = _field2method(PathField, "path")
+    log_level: _ParserMethod[_int] = _field2method(LogLevelField, "log_level")
+    timedelta: _ParserMethod[_timedelta] = _field2method(
         ma.fields.TimeDelta, "timedelta"
     )
-    uuid: ParserMethod[UUID] = _field2method(ma.fields.UUID, "uuid")
-    url: ParserMethod[_str] = _field2method(URLField, "url")
-    enum: ParserMethod[Enum] = _func2method(_enum_parser, "enum")
-    dj_db_url: ParserMethod[typing.Dict[_str, _str]] = _func2method(
+    uuid: _ParserMethod[UUID] = _field2method(ma.fields.UUID, "uuid")
+    url: _ParserMethod[_str] = _field2method(URLField, "url")
+    enum: _ParserMethod[Enum] = _func2method(_enum_parser, "enum")
+    dj_db_url: _ParserMethod[typing.Dict[_str, _str]] = _func2method(
         _dj_db_url_parser, "dj_db_url"
     )
-    dj_email_url: ParserMethod[typing.Dict[_str, _str]] = _func2method(
+    dj_email_url: _ParserMethod[typing.Dict[_str, _str]] = _func2method(
         _dj_email_url_parser, "dj_email_url"
     )
-    dj_cache_url: ParserMethod[typing.Dict[_str, _str]] = _func2method(
+    dj_cache_url: _ParserMethod[typing.Dict[_str, _str]] = _func2method(
         _dj_cache_url_parser, "dj_cache_url"
     )
 
@@ -459,7 +459,7 @@ class Env:
         self._values: typing.Dict[_StrType, typing.Any] = {}
         self._errors: ErrorMapping = collections.defaultdict(list)
         self._prefix: typing.Optional[_StrType] = None
-        self.__custom_parsers__: typing.Dict[_StrType, ParserMethod] = {}
+        self.__custom_parsers__: typing.Dict[_StrType, _ParserMethod] = {}
 
     def __repr__(self) -> _StrType:
         return f"<{self.__class__.__name__}(eager={self.eager}, expand_vars={self.expand_vars})>"  # noqa: E501
