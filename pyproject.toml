@@ -40,9 +40,13 @@ include = ["tests/", "CHANGELOG.md", "CONTRIBUTING.md", "tox.ini"]
 src = ["src"]
 fix = true
 show-fixes = true
-show-source = true
+output-format = "full"
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [tool.ruff.lint]
+ignore = ["E203", "E266", "E501", "E731"]
 select = [
   "B",  # flake8-bugbear
   "E",  # pycodestyle error
@@ -52,7 +56,7 @@ select = [
   "W",  # pycodestyle warning
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E721"]
 
 [tool.ruff.lint.pycodestyle]
