@@ -27,7 +27,7 @@ Source = "https://github.com/sloria/environs"
 [project.optional-dependencies]
 django = ["dj-database-url", "dj-email-url", "django-cache-url"]
 tests = ["environs[django]", "pytest"]
-dev = ["environs[tests]", "tox", "pre-commit~=3.5"]
+dev = ["environs[tests]", "tox", "pre-commit>=3.5,<5.0"]
 
 [build-system]
 requires = ["flit_core<4"]
