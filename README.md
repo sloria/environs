@@ -231,6 +231,7 @@ env.str("EMAIL", validate=[Length(min=4), Email()])
 
 By default, a validation error is raised immediately upon calling a parser method for an invalid environment variable.
 To defer validation and raise an exception with the combined error messages for all invalid variables, pass `eager=False` to `Env`.
+Unvalidated variables may have any type, usually `str | None`.
 Call `env.seal()` after all variables have been parsed.
 
 ```python
