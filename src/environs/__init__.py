@@ -448,7 +448,9 @@ class Env:
             for dirname in _walk_to_root(start_dir):
                 check_path = Path(dirname) / env_name
                 if check_path.exists():
-                    is_env_loaded = load_dotenv(check_path, verbose=verbose, override=override)
+                    is_env_loaded = load_dotenv(
+                        check_path, verbose=verbose, override=override
+                    )
                     env_path = str(check_path)
         else:
             is_env_loaded = load_dotenv(str(start), verbose=verbose, override=override)
