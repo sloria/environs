@@ -418,7 +418,7 @@ class Env:
         verbose: _BoolType = False,
         override: _BoolType = False,
         return_path: _BoolType = False,
-    ) -> _BoolType | _StrType:
+    ) -> typing.Union[_BoolType, _StrType]:
         """Read a .env file into os.environ.
 
         If .env is not found in the directory from which this method is called,
