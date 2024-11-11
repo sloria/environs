@@ -1,6 +1,6 @@
 # Changelog
 
-## 11.1.0 (unreleased)
+## 11.1.0 (2025-11-11)
 
 Features:
 
