@@ -1,5 +1,15 @@
 # Changelog
 
+## 11.1.0 (unreleased)
+
+Features:
+
+- Add `return_path` argument to `Env.read_env` to return the path of the
+  parsed file ([#362](https://github.com/sloria/environs/issues/362)).
+  Thanks [senese](https://github.com/senese) for the suggestion and PR.
+  NOTE: This is added as a backwards-compatible change that is scheduled to be
+  removed in 12.0.0. The path will stored as an attribute of `Env`.
+
 ## 11.0.0 (2024-03-04)
 
 Fixes:

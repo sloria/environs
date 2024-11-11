@@ -417,7 +417,8 @@ class Env:
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
-    ) -> _BoolType:
+        return_path: _BoolType = False,
+    ) -> typing.Union[_BoolType, _StrType]:
         """Read a .env file into os.environ.
 
         If .env is not found in the directory from which this method is called,
@@ -425,6 +426,8 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
+
+        is_env_loaded = False
         if path is None:
             # By default, start search from the same directory this function is called
             current_frame = inspect.currentframe()
@@ -445,10 +448,18 @@ class Env:
             for dirname in _walk_to_root(start_dir):
                 check_path = Path(dirname) / env_name
                 if check_path.exists():
-                    return load_dotenv(check_path, verbose=verbose, override=override)
-            return False
+                    is_env_loaded = load_dotenv(
+                        check_path, verbose=verbose, override=override
+                    )
+                    env_path = str(check_path)
         else:
-            return load_dotenv(str(start), verbose=verbose, override=override)
+            is_env_loaded = load_dotenv(str(start), verbose=verbose, override=override)
+            env_path = str(start)
+
+        if return_path:
+            return env_path
+        else:
+            return is_env_loaded
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:

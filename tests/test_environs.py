@@ -362,6 +362,11 @@ class TestEnvFileReading:
         with pytest.raises(ValueError, match="path must be a filename"):
             assert env.read_env("tests")
 
+    def test_read_env_return_path(self, env):
+        path = env.read_env(return_path=True)
+        env_path = str(HERE / ".env")
+        assert path == env_path
+
 
 def always_fail(value):
     raise environs.EnvError("something went wrong")
