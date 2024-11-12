@@ -78,7 +78,7 @@ secret = env("SECRET")  # => raises error if not set
 # casting
 max_connections = env.int("MAX_CONNECTIONS")  # => 100
 ship_date = env.date("SHIP_DATE")  # => datetime.date(1984, 6, 25)
-ttl = env.timedelta("TTL")  # => datetime.timedelta(0, 42)
+ttl = env.timedelta("TTL")  # => datetime.timedelta(seconds=42)
 log_level = env.log_level("LOG_LEVEL")  # => logging.DEBUG
 
 # providing a default value
@@ -110,7 +110,7 @@ The following are all type-casting methods of `Env`:
 - `env.datetime`
 - `env.date`
 - `env.time`
-- `env.timedelta` (assumes value is an integer in seconds)
+- `env.timedelta` (assumes value is an integer in seconds, or an ordered case-insensitive duration string like `7m7s` or `7w 7d 7h 7m 7s 7ms 7us`)
 - `env.url`
 - `env.uuid`
 - `env.log_level`

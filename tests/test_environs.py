@@ -231,6 +231,25 @@ class TestCasting:
     def test_timedelta_cast(self, set_env, env):
         set_env({"TIMEDELTA": "42"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
+        set_env({"TIMEDELTA": "42s"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
+        # whitespace, case-insensitive, missing units
+        set_env({"TIMEDELTA": " 42 D  42s "})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(days=42, seconds=42)
+        # unicode µs (in addition to us below)
+        set_env({"TIMEDELTA": "42µs"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(microseconds=42)
+        # all supported units
+        set_env({"TIMEDELTA": "42w 42d 42h 42m 42s 42ms 42us"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(
+            weeks=42,
+            days=42,
+            hours=42,
+            minutes=42,
+            seconds=42,
+            milliseconds=42,
+            microseconds=42,
+        )
 
     def test_time_cast(self, set_env, env):
         set_env({"TIME": "10:30"})

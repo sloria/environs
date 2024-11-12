@@ -8,6 +8,7 @@ import os
 import re
 import typing
 from collections.abc import Mapping
+from datetime import timedelta
 from enum import Enum
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
@@ -31,6 +32,17 @@ ParserMethod = typing.Callable
 
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
+_TIMEDELTA_PATTERN = re.compile(
+    r"^(?:\s*)"  # optional whitespace at the beginning of the string
+    r"(?:(\d+)\s*w\s*)?"  # weeks with optional whitespace around unit
+    r"(?:(\d+)\s*d\s*)?"  # days with optional whitespace around unit
+    r"(?:(\d+)\s*h\s*)?"  # hours with optional whitespace around unit
+    r"(?:(\d+)\s*m\s*)?"  # minutes with optional whitespace around unit
+    r"(?:(\d+)\s*s\s*)?"  # seconds with optional whitespace around unit
+    r"(?:(\d+)\s*ms\s*)?"  # milliseconds with optional whitespace around unit
+    r"(?:(\d+)\s*[µu]s\s*)?$",  # microseconds with optional whitespace around unit
+    flags=re.IGNORECASE,
+)
 
 
 class EnvError(ValueError):
@@ -356,6 +368,24 @@ class LogLevelField(ma.fields.Int):
                 raise ma.ValidationError("Not a valid log level.") from error
 
 
+class TimeDeltaField(ma.fields.TimeDelta):
+    def _deserialize(self, value, *args, **kwargs) -> timedelta:
+        if isinstance(value, timedelta):
+            return value
+        match = _TIMEDELTA_PATTERN.match(value)
+        if match is not None and any(groups := match.groups()):
+            return timedelta(
+                weeks=int(groups[0] or 0),
+                days=int(groups[1] or 0),
+                hours=int(groups[2] or 0),
+                minutes=int(groups[3] or 0),
+                seconds=int(groups[4] or 0),
+                milliseconds=int(groups[5] or 0),
+                microseconds=int(groups[6] or 0),
+            )
+        return super()._deserialize(value, *args, **kwargs)
+
+
 class Env:
     """An environment variable reader."""
 
@@ -390,7 +420,7 @@ class Env:
     time = _field2method(ma.fields.Time, "time")
     path = _field2method(PathField, "path")
     log_level = _field2method(LogLevelField, "log_level")
-    timedelta = _field2method(ma.fields.TimeDelta, "timedelta")
+    timedelta = _field2method(TimeDeltaField, "timedelta")
     uuid = _field2method(ma.fields.UUID, "uuid")
     url = _field2method(URLField, "url")
     enum = _func2method(_enum_parser, "enum")
