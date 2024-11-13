@@ -373,15 +373,15 @@ class TimeDeltaField(ma.fields.TimeDelta):
         if isinstance(value, timedelta):
             return value
         match = _TIMEDELTA_PATTERN.match(value)
-        if match is not None and any(groups := match.groups()):
+        if match is not None and any(groups := match.groups(default=0)):
             return timedelta(
-                weeks=int(groups[0] or 0),
-                days=int(groups[1] or 0),
-                hours=int(groups[2] or 0),
-                minutes=int(groups[3] or 0),
-                seconds=int(groups[4] or 0),
-                milliseconds=int(groups[5] or 0),
-                microseconds=int(groups[6] or 0),
+                weeks=int(groups[0]),
+                days=int(groups[1]),
+                hours=int(groups[2]),
+                minutes=int(groups[3]),
+                seconds=int(groups[4]),
+                milliseconds=int(groups[5]),
+                microseconds=int(groups[6]),
             )
         return super()._deserialize(value, *args, **kwargs)
 

@@ -233,7 +233,7 @@ class TestCasting:
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
         set_env({"TIMEDELTA": "42s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
-        # whitespace, case-insensitive, missing units
+        # whitespaces, case-insensitive, units subselection
         set_env({"TIMEDELTA": " 42 D  42s "})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(days=42, seconds=42)
         # unicode µs (in addition to us below)
