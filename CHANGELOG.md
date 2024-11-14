@@ -1,5 +1,13 @@
 # Changelog
 
+## 11.2.0 (unreleased)
+
+Features:
+
+- `Env.timedelta` can parse [GEP-2257](https://gateway-api.sigs.k8s.io/geps/gep-2257/)
+  duration strings ([#366](https://github.com/sloria/environs/pull/366)).
+  Thanks [ddelange](https://github.com/ddelange) for the PR.
+
 ## 11.1.0 (2024-11-11)
 
 Features:
