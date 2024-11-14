@@ -32,11 +32,10 @@ ParserMethod = typing.Callable
 
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
-# Ordered case-insensitive duration strings, loosely based on the [GEP-2257](https://gateway-api.sigs.k8s.io/geps/gep-2257/) spec
+# Ordered duration strings, loosely based on the [GEP-2257](https://gateway-api.sigs.k8s.io/geps/gep-2257/) spec
 # Discrepancies between this pattern and GEP-2257 duration strings:
 # - this pattern accepts units `w|d|h|m|s|ms|[uµ]s` (all units supported by the datetime.timedelta constructor), GEP-2257 accepts only `h|m|s|ms`
 # - this pattern allows for optional whitespace around the units, GEP-2257 does not
-# - this pattern is compiled to be case-insensitive, GEP-2257 expects lowercase units
 # - this pattern expects ordered (descending) units, GEP-2257 allows arbitrary order
 # - this pattern does not allow duplicate unit occurrences, GEP-2257 does
 # - this pattern allows for negative integers, GEP-2257 does not
@@ -49,7 +48,6 @@ _TIMEDELTA_PATTERN = re.compile(
     r"(?:(-?\d+)\s*s\s*)?"  # seconds with optional whitespace around unit
     r"(?:(-?\d+)\s*ms\s*)?"  # milliseconds with optional whitespace around unit
     r"(?:(-?\d+)\s*[µu]s\s*)?$",  # microseconds with optional whitespace around unit
-    flags=re.IGNORECASE,
 )
 
 

@@ -243,8 +243,8 @@ class TestCasting:
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
         set_env({"TIMEDELTA": "-42s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=-42)
-        # whitespaces, case-insensitive, units subselection
-        set_env({"TIMEDELTA": " 42 D  -42s "})
+        # whitespaces, units subselection (but descending ordering)
+        set_env({"TIMEDELTA": " 42 d  -42s "})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(days=42, seconds=-42)
         # unicode µs (in addition to us below)
         set_env({"TIMEDELTA": "42µs"})
@@ -268,7 +268,7 @@ class TestCasting:
         set_env({"TIMEDELTA": "4.2"})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
-        set_env({"TIMEDELTA": "4.2d"})
+        set_env({"TIMEDELTA": "4.2s"})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
 
