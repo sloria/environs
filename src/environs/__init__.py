@@ -8,6 +8,7 @@ import os
 import re
 import typing
 from collections.abc import Mapping
+from datetime import timedelta
 from enum import Enum
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
@@ -31,6 +32,23 @@ ParserMethod = typing.Callable
 
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
+# Ordered duration strings, loosely based on the [GEP-2257](https://gateway-api.sigs.k8s.io/geps/gep-2257/) spec
+# Discrepancies between this pattern and GEP-2257 duration strings:
+# - this pattern accepts units `w|d|h|m|s|ms|[uµ]s` (all units supported by the datetime.timedelta constructor), GEP-2257 accepts only `h|m|s|ms`
+# - this pattern allows for optional whitespace around the units, GEP-2257 does not
+# - this pattern expects ordered (descending) units, GEP-2257 allows arbitrary order
+# - this pattern does not allow duplicate unit occurrences, GEP-2257 does
+# - this pattern allows for negative integers, GEP-2257 does not
+_TIMEDELTA_PATTERN = re.compile(
+    r"^(?:\s*)"  # optional whitespace at the beginning of the string
+    r"(?:(-?\d+)\s*w\s*)?"  # weeks with optional whitespace around unit
+    r"(?:(-?\d+)\s*d\s*)?"  # days with optional whitespace around unit
+    r"(?:(-?\d+)\s*h\s*)?"  # hours with optional whitespace around unit
+    r"(?:(-?\d+)\s*m\s*)?"  # minutes with optional whitespace around unit
+    r"(?:(-?\d+)\s*s\s*)?"  # seconds with optional whitespace around unit
+    r"(?:(-?\d+)\s*ms\s*)?"  # milliseconds with optional whitespace around unit
+    r"(?:(-?\d+)\s*[µu]s\s*)?$",  # microseconds with optional whitespace around unit
+)
 
 
 class EnvError(ValueError):
@@ -356,6 +374,24 @@ class LogLevelField(ma.fields.Int):
                 raise ma.ValidationError("Not a valid log level.") from error
 
 
+class TimeDeltaField(ma.fields.TimeDelta):
+    def _deserialize(self, value, *args, **kwargs) -> timedelta:
+        if isinstance(value, timedelta):
+            return value
+        match = _TIMEDELTA_PATTERN.match(value)
+        if match is not None and match.group(0):  # disallow "", allow "0s"
+            return timedelta(
+                weeks=int(match.group(1) or 0),
+                days=int(match.group(2) or 0),
+                hours=int(match.group(3) or 0),
+                minutes=int(match.group(4) or 0),
+                seconds=int(match.group(5) or 0),
+                milliseconds=int(match.group(6) or 0),
+                microseconds=int(match.group(7) or 0),
+            )
+        return super()._deserialize(value, *args, **kwargs)
+
+
 class Env:
     """An environment variable reader."""
 
@@ -390,7 +426,7 @@ class Env:
     time = _field2method(ma.fields.Time, "time")
     path = _field2method(PathField, "path")
     log_level = _field2method(LogLevelField, "log_level")
-    timedelta = _field2method(ma.fields.TimeDelta, "timedelta")
+    timedelta = _field2method(TimeDeltaField, "timedelta")
     uuid = _field2method(ma.fields.UUID, "uuid")
     url = _field2method(URLField, "url")
     enum = _func2method(_enum_parser, "enum")
