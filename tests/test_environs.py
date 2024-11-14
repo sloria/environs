@@ -229,13 +229,23 @@ class TestCasting:
         assert env.date("DATE") == date
 
     def test_timedelta_cast(self, set_env, env):
+        # seconds as integer
+        set_env({"TIMEDELTA": "0"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta()
         set_env({"TIMEDELTA": "42"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
+        set_env({"TIMEDELTA": "-42"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=-42)
+        # seconds as duration string
+        set_env({"TIMEDELTA": "0s"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta()
         set_env({"TIMEDELTA": "42s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
+        set_env({"TIMEDELTA": "-42s"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=-42)
         # whitespaces, case-insensitive, units subselection
-        set_env({"TIMEDELTA": " 42 D  42s "})
-        assert env.timedelta("TIMEDELTA") == dt.timedelta(days=42, seconds=42)
+        set_env({"TIMEDELTA": " 42 D  -42s "})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(days=42, seconds=-42)
         # unicode µs (in addition to us below)
         set_env({"TIMEDELTA": "42µs"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(microseconds=42)
@@ -250,6 +260,17 @@ class TestCasting:
             milliseconds=42,
             microseconds=42,
         )
+        # empty string not allowed
+        set_env({"TIMEDELTA": ""})
+        with pytest.raises(environs.EnvError):
+            env.timedelta("TIMEDELTA")
+        # float not allowed
+        set_env({"TIMEDELTA": "4.2"})
+        with pytest.raises(environs.EnvError):
+            env.timedelta("TIMEDELTA")
+        set_env({"TIMEDELTA": "4.2d"})
+        with pytest.raises(environs.EnvError):
+            env.timedelta("TIMEDELTA")
 
     def test_time_cast(self, set_env, env):
         set_env({"TIME": "10:30"})
