@@ -229,6 +229,12 @@ class TestCasting:
         assert env.date("DATE") == date
 
     def test_timedelta_cast(self, set_env, env):
+        # default values
+        assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)
+        assert env.timedelta("TIMEDELTA", 42.9) == dt.timedelta(seconds=42)  # bug?
+        assert env.timedelta("TIMEDELTA", dt.timedelta(seconds=42)) == dt.timedelta(
+            seconds=42,
+        )
         # seconds as integer
         set_env({"TIMEDELTA": "0"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()
