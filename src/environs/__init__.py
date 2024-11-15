@@ -463,6 +463,7 @@ class Env:
         False as a second positional argument.
         """
 
+        env_path = ""
         is_env_loaded = False
         if path is None:
             # By default, start search from the same directory this function is called
