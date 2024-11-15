@@ -407,6 +407,17 @@ class TestEnvFileReading:
         env_path = str(HERE / ".env")
         assert path == env_path
 
+    def test_read_env_return_path_with_dotenv_on_working_dir(self, env):
+        working_dir = pathlib.Path(os.getcwd())
+        dotenv_path = working_dir / ".env"
+        open(dotenv_path, "x")  # create .env on working dir
+
+        path = env.read_env(return_path=True)
+        env_path = str(HERE / ".env")
+        assert path == env_path
+
+        os.remove(dotenv_path)
+
 
 def always_fail(value):
     raise environs.EnvError("something went wrong")

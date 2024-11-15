@@ -488,6 +488,7 @@ class Env:
                         check_path, verbose=verbose, override=override
                     )
                     env_path = str(check_path)
+                    break
         else:
             is_env_loaded = load_dotenv(str(start), verbose=verbose, override=override)
             env_path = str(start)
