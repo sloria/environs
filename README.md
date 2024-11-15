@@ -110,7 +110,7 @@ The following are all type-casting methods of `Env`:
 - `env.datetime`
 - `env.date`
 - `env.time`
-- `env.timedelta` (assumes value is an integer in seconds, or an ordered duration string like `7h7s` or `7w 7d 7h 7m 7s 7ms 7us`)
+- `env.timedelta` (assumes value is an float in seconds, or an ordered duration string like `7h7s` or `7w 7d 7h 7m 7s 7ms 7us`)
 - `env.url`
 - `env.uuid`
 - `env.log_level`

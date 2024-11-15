@@ -229,29 +229,71 @@ class TestCasting:
         assert env.date("DATE") == date
 
     def test_timedelta_cast(self, set_env, env):
-        # seconds as integer
+        # default as an integer, a float or a timedelta
+        assert env.timedelta("NO_VALUE", default=0) == dt.timedelta()
+        assert env.timedelta("NO_VALUE", default=42) == dt.timedelta(seconds=42)
+        assert env.timedelta("NO_VALUE", default=-42) == dt.timedelta(seconds=-42)
+        assert env.timedelta("NO_VALUE", default=42.3) == dt.timedelta(
+            seconds=42, milliseconds=300
+        )
+        assert env.timedelta(
+            "NO_VALUE", default=dt.timedelta(seconds=42)
+        ) == dt.timedelta(seconds=42)
+        assert env.timedelta(
+            "NO_VALUE", default=dt.timedelta(seconds=42, milliseconds=300)
+        ) == dt.timedelta(seconds=42, milliseconds=300)
+        # seconds as integer string
         set_env({"TIMEDELTA": "0"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()
+        assert env.timedelta("NO_VALUE", default="0") == dt.timedelta()
         set_env({"TIMEDELTA": "42"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
+        assert env.timedelta("NO_VALUE", default="42") == dt.timedelta(seconds=42)
         set_env({"TIMEDELTA": "-42"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=-42)
+        assert env.timedelta("NO_VALUE", default="-42") == dt.timedelta(seconds=-42)
+        # seconds as a float string
+        set_env({"TIMEDELTA": "42.3"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42, milliseconds=300)
+        assert env.timedelta("NO_VALUE", default="42.3") == dt.timedelta(
+            seconds=42, milliseconds=300
+        )
         # seconds as duration string
         set_env({"TIMEDELTA": "0s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()
+        assert env.timedelta("NO_VALUE", default="0s") == dt.timedelta()
         set_env({"TIMEDELTA": "42s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
+        assert env.timedelta("NO_VALUE", default="42s") == dt.timedelta(seconds=42)
         set_env({"TIMEDELTA": "-42s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=-42)
+        assert env.timedelta("NO_VALUE", default="-42s") == dt.timedelta(seconds=-42)
         # whitespaces, units subselection (but descending ordering)
         set_env({"TIMEDELTA": " 42 d  -42s "})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(days=42, seconds=-42)
+        assert env.timedelta("NO_VALUE", default=" 42 d  -42s ") == dt.timedelta(
+            days=42, seconds=-42
+        )
         # unicode µs (in addition to us below)
         set_env({"TIMEDELTA": "42µs"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(microseconds=42)
+        assert env.timedelta("NO_VALUE", default="42µs") == dt.timedelta(
+            microseconds=42
+        )
         # all supported units
         set_env({"TIMEDELTA": "42w 42d 42h 42m 42s 42ms 42us"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(
+            weeks=42,
+            days=42,
+            hours=42,
+            minutes=42,
+            seconds=42,
+            milliseconds=42,
+            microseconds=42,
+        )
+        assert env.timedelta(
+            "NO_VALUE", default="42w 42d 42h 42m 42s 42ms 42us"
+        ) == dt.timedelta(
             weeks=42,
             days=42,
             hours=42,
@@ -264,13 +306,20 @@ class TestCasting:
         set_env({"TIMEDELTA": ""})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
-        # float not allowed
-        set_env({"TIMEDELTA": "4.2"})
+        set_env({"TIMEDELTA": "something"})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
         set_env({"TIMEDELTA": "4.2s"})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
+        with pytest.raises(environs.EnvError):
+            env.timedelta("NO_VALUE", default="")
+        with pytest.raises(environs.EnvError):
+            env.timedelta("NO_VALUE", default="4.2s")
+        with pytest.raises(environs.EnvError):
+            env.timedelta("NO_VALUE", default=True)
+        with pytest.raises(environs.EnvError):
+            env.timedelta("NO_VALUE", default=dt.datetime.now())
 
     def test_time_cast(self, set_env, env):
         set_env({"TIME": "10:30"})

@@ -40,7 +40,6 @@ _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 # - this pattern does not allow duplicate unit occurrences, GEP-2257 does
 # - this pattern allows for negative integers, GEP-2257 does not
 _TIMEDELTA_PATTERN = re.compile(
-    r"^(?:\s*)"  # optional whitespace at the beginning of the string
     r"(?:(-?\d+)\s*w\s*)?"  # weeks with optional whitespace around unit
     r"(?:(-?\d+)\s*d\s*)?"  # days with optional whitespace around unit
     r"(?:(-?\d+)\s*h\s*)?"  # hours with optional whitespace around unit
@@ -378,16 +377,34 @@ class TimeDeltaField(ma.fields.TimeDelta):
     def _deserialize(self, value, *args, **kwargs) -> timedelta:
         if isinstance(value, timedelta):
             return value
-        match = _TIMEDELTA_PATTERN.match(value)
-        if match is not None and match.group(0):  # disallow "", allow "0s"
+        if isinstance(value, str):
+            if value.strip() == "":
+                raise ma.ValidationError(
+                    "An empty string is not a valid period of time."
+                )
+            match = _TIMEDELTA_PATTERN.match(value.strip())
+            if match is not None:
+                return timedelta(
+                    weeks=int(match.group(1) or 0),
+                    days=int(match.group(2) or 0),
+                    hours=int(match.group(3) or 0),
+                    minutes=int(match.group(4) or 0),
+                    seconds=int(match.group(5) or 0),
+                    milliseconds=int(match.group(6) or 0),
+                    microseconds=int(match.group(7) or 0),
+                )
+            try:
+                value = float(value)
+            except ValueError:
+                raise ma.ValidationError("Not a valid period of time.") from None
+        if isinstance(value, bool):
+            raise ma.ValidationError("Not a valid period of time.")
+        if isinstance(value, (int, float)):
+            seconds = int(value)
+            milliseconds = int(value * 1000 % 1000)
             return timedelta(
-                weeks=int(match.group(1) or 0),
-                days=int(match.group(2) or 0),
-                hours=int(match.group(3) or 0),
-                minutes=int(match.group(4) or 0),
-                seconds=int(match.group(5) or 0),
-                milliseconds=int(match.group(6) or 0),
-                microseconds=int(match.group(7) or 0),
+                seconds=seconds,
+                milliseconds=milliseconds,
             )
         return super()._deserialize(value, *args, **kwargs)
 
