@@ -250,7 +250,7 @@ class TestCasting:
         set_env({"TIMEDELTA": "-42s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=-42)
         # whitespaces, units subselection (but descending ordering)
-        set_env({"TIMEDELTA": " 42 d  -42s "})
+        set_env({"TIMEDELTA": " 42 d \t -42s "})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(days=42, seconds=-42)
         # unicode µs (in addition to us below)
         set_env({"TIMEDELTA": "42µs"})
@@ -268,6 +268,10 @@ class TestCasting:
         )
         # empty string not allowed
         set_env({"TIMEDELTA": ""})
+        with pytest.raises(environs.EnvError):
+            env.timedelta("TIMEDELTA")
+        # empty string with whitespace not allowed
+        set_env({"TIMEDELTA": " "})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
         # float not allowed
