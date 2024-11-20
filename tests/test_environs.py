@@ -15,7 +15,6 @@ import pytest
 from marshmallow import fields, validate
 
 import environs
-import tempfile
 
 HERE = pathlib.Path(__file__).parent
 
