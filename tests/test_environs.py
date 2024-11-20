@@ -229,6 +229,13 @@ class TestCasting:
         assert env.date("DATE") == date
 
     def test_timedelta_cast(self, set_env, env):
+        # default values
+        assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)
+        assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)
+        assert env.timedelta("TIMEDELTA", 42.9) == dt.timedelta(seconds=42)  # bug?
+        assert env.timedelta("TIMEDELTA", dt.timedelta(seconds=42)) == dt.timedelta(
+            seconds=42,
+        )
         # seconds as integer
         set_env({"TIMEDELTA": "0"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()
@@ -244,7 +251,7 @@ class TestCasting:
         set_env({"TIMEDELTA": "-42s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=-42)
         # whitespaces, units subselection (but descending ordering)
-        set_env({"TIMEDELTA": " 42 d  -42s "})
+        set_env({"TIMEDELTA": " 42 d \t -42s "})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(days=42, seconds=-42)
         # unicode µs (in addition to us below)
         set_env({"TIMEDELTA": "42µs"})
@@ -262,6 +269,10 @@ class TestCasting:
         )
         # empty string not allowed
         set_env({"TIMEDELTA": ""})
+        with pytest.raises(environs.EnvError):
+            env.timedelta("TIMEDELTA")
+        # empty string with whitespace not allowed
+        set_env({"TIMEDELTA": " "})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
         # float not allowed

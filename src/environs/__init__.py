@@ -378,17 +378,18 @@ class TimeDeltaField(ma.fields.TimeDelta):
     def _deserialize(self, value, *args, **kwargs) -> timedelta:
         if isinstance(value, timedelta):
             return value
-        match = _TIMEDELTA_PATTERN.match(value)
-        if match is not None and match.group(0):  # disallow "", allow "0s"
-            return timedelta(
-                weeks=int(match.group(1) or 0),
-                days=int(match.group(2) or 0),
-                hours=int(match.group(3) or 0),
-                minutes=int(match.group(4) or 0),
-                seconds=int(match.group(5) or 0),
-                milliseconds=int(match.group(6) or 0),
-                microseconds=int(match.group(7) or 0),
-            )
+        if isinstance(value, str):
+            match = _TIMEDELTA_PATTERN.match(value)
+            if match is not None and any(groups := match.groups(default=0)):
+                return timedelta(
+                    weeks=int(groups[0]),
+                    days=int(groups[1]),
+                    hours=int(groups[2]),
+                    minutes=int(groups[3]),
+                    seconds=int(groups[4]),
+                    milliseconds=int(groups[5]),
+                    microseconds=int(groups[6]),
+                )
         return super()._deserialize(value, *args, **kwargs)
 
 
