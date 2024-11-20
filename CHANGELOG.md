@@ -1,5 +1,13 @@
 # Changelog
 
+## 11.2.1 (unreleased)
+
+Bug fixes:
+
+- Fix `Env.read_env(recurse=True)` so that it returns as soon as a `.env`
+  file is found ([#370](https://github.com/sloria/environs/pull/370)).
+  Thanks [senese](https://github.com/senese) for the PR.
+
 ## 11.2.0 (2024-11-14)
 
 Features:
