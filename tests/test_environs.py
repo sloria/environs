@@ -15,6 +15,7 @@ import pytest
 from marshmallow import fields, validate
 
 import environs
+import tempfile
 
 HERE = pathlib.Path(__file__).parent
 
@@ -407,16 +408,35 @@ class TestEnvFileReading:
         env_path = str(HERE / ".env")
         assert path == env_path
 
-    def test_read_env_return_path_with_dotenv_on_working_dir(self, env):
+    def test_read_env_return_path_with_dotenv_in_working_dir(self, env):
         working_dir = pathlib.Path(os.getcwd())
-        dotenv_path = working_dir / ".env"
-        open(dotenv_path, "x")  # create .env on working dir
+        temp_env = working_dir / ".env"
+        try:
+            # Create an empty .env file in working dir
+            temp_env.touch()
+            path = env.read_env(return_path=True)
+        finally:
+            if temp_env.exists():
+                temp_env.unlink()
 
-        path = env.read_env(return_path=True)
         env_path = str(HERE / ".env")
         assert path == env_path
 
-        os.remove(dotenv_path)
+    def test_read_env_return_path_if_env_not_found(self, env, tmp_path):
+        # Move .env file to temp location
+        env_path = HERE / ".env"
+        temp_env = tmp_path / ".env"
+        env_path.rename(temp_env)
+
+        try:
+            path = env.read_env(return_path=True)
+        finally:
+            # Restore .env file
+            if temp_env.exists():
+                temp_env.rename(env_path)
+            assert path == ""
+
+        assert path == ""
 
 
 def always_fail(value):
