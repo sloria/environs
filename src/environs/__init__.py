@@ -454,7 +454,7 @@ class Env:
         verbose: _BoolType = False,
         override: _BoolType = False,
         return_path: _BoolType = False,
-    ) -> typing.Union[_BoolType, _StrType]:
+    ) -> typing.Union[_BoolType, typing.Optional[_StrType]]:
         """Read a .env file into os.environ.
 
         If .env is not found in the directory from which this method is called,
@@ -462,8 +462,7 @@ class Env:
         file is found. If you do not wish to recurse up the tree, you may pass
         False as a second positional argument.
         """
-
-        env_path = ""
+        env_path = None
         is_env_loaded = False
         if path is None:
             # By default, start search from the same directory this function is called

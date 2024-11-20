@@ -426,17 +426,14 @@ class TestEnvFileReading:
         # Move .env file to temp location
         env_path = HERE / ".env"
         temp_env = tmp_path / ".env"
-        env_path.rename(temp_env)
-
         try:
+            env_path.rename(temp_env)
             path = env.read_env(return_path=True)
+            assert path is None
         finally:
             # Restore .env file
             if temp_env.exists():
                 temp_env.rename(env_path)
-            assert path == ""
-
-        assert path == ""
 
 
 def always_fail(value):
