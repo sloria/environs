@@ -1,6 +1,6 @@
 # Changelog
 
-## 11.2.1 (unreleased)
+## 11.2.1 (2024-11-20)
 
 Bug fixes:
 
