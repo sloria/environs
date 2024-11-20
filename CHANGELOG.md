@@ -4,6 +4,9 @@
 
 Bug fixes:
 
+- Fix passing non-string default values to `Env.timedelta` ([#369](https://github.com/sloria/environs/pull/369)).
+  Thanks [tcleonard](https://github.com/tcleonard) for reporting and
+  thanks [ddelange](https://github.com/ddelange) for the PR.
 - Fix `Env.read_env(recurse=True)` so that it returns as soon as a `.env`
   file is found ([#370](https://github.com/sloria/environs/pull/370)).
   Thanks [senese](https://github.com/senese) for the PR.
