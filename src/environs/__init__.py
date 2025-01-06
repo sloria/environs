@@ -16,6 +16,12 @@ from urllib.parse import ParseResult, urlparse
 import marshmallow as ma
 from dotenv.main import _walk_to_root, load_dotenv
 
+if typing.TYPE_CHECKING:
+    try:
+        from dj_database_url import DBConfig
+    except ImportError:
+        pass
+
 __all__ = ["EnvError", "Env"]
 
 _T = typing.TypeVar("_T")
@@ -297,7 +303,7 @@ def _enum_parser(value, type: type[_EnumT], ignore_case: bool = False) -> _EnumT
     raise invalid_exc
 
 
-def _dj_db_url_parser(value: str, **kwargs) -> dict:
+def _dj_db_url_parser(value: str, **kwargs) -> "DBConfig":
     try:
         import dj_database_url
     except ImportError as error:
