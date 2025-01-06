@@ -51,6 +51,10 @@ _TIMEDELTA_PATTERN = re.compile(
 )
 
 
+# Reexport marshmallow's ValidationError. Custom validators should raise this for invalid input.
+ValidationError = ma.ValidationError
+
+
 class EnvError(ValueError):
     """Raised when an environment variable or
     if a required environment variable is unset.
@@ -170,7 +174,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
                 "Env has already been sealed. New values cannot be parsed."
             )
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
-        self._fields[parsed_key] = ma.fields.Field()
+        self._fields[parsed_key] = ma.fields.Raw()
         source_key = proxied_key or parsed_key
         if raw_value is ma.missing:
             if self.eager:
@@ -396,7 +400,7 @@ class TimeDeltaField(ma.fields.TimeDelta):
 class Env:
     """An environment variable reader."""
 
-    __call__: ParserMethod = _field2method(ma.fields.Field, "__call__")
+    __call__: ParserMethod = _field2method(ma.fields.Raw, "__call__")
 
     int = _field2method(ma.fields.Int, "int")
     bool = _field2method(ma.fields.Bool, "bool")

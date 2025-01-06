@@ -10,13 +10,13 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = ["python-dotenv", "marshmallow>=3.13.0"]
 
 [project.urls]
@@ -26,8 +26,8 @@ Source = "https://github.com/sloria/environs"
 
 [project.optional-dependencies]
 django = ["dj-database-url", "dj-email-url", "django-cache-url"]
-tests = ["environs[django]", "pytest"]
-dev = ["environs[tests]", "tox", "pre-commit>=3.5,<5.0"]
+tests = ["environs[django]", "pytest", "packaging"]
+dev = ["environs[tests]", "tox", "pre-commit>=4.0,<5.0"]
 
 [build-system]
 requires = ["flit_core<4"]

@@ -1,4 +1,5 @@
 import datetime as dt
+import importlib.metadata
 import logging
 import os
 import pathlib
@@ -13,10 +14,12 @@ import django_cache_url
 import marshmallow as ma
 import pytest
 from marshmallow import fields, validate
+from packaging.version import Version
 
 import environs
 
 HERE = pathlib.Path(__file__).parent
+MARSHMALLOW_VERSION = Version(importlib.metadata.version("marshmallow"))
 
 
 @pytest.fixture
@@ -190,7 +193,7 @@ class TestCasting:
         assert exc.value.args[0] == 'Environment variable "FOO" not set'
 
     def test_default_set(self, env):
-        if ma.__version_info__ >= (3, 13):
+        if MARSHMALLOW_VERSION >= Version("3.13"):
             assert env.str("FOO", load_default="foo") == "foo"
         else:
             assert env.str("FOO", missing="foo") == "foo"
@@ -232,10 +235,13 @@ class TestCasting:
         # default values
         assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)
         assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)
-        assert env.timedelta("TIMEDELTA", 42.9) == dt.timedelta(seconds=42)  # bug?
-        assert env.timedelta("TIMEDELTA", dt.timedelta(seconds=42)) == dt.timedelta(
-            seconds=42,
-        )
+        # marshmallow 4 preserves float values as microseconds
+        if MARSHMALLOW_VERSION >= Version("4.0"):
+            assert env.timedelta("TIMEDELTA", 42.9) == dt.timedelta(
+                seconds=42, microseconds=900000
+            )
+        else:
+            assert env.timedelta("TIMEDELTA", 42.9) == dt.timedelta(seconds=42)
         # seconds as integer
         set_env({"TIMEDELTA": "0"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()
@@ -273,10 +279,6 @@ class TestCasting:
             env.timedelta("TIMEDELTA")
         # empty string with whitespace not allowed
         set_env({"TIMEDELTA": " "})
-        with pytest.raises(environs.EnvError):
-            env.timedelta("TIMEDELTA")
-        # float not allowed
-        set_env({"TIMEDELTA": "4.2"})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
         set_env({"TIMEDELTA": "4.2s"})
@@ -454,8 +456,12 @@ class TestValidation:
     def test_can_add_validator(self, set_env, env):
         set_env({"NUM": "3"})
 
+        def validate(n):
+            if n <= 3:
+                raise environs.EnvError("Invalid value.")
+
         with pytest.raises(environs.EnvError) as excinfo:
-            env.int("NUM", validate=lambda n: n > 3)
+            env.int("NUM", validate=validate)
         assert "Invalid value." in excinfo.value.args[0]
 
     def test_can_add_marshmallow_validator(self, set_env, env):
@@ -641,11 +647,15 @@ class TestPrefix:
         }
 
     def test_error_message_for_prefixed_var(self, env):
+        def validate(val):
+            if val >= 42:
+                raise environs.ValidationError("Invalid value.")
+
         with env.prefixed("APP_"):
             with pytest.raises(
                 environs.EnvError, match='Environment variable "APP_INT" invalid'
             ):
-                env.int("INT", validate=lambda val: val < 42)
+                env.int("INT", validate=validate)
 
 
 class TestNestedPrefix:
