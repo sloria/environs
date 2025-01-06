@@ -36,7 +36,7 @@ FieldFactory = typing.Callable[..., ma.fields.Field]
 Subcast = typing.Union[type, typing.Callable[..., _T], ma.fields.Field]
 FieldType = type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
-ParserMethod = typing.Callable
+ParserMethod = typing.Callable[..., typing.Any]
 
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
