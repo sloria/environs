@@ -1,6 +1,6 @@
 # Changelog
 
-## 12.0.0 (unreleased)
+## 12.0.0 (2025-01-06)
 
 Features:
 
