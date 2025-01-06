@@ -347,24 +347,29 @@ def _dj_cache_url_parser(value: str, **kwargs) -> dict:
         raise ma.ValidationError(error.args[0]) from error
 
 
-class URLField(ma.fields.URL):
-    def _serialize(self, value: ParseResult, *args, **kwargs) -> str:
+class URLField(ma.fields.Url):
+    def _serialize(self, value: ParseResult, *args, **kwargs) -> str:  # type: ignore[override]
         return value.geturl()
 
     # Override deserialize rather than _deserialize because we need
     # to call urlparse *after* validation has occurred
-    def deserialize(
+    def deserialize(  # type: ignore[override]
         self,
-        value: str,
-        attr: typing.Optional[str] = None,
-        data: typing.Optional[typing.Mapping] = None,
+        value: typing.Any,
+        attr: str | None = None,
+        data: typing.Mapping[str, typing.Any] | None = None,
         **kwargs,
     ) -> ParseResult:
         ret = super().deserialize(value, attr, data, **kwargs)
         return urlparse(ret)
 
 
-class PathField(ma.fields.Str):
+class PathField(ma.fields.Field[Path]):
+    def _serialize(self, value: Path | None, *args, **kwargs) -> str | None:
+        if value is None:
+            return None
+        return str(value)
+
     def _deserialize(self, value, *args, **kwargs) -> Path:
         if isinstance(value, Path):
             return value
@@ -372,7 +377,7 @@ class PathField(ma.fields.Str):
         return Path(ret)
 
 
-class LogLevelField(ma.fields.Int):
+class LogLevelField(ma.fields.Integer):
     def _format_num(self, value) -> int:
         try:
             return super()._format_num(value)
