@@ -236,7 +236,7 @@ class TestCasting:
         assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)
         assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)
         # marshmallow 4 preserves float values as microseconds
-        if MARSHMALLOW_VERSION >= Version("4.0"):
+        if MARSHMALLOW_VERSION.major >= 4:
             assert env.timedelta("TIMEDELTA", 42.9) == dt.timedelta(
                 seconds=42, microseconds=900000
             )
