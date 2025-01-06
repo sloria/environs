@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import collections
 import contextlib
 import functools
@@ -68,9 +70,7 @@ class EnvError(ValueError):
 
 
 class EnvValidationError(EnvError):
-    def __init__(
-        self, message: str, error_messages: typing.Union[ErrorList, ErrorMapping]
-    ):
+    def __init__(self, message: str, error_messages: ErrorList | ErrorMapping):
         self.error_messages = error_messages
         super().__init__(message)
 
@@ -89,29 +89,28 @@ def _field2method(
     field_or_factory: FieldOrFactory,
     method_name: str,
     *,
-    preprocess: typing.Optional[typing.Callable] = None,
+    preprocess: typing.Callable | None = None,
     preprocess_kwarg_names: typing.Sequence[str] = tuple(),
 ) -> ParserMethod:
     def method(
-        self: "Env",
+        self: Env,
         name: str,
         default: typing.Any = ma.missing,
-        subcast: typing.Optional[Subcast] = None,
+        subcast: Subcast | None = None,
         *,
         # Subset of relevant marshmallow.Field kwargs
         load_default: typing.Any = ma.missing,
-        validate: typing.Optional[
-            typing.Union[
-                typing.Callable[[typing.Any], typing.Any],
-                typing.Iterable[typing.Callable[[typing.Any], typing.Any]],
-            ]
-        ] = None,
+        validate: (
+            typing.Callable[[typing.Any], typing.Any]
+            | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
+            | None
+        ) = None,
         required: bool = False,
-        allow_none: typing.Optional[bool] = None,
-        error_messages: typing.Optional[dict[str, str]] = None,
-        metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
+        allow_none: bool | None = None,
+        error_messages: dict[str, str] | None = None,
+        metadata: typing.Mapping[str, typing.Any] | None = None,
         **kwargs,
-    ) -> typing.Optional[_T]:
+    ) -> _T | None:
         if self._sealed:
             raise EnvSealedError(
                 "Env has already been sealed. New values cannot be parsed."
@@ -132,7 +131,7 @@ def _field2method(
         ):
             field = field_or_factory(**field_kwargs, **kwargs)
         else:
-            parsed_subcast = _make_subcast_field(subcast)
+            parsed_subcast = _make_subcast_field(subcast) if subcast else ma.fields.Raw
             field = typing.cast(FieldFactory, field_or_factory)(
                 subcast=parsed_subcast, **field_kwargs
             )
@@ -170,11 +169,11 @@ def _field2method(
 
 def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
     def method(
-        self: "Env",
+        self: Env,
         name: str,
         default: typing.Any = ma.missing,
         **kwargs,
-    ) -> typing.Optional[_T]:
+    ) -> _T | None:
         if self._sealed:
             raise EnvSealedError(
                 "Env has already been sealed. New values cannot be parsed."
@@ -217,7 +216,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
 
 
 def _make_subcast_field(
-    subcast: typing.Optional[Subcast],
+    subcast: Subcast,
 ) -> type[ma.fields.Field]:
     if isinstance(subcast, type) and subcast in ma.Schema.TYPE_MAPPING:
         inner_field = ma.Schema.TYPE_MAPPING[subcast]
@@ -232,17 +231,20 @@ def _make_subcast_field(
 
         inner_field = SubcastField
     else:
-        inner_field = ma.fields.Field
+        inner_field = ma.fields.Raw
     return inner_field
 
 
-def _make_list_field(*, subcast: typing.Optional[type], **kwargs) -> ma.fields.List:
-    inner_field = _make_subcast_field(subcast)
+def _make_list_field(*, subcast: Subcast | None, **kwargs) -> ma.fields.List:
+    if subcast:
+        inner_field = _make_subcast_field(subcast)
+    else:
+        inner_field = ma.fields.Raw
     return ma.fields.List(inner_field, **kwargs)
 
 
 def _preprocess_list(
-    value: typing.Union[str, typing.Iterable], *, delimiter: str = ",", **kwargs
+    value: str | typing.Iterable, *, delimiter: str = ",", **kwargs
 ) -> typing.Iterable:
     if ma.utils.is_iterable_but_not_string(value) or value is None:
         return value
@@ -250,19 +252,25 @@ def _preprocess_list(
 
 
 def _preprocess_dict(
-    value: typing.Union[str, typing.Mapping],
+    value: str | typing.Mapping,
     *,
-    subcast_keys: typing.Optional[Subcast] = None,
-    subcast_values: typing.Optional[Subcast] = None,
+    subcast_keys: Subcast | None = None,
+    subcast_values: Subcast | None = None,
     delimiter: str = ",",
     **kwargs,
 ) -> typing.Mapping:
     if isinstance(value, Mapping):
         return value
-    subcast_keys_instance: ma.fields.Field = _make_subcast_field(subcast_keys)(**kwargs)
-    subcast_values_instance: ma.fields.Field = _make_subcast_field(subcast_values)(
-        **kwargs
-    )
+    subcast_keys_instance: ma.fields.Field
+    if subcast_keys:
+        subcast_keys_instance = _make_subcast_field(subcast_keys)(**kwargs)
+    else:
+        subcast_keys_instance = ma.fields.Raw()
+    subcast_values_instance: ma.fields.Field
+    if subcast_values:
+        subcast_values_instance = _make_subcast_field(subcast_values)(**kwargs)
+    else:
+        subcast_values_instance = ma.fields.Raw()
 
     return {
         subcast_keys_instance.deserialize(
@@ -272,7 +280,7 @@ def _preprocess_dict(
     }
 
 
-def _preprocess_json(value: typing.Union[str, typing.Mapping, list], **kwargs):
+def _preprocess_json(value: str | typing.Mapping | list, **kwargs):
     try:
         if isinstance(value, str):
             return pyjson.loads(value)
@@ -303,7 +311,7 @@ def _enum_parser(value, type: type[_EnumT], ignore_case: bool = False) -> _EnumT
     raise invalid_exc
 
 
-def _dj_db_url_parser(value: str, **kwargs) -> "DBConfig":
+def _dj_db_url_parser(value: str, **kwargs) -> DBConfig:
     try:
         import dj_database_url
     except ImportError as error:
@@ -364,7 +372,8 @@ class URLField(ma.fields.Url):
         return urlparse(ret)
 
 
-class PathField(ma.fields.Field[Path]):
+# TODO: Change to ma.fields.Field[Path] when supporting marshmallow >= 4
+class PathField(ma.fields.Field):
     def _serialize(self, value: Path | None, *args, **kwargs) -> str | None:
         if value is None:
             return None
@@ -457,7 +466,7 @@ class Env:
         self._fields: dict[_StrType, ma.fields.Field] = {}
         self._values: dict[_StrType, typing.Any] = {}
         self._errors: ErrorMapping = collections.defaultdict(list)
-        self._prefix: typing.Optional[_StrType] = None
+        self._prefix: _StrType | None = None
         self.__custom_parsers__: dict[_StrType, ParserMethod] = {}
 
     def __repr__(self) -> _StrType:
@@ -465,12 +474,12 @@ class Env:
 
     @staticmethod
     def read_env(
-        path: typing.Optional[_StrType] = None,
+        path: _StrType | None = None,
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
         return_path: _BoolType = False,
-    ) -> typing.Union[_BoolType, typing.Optional[_StrType]]:
+    ) -> _BoolType | _StrType | None:
         """Read a .env file into os.environ.
 
         If .env is not found in the directory from which this method is called,
@@ -516,7 +525,7 @@ class Env:
             return is_env_loaded
 
     @contextlib.contextmanager
-    def prefixed(self, prefix: _StrType) -> typing.Iterator["Env"]:
+    def prefixed(self, prefix: _StrType) -> typing.Iterator[Env]:
         """Context manager for parsing envvars with a common prefix."""
         try:
             old_prefix = self._prefix
@@ -588,7 +597,7 @@ class Env:
 
     def _get_from_environ(
         self, key: _StrType, default: typing.Any, *, proxied: _BoolType = False
-    ) -> tuple[_StrType, typing.Any, typing.Optional[_StrType]]:
+    ) -> tuple[_StrType, typing.Any, _StrType | None]:
         """Access a value from os.environ. Handles proxied variables,
         e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
 
@@ -605,7 +614,7 @@ class Env:
             expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
             if expand_match:  # Full match expand_vars - special case keep default
                 proxied_key: _StrType = expand_match.groups()[0]
-                subs_default: typing.Optional[_StrType] = expand_match.groups()[1]
+                subs_default: _StrType | None = expand_match.groups()[1]
                 if subs_default is not None:
                     default = subs_default[2:]
                 elif (
