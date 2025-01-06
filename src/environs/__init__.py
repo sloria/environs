@@ -24,7 +24,7 @@ if typing.TYPE_CHECKING:
     except ImportError:
         pass
 
-__all__ = ["EnvError", "Env"]
+__all__ = ["Env", "EnvError", "ValidationError"]
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -355,7 +355,7 @@ def _dj_cache_url_parser(value: str, **kwargs) -> dict:
         raise ma.ValidationError(error.args[0]) from error
 
 
-class URLField(ma.fields.Url):
+class _URLField(ma.fields.Url):
     def _serialize(self, value: ParseResult, *args, **kwargs) -> str:  # type: ignore[override]
         return value.geturl()
 
@@ -372,8 +372,8 @@ class URLField(ma.fields.Url):
         return urlparse(ret)
 
 
-# TODO: Change to ma.fields.Field[Path] when supporting marshmallow >= 4
-class PathField(ma.fields.Field):
+# TODO: Change to ma.fields.Field[Path] after dropping marshmallow 3 support
+class _PathField(ma.fields.Field):
     def _serialize(self, value: Path | None, *args, **kwargs) -> str | None:
         if value is None:
             return None
@@ -386,7 +386,7 @@ class PathField(ma.fields.Field):
         return Path(ret)
 
 
-class LogLevelField(ma.fields.Integer):
+class _LogLevelField(ma.fields.Integer):
     def _format_num(self, value) -> int:
         try:
             return super()._format_num(value)
@@ -398,7 +398,7 @@ class LogLevelField(ma.fields.Integer):
                 raise ma.ValidationError("Not a valid log level.") from error
 
 
-class TimeDeltaField(ma.fields.TimeDelta):
+class _TimeDeltaField(ma.fields.TimeDelta):
     def _deserialize(self, value, *args, **kwargs) -> timedelta:
         if isinstance(value, timedelta):
             return value
@@ -449,11 +449,11 @@ class Env:
     datetime = _field2method(ma.fields.DateTime, "datetime")
     date = _field2method(ma.fields.Date, "date")
     time = _field2method(ma.fields.Time, "time")
-    path = _field2method(PathField, "path")
-    log_level = _field2method(LogLevelField, "log_level")
-    timedelta = _field2method(TimeDeltaField, "timedelta")
+    path = _field2method(_PathField, "path")
+    log_level = _field2method(_LogLevelField, "log_level")
+    timedelta = _field2method(_TimeDeltaField, "timedelta")
     uuid = _field2method(ma.fields.UUID, "uuid")
-    url = _field2method(URLField, "url")
+    url = _field2method(_URLField, "url")
     enum = _func2method(_enum_parser, "enum")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
