@@ -1,5 +1,18 @@
 # Changelog
 
+## 12.0.0 (unreleased)
+
+Features:
+
+- `Env.enum` allows passing an `Enum` as `default`.
+
+Other changes:
+
+- Support marshmallow 4.
+- Support Python 3.9-3.13.
+- _Backwards-incompatible_: Make `Field` classes private. Users should
+  not need to access these.
+
 ## 11.2.1 (2024-11-20)
 
 Bug fixes:
