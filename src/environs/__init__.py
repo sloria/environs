@@ -22,11 +22,11 @@ _T = typing.TypeVar("_T")
 _StrType = str
 _BoolType = bool
 
-ErrorMapping = typing.Mapping[str, typing.List[str]]
-ErrorList = typing.List[str]
+ErrorMapping = typing.Mapping[str, list[str]]
+ErrorList = list[str]
 FieldFactory = typing.Callable[..., ma.fields.Field]
-Subcast = typing.Union[typing.Type, typing.Callable[..., _T], ma.fields.Field]
-FieldType = typing.Type[ma.fields.Field]
+Subcast = typing.Union[type, typing.Callable[..., _T], ma.fields.Field]
+FieldType = type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable
 
@@ -102,7 +102,7 @@ def _field2method(
         ] = None,
         required: bool = False,
         allow_none: typing.Optional[bool] = None,
-        error_messages: typing.Optional[typing.Dict[str, str]] = None,
+        error_messages: typing.Optional[dict[str, str]] = None,
         metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
         **kwargs,
     ) -> typing.Optional[_T]:
@@ -212,7 +212,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
 
 def _make_subcast_field(
     subcast: typing.Optional[Subcast],
-) -> typing.Type[ma.fields.Field]:
+) -> type[ma.fields.Field]:
     if isinstance(subcast, type) and subcast in ma.Schema.TYPE_MAPPING:
         inner_field = ma.Schema.TYPE_MAPPING[subcast]
     elif isinstance(subcast, type) and issubclass(subcast, ma.fields.Field):
@@ -266,7 +266,7 @@ def _preprocess_dict(
     }
 
 
-def _preprocess_json(value: typing.Union[str, typing.Mapping, typing.List], **kwargs):
+def _preprocess_json(value: typing.Union[str, typing.Mapping, list], **kwargs):
     try:
         if isinstance(value, str):
             return pyjson.loads(value)
@@ -281,7 +281,7 @@ def _preprocess_json(value: typing.Union[str, typing.Mapping, typing.List], **kw
 _EnumT = typing.TypeVar("_EnumT", bound=Enum)
 
 
-def _enum_parser(value, type: typing.Type[_EnumT], ignore_case: bool = False) -> _EnumT:
+def _enum_parser(value, type: type[_EnumT], ignore_case: bool = False) -> _EnumT:
     invalid_exc = ma.ValidationError(f"Not a valid '{type.__name__}' enum.")
 
     if not ignore_case:
@@ -443,11 +443,11 @@ class Env:
         self.eager = eager
         self._sealed: bool = False
         self.expand_vars = expand_vars
-        self._fields: typing.Dict[_StrType, typing.Union[ma.fields.Field, type]] = {}
-        self._values: typing.Dict[_StrType, typing.Any] = {}
+        self._fields: dict[_StrType, ma.fields.Field] = {}
+        self._values: dict[_StrType, typing.Any] = {}
         self._errors: ErrorMapping = collections.defaultdict(list)
         self._prefix: typing.Optional[_StrType] = None
-        self.__custom_parsers__: typing.Dict[_StrType, ParserMethod] = {}
+        self.__custom_parsers__: dict[_StrType, ParserMethod] = {}
 
     def __repr__(self) -> _StrType:
         return f"<{self.__class__.__name__}(eager={self.eager}, expand_vars={self.expand_vars})>"  # noqa: E501
@@ -562,9 +562,7 @@ class Env:
 
         return decorator
 
-    def add_parser_from_field(
-        self, name: _StrType, field_cls: typing.Type[ma.fields.Field]
-    ):
+    def add_parser_from_field(self, name: _StrType, field_cls: type[ma.fields.Field]):
         """Register a new parser method with name ``name``,
         given a marshmallow ``Field``.
         """
@@ -579,7 +577,7 @@ class Env:
 
     def _get_from_environ(
         self, key: _StrType, default: typing.Any, *, proxied: _BoolType = False
-    ) -> typing.Tuple[_StrType, typing.Any, typing.Optional[_StrType]]:
+    ) -> tuple[_StrType, typing.Any, typing.Optional[_StrType]]:
         """Access a value from os.environ. Handles proxied variables,
         e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
 
