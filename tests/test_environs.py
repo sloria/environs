@@ -231,6 +231,24 @@ class TestCasting:
         set_env({"DATE": date.isoformat()})
         assert env.date("DATE") == date
 
+    @pytest.mark.xfail(
+        MARSHMALLOW_VERSION.major < 4,
+        reason="marshmallow 3 does not allow all fields to accept internal types",
+    )
+    @pytest.mark.parametrize(
+        ("method_name", "value"),
+        [
+            pytest.param("timedelta", dt.timedelta(seconds=42), id="timedelta"),
+            pytest.param("date", dt.date(2020, 1, 1), id="date"),
+            pytest.param("datetime", dt.datetime(2020, 1, 1, 1, 2, 3), id="datetime"),
+            pytest.param("time", dt.time(1, 2, 3), id="time"),
+            pytest.param("uuid", uuid.uuid4(), id="uuid"),
+        ],
+    )
+    def test_default_can_be_set_to_internal_type(self, env, method_name: str, value):
+        method = getattr(env, method_name)
+        assert method("NOTFOUND", value) == value
+
     def test_timedelta_cast(self, set_env, env):
         # default values
         assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)
@@ -363,6 +381,11 @@ class TestCasting:
         set_env({"DAY": "SonDAY"})
         with pytest.raises(environs.EnvError):
             assert env.enum("DAY", type=DayEnum, ignore_case=True)
+
+    def test_enum_default(self, env: environs.Env):
+        assert (
+            env.enum("NOTFOUND", type=DayEnum, default=DayEnum.SUNDAY) == DayEnum.SUNDAY
+        )
 
 
 class TestEnvFileReading:

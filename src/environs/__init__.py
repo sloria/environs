@@ -296,6 +296,9 @@ _EnumT = typing.TypeVar("_EnumT", bound=Enum)
 
 
 def _enum_parser(value, type: type[_EnumT], ignore_case: bool = False) -> _EnumT:
+    if isinstance(value, type):
+        return value
+
     invalid_exc = ma.ValidationError(f"Not a valid '{type.__name__}' enum.")
 
     if not ignore_case:
