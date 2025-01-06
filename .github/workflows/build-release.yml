@@ -17,6 +17,8 @@ jobs:
           - { name: "3.13", python: "3.13", tox: py313-marshmallow3 }
           - { name: "lowest", python: "3.9", tox: py39-marshmallowlowest }
           - { name: "highest", python: "3.13", tox: py313-marshmallowdev }
+          - { name: "mypy-ma3", python: "3.13", tox: mypy-marshmallow3 }
+          - { name: "mypy-madev", python: "3.13", tox: mypy-marshmallowdev }
     steps:
       - uses: actions/checkout@v4.0.0
       - uses: actions/setup-python@v5
