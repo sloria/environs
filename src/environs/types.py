@@ -5,6 +5,8 @@
     This module is provisional. Types may be modified, added, and removed between minor releases.
 """
 
+from __future__ import annotations
+
 import enum
 import typing
 
@@ -29,7 +31,7 @@ ParserMethod = typing.Callable[..., T]
 
 
 class BaseMethodKwargs(typing.TypedDict, total=False):
-    # Subset of relevant marshmallow.Field kwargs
+    # Subset of relevant marshmallow.Field kwargs shared by all parser methods
     load_default: typing.Any
     validate: (
         typing.Callable[[typing.Any], typing.Any]
