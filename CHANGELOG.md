@@ -9,7 +9,10 @@ Features:
 
 Other changes:
 
+- Drop support for marshmallow<3.18.0.
 - _Backwards-incompatible_: Remove `load_default` param from parser methods. Use `default` instead.
+- _Backwards-incompatible_: Rename `Env.enum`'s `type` param to `enum`.
+- _Backwards-incompatible_: Remove `ignore_case` param from `Env.enum`.
 - _Backwards-incompatible_: Remove
   `allow_none`, `error_messages`, and `metadata` params from parser methods.
 

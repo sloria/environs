@@ -19,7 +19,7 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = [
   "python-dotenv",
-  "marshmallow>=3.13.0",
+  "marshmallow>=3.18.0",
   "typing-extensions; python_version < '3.11'",
 ]
 

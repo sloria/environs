@@ -27,8 +27,7 @@ from .exceptions import (
 )
 from .types import (
     DictFieldMethod,
-    EnumFuncMethod,
-    EnumT,
+    EnumFieldMethod,
     ErrorMapping,
     FieldFactory,
     FieldMethod,
@@ -264,25 +263,6 @@ def _preprocess_json(value: str | typing.Mapping | list, **kwargs):
         raise ma.ValidationError("Not valid JSON.") from error
 
 
-def _enum_parser(value, type: type[EnumT], ignore_case: bool = False) -> EnumT:
-    if isinstance(value, type):
-        return value
-
-    invalid_exc = ma.ValidationError(f"Not a valid '{type.__name__}' enum.")
-
-    if not ignore_case:
-        try:
-            return type[value]
-        except KeyError as error:
-            raise invalid_exc from error
-
-    for enum_value in type:
-        if enum_value.name.lower() == value.lower():
-            return enum_value
-
-    raise invalid_exc
-
-
 def _dj_db_url_parser(value: str, **kwargs) -> DBConfig:
     try:
         import dj_database_url
@@ -367,7 +347,7 @@ class Env:
     uuid: FieldMethod[uuid.UUID] = _field2method(ma.fields.UUID, "uuid")
     url: FieldMethod[ParseResult] = _field2method(fields.Url, "url")
 
-    enum: EnumFuncMethod = _func2method(_enum_parser, "enum")
+    enum: EnumFieldMethod = _field2method(fields.Enum, "enum")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")

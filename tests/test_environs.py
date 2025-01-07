@@ -237,11 +237,9 @@ class TestCasting:
     @pytest.mark.parametrize(
         ("method_name", "value"),
         [
-            pytest.param("timedelta", dt.timedelta(seconds=42), id="timedelta"),
             pytest.param("date", dt.date(2020, 1, 1), id="date"),
             pytest.param("datetime", dt.datetime(2020, 1, 1, 1, 2, 3), id="datetime"),
             pytest.param("time", dt.time(1, 2, 3), id="time"),
-            pytest.param("uuid", uuid.uuid4(), id="uuid"),
         ],
     )
     def test_default_can_be_set_to_internal_type(
@@ -312,6 +310,8 @@ class TestCasting:
         set_env({"UUID": str(uid)})
         assert env.uuid("UUID") == uid
 
+        assert env.uuid("NOT_SET", uid) == uid
+
     def test_url_cast(self, set_env, env: environs.Env):
         set_env({"URL": "http://stevenloria.com/projects/?foo=42"})
         res = env.url("URL")
@@ -368,25 +368,18 @@ class TestCasting:
 
     def test_enum_cast(self, set_env, env: environs.Env):
         set_env({"DAY": "SUNDAY"})
-        assert env.enum("DAY", type=DayEnum) == DayEnum.SUNDAY
-
-    def test_enum_cast_ignore_case(self, set_env, env: environs.Env):
-        set_env({"DAY": "suNDay"})
-        assert env.enum("DAY", type=DayEnum, ignore_case=True) == DayEnum.SUNDAY
+        assert env.enum("DAY", enum=DayEnum) == DayEnum.SUNDAY
 
     def test_invalid_enum(self, set_env, env: environs.Env):
         set_env({"DAY": "suNDay"})
-        with pytest.raises(environs.EnvError):
-            assert env.enum("DAY", type=DayEnum)
-
-    def test_invalid_enum_ignore_case(self, set_env, env: environs.Env):
-        set_env({"DAY": "SonDAY"})
-        with pytest.raises(environs.EnvError):
-            assert env.enum("DAY", type=DayEnum, ignore_case=True)
+        with pytest.raises(
+            environs.EnvError, match="Must be one of: SUNDAY, MONDAY, TUESDAY"
+        ):
+            assert env.enum("DAY", enum=DayEnum)
 
     def test_enum_default(self, env: environs.Env):
         assert (
-            env.enum("NOTFOUND", type=DayEnum, default=DayEnum.SUNDAY) == DayEnum.SUNDAY
+            env.enum("NOTFOUND", enum=DayEnum, default=DayEnum.SUNDAY) == DayEnum.SUNDAY
         )
 
 

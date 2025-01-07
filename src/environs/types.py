@@ -120,11 +120,41 @@ class DictFieldMethod:
     ) -> dict[TKeys, TValues] | None: ...
 
 
-class EnumFuncMethod:
+class EnumFieldMethod(typing.Generic[EnumT]):
+    @typing.overload
     def __call__(
         self,
-        value,
-        type: type[EnumT],
-        default: EnumT | None = None,
-        ignore_case: bool = False,
+        name: str,
+        *,
+        enum: type[EnumT],
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> EnumT: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: None = ...,
+        *,
+        enum: type[EnumT],
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> EnumT | None: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: EnumT = ...,
+        *,
+        enum: type[EnumT],
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> EnumT: ...
+
+    def __call__(
+        self,
+        name: str,
+        default: EnumT | None = ...,
+        *,
+        enum: type[EnumT],
+        **kwargs: Unpack[BaseMethodKwargs],
     ) -> EnumT | None: ...

@@ -11,6 +11,7 @@ Or ::
 
 import datetime as dt
 import decimal
+import enum
 import pathlib
 import uuid
 from typing import Any
@@ -19,6 +20,12 @@ from urllib.parse import ParseResult
 import environs
 
 env = environs.Env()
+
+
+class Color(enum.IntEnum):
+    RED = 1
+    BLUE = 2
+
 
 INT0: int = env.int("FOO")
 INT1: int | None = env.int("FOO", None)
@@ -43,4 +50,7 @@ PATH0: pathlib.Path | None = env.path("FOO", None)
 LOG_LEVEL0: int | None = env.log_level("FOO", None)
 UUID0: uuid.UUID | None = env.uuid("FOO", None)
 URL0: ParseResult | None = env.url("FOO", None)
+ENUM0: Color = env.enum("FOO", enum=Color)
+ENUM1: Color | None = env.enum("FOO", None, enum=Color)
+ENUM2: Color = env.enum("FOO", Color.RED, enum=Color)
 CALL0: Any = env("FOO", None)
