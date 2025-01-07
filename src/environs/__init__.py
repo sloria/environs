@@ -87,7 +87,7 @@ class EnvValidationError(EnvError):
 
 
 class EnvSealedError(TypeError, EnvError):
-    pass
+    """Raised when trying to parse new values after an `Env` has already been sealed."""
 
 
 class ParserConflictError(ValueError):

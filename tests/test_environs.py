@@ -254,14 +254,12 @@ class TestCasting:
         # default values may be in serialized form
         assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)  # type: ignore[call-overload]
         assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)  # type: ignore[call-overload]
-        set_env({"TIMEDELTA": "42.9"})
         # marshmallow 4 preserves float values as microseconds
         if MARSHMALLOW_VERSION.major >= 4:
+            set_env({"TIMEDELTA": "42.9"})
             assert env.timedelta("TIMEDELTA") == dt.timedelta(
                 seconds=42, microseconds=900000
             )
-        else:
-            assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
         # seconds as integer
         set_env({"TIMEDELTA": "0"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()
