@@ -1,6 +1,6 @@
 # Changelog
 
-## 13.0.0 (unreleased)
+## 13.0.0 (2025-01-07)
 
 Features:
 
