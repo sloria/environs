@@ -98,3 +98,12 @@ class Url(fields.Url):
     ) -> ParseResult:
         ret = typing.cast(str, super().deserialize(value, attr, data, **kwargs))
         return urlparse(ret)
+
+
+# Remove after dropping marshmallow 3
+# This is only included to allow passing Enum values as `default``
+class Enum(fields.Enum):
+    def _deserialize(self, value, attr, data, **kwargs):
+        if isinstance(value, self.enum):
+            return value
+        return super()._deserialize(value, attr, data, **kwargs)
