@@ -1,11 +1,15 @@
 # Changelog
 
-## 12.1.0 (unreleased)
+## 13.0.0 (unreleased)
 
 Features:
 
 - Typing: Add type hints for parser methods ([#367](https://github.com/sloria/environs/issues/367)).
   Thanks [OkeyDev](https://github/OkeyDev) for the PR.
+
+Other changes:
+
+- _Backwards-incompatible_: Remove `load_default` param from parser methods. Use `default` instead.
 
 ## 12.0.0 (2025-01-06)
 

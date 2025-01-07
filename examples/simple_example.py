@@ -25,7 +25,7 @@ enable_login = env.bool("ENABLE_LOGIN", False)  # => True
 enable_feature_x = env.bool("ENABLE_FEATURE_X", False)  # => False
 # parsing lists
 gh_repos = env.list("GITHUB_REPOS")  # => ['webargs', 'konch', 'ped']
-coords = env.list("COORDINATES", subcast=float)  # => [23.3, 50.0]
+coords: list[float] | None = env.list("COORDINATES", subcast=float)  # => [23.3, 50.0]
 
 with env.prefixed("MYAPP_"):
     host = env("HOST", "localhost")

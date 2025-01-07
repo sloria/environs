@@ -110,7 +110,6 @@ def _field2method(
         subcast: Subcast[_T] | None = None,
         *,
         # Subset of relevant marshmallow.Field kwargs
-        load_default: typing.Any = ma.missing,
         validate: (
             typing.Callable[[typing.Any], typing.Any]
             | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
@@ -130,7 +129,7 @@ def _field2method(
             validate=validate,
             required=required,
             allow_none=allow_none,
-            load_default=load_default or default,
+            load_default=default,
             error_messages=error_messages,
             metadata=metadata,
         )
