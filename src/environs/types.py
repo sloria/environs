@@ -20,13 +20,9 @@ import marshmallow as ma
 T = typing.TypeVar("T")
 EnumT = typing.TypeVar("EnumT", bound=enum.Enum)
 
-
 ErrorMapping = typing.Mapping[str, list[str]]
-ErrorList = list[str]
 FieldFactory = typing.Callable[..., ma.fields.Field]
 Subcast = typing.Union[type[T], typing.Callable[..., T], ma.fields.Field]
-FieldType = type[ma.fields.Field]
-FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable[..., T]
 
 
