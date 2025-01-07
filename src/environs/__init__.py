@@ -348,7 +348,7 @@ class Env:
     uuid: FieldMethod[uuid.UUID] = _field2method(ma.fields.UUID, "uuid")
     url: FieldMethod[ParseResult] = _field2method(fields.Url, "url")
 
-    enum: EnumFieldMethod = _field2method(fields.Enum, "enum")
+    enum: EnumFieldMethod = _field2method(ma.fields.Enum, "enum")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
