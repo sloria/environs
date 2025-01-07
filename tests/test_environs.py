@@ -17,6 +17,7 @@ from marshmallow import fields, validate
 from packaging.version import Version
 
 import environs
+from environs.types import FieldMethod
 
 HERE = pathlib.Path(__file__).parent
 MARSHMALLOW_VERSION = Version(importlib.metadata.version("marshmallow"))
@@ -237,23 +238,27 @@ class TestCasting:
     @pytest.mark.parametrize(
         ("method_name", "value"),
         [
-            pytest.param("timedelta", dt.timedelta(seconds=42), id="timedelta"),
             pytest.param("date", dt.date(2020, 1, 1), id="date"),
             pytest.param("datetime", dt.datetime(2020, 1, 1, 1, 2, 3), id="datetime"),
             pytest.param("time", dt.time(1, 2, 3), id="time"),
             pytest.param("uuid", uuid.uuid4(), id="uuid"),
+            # timedelta is tested below
+            # pytest.param("timedelta", dt.timedelta(seconds=42), id="timedelta"),
         ],
     )
     def test_default_can_be_set_to_internal_type(
         self, env: environs.Env, method_name: str, value
     ):
-        method = getattr(env, method_name)
+        method: FieldMethod = getattr(env, method_name)
         assert method("NOTFOUND", value) == value
 
     def test_timedelta_cast(self, set_env, env: environs.Env):
         # default values may be in serialized form
         assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)  # type: ignore[call-overload]
         assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)  # type: ignore[call-overload]
+        assert env.timedelta("TIMEDELTA", dt.timedelta(seconds=42)) == dt.timedelta(
+            seconds=42
+        )
         # marshmallow 4 preserves float values as microseconds
         if MARSHMALLOW_VERSION.major >= 4:
             set_env({"TIMEDELTA": "42.9"})
