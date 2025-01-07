@@ -203,13 +203,19 @@ year = env.int("YEAR")  # =>2020
 # export NODE_ENV='invalid'
 # export EMAIL='^_^'
 
-from environs import Env
+from environs import Env, ValidationError
 from marshmallow.validate import OneOf, Length, Email
 
 env = Env()
 
+
 # simple validator
-env.int("TTL", validate=lambda n: n > 0)
+def validator(n):
+    if n <= 0:
+        raise ValidationError("Invalid value.")
+
+
+env.int("TTL", validate=validator)
 # => Environment variable "TTL" invalid: ['Invalid value.']
 
 
