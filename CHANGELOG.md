@@ -25,6 +25,13 @@ release_date = env.date("RELEASE", "2025-01-07")
 numbers = env.list("NUMBERS", "1,2,42", subcast=float)
 ```
 
+The exceptions to this rule are the Django-related functions, which
+accept string defaults.
+
+```python
+DATABASE_URL = env.dj_db_url("DATABASE_URL", default="postgresql://localhost:5432/mydb")
+```
+
 This fixes [#297](https://github.com/sloria/environs/issues/297)
 and [#270](https://github.com/sloria/environs/issues/270).
 
