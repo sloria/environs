@@ -111,7 +111,7 @@ class DictFieldMethod:
     def __call__(
         self,
         name: str,
-        default: typing.Any = ma.missing,
+        default: typing.Any = ...,
         *,
         subcast_keys: Subcast[TKeys] | None = None,
         subcast_values: Subcast[TValues] | None = None,
