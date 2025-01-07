@@ -22,15 +22,15 @@ from dj_database_url import DBConfig
 from dotenv.main import _walk_to_root, load_dotenv
 
 from .types import (
+    DictFieldMethod,
+    EnumFuncMethod,
     EnumT,
     ErrorList,
     ErrorMapping,
-    Field2MethodDictType,
-    Field2MethodListType,
-    Field2MethodType,
     FieldFactory,
+    FieldMethod,
     FieldOrFactory,
-    Func2MethodEnum,
+    ListFieldMethod,
     ParserMethod,
     Subcast,
 )
@@ -433,20 +433,18 @@ class Env:
 
     __call__: ParserMethod = _field2method(ma.fields.Raw, "__call__")
 
-    int: Field2MethodType[int] = _field2method(ma.fields.Int, "int")
-    bool: Field2MethodType[bool] = _field2method(ma.fields.Bool, "bool")
-    str: Field2MethodType[str] = _field2method(ma.fields.Str, "str")
-    float: Field2MethodType[float] = _field2method(ma.fields.Float, "float")
-    decimal: Field2MethodType[decimal.Decimal] = _field2method(
-        ma.fields.Decimal, "decimal"
-    )
-    list: Field2MethodListType = _field2method(
+    int: FieldMethod[int] = _field2method(ma.fields.Int, "int")
+    bool: FieldMethod[bool] = _field2method(ma.fields.Bool, "bool")
+    str: FieldMethod[str] = _field2method(ma.fields.Str, "str")
+    float: FieldMethod[float] = _field2method(ma.fields.Float, "float")
+    decimal: FieldMethod[decimal.Decimal] = _field2method(ma.fields.Decimal, "decimal")
+    list: ListFieldMethod = _field2method(
         _make_list_field,
         "list",
         preprocess=_preprocess_list,
         preprocess_kwarg_names=("subcast", "delimiter"),
     )
-    dict: Field2MethodDictType = _field2method(
+    dict: DictFieldMethod = _field2method(
         ma.fields.Dict,
         "dict",
         preprocess=_preprocess_dict,
@@ -458,24 +456,20 @@ class Env:
             "delimiter",
         ),
     )
-    json: Field2MethodType[_ListType | _DictType] = _field2method(
+    json: FieldMethod[_ListType | _DictType] = _field2method(
         ma.fields.Field, "json", preprocess=_preprocess_json
     )
-    datetime: Field2MethodType[dt.datetime] = _field2method(
-        ma.fields.DateTime, "datetime"
-    )
-    date: Field2MethodType[dt.date] = _field2method(ma.fields.Date, "date")
-    time: Field2MethodType[dt.time] = _field2method(ma.fields.Time, "time")
-    timedelta: Field2MethodType[dt.timedelta] = _field2method(
-        _TimeDeltaField, "timedelta"
-    )
-    path: Field2MethodType[Path] = _field2method(_PathField, "path")
-    log_level: Field2MethodType[_IntType] = _field2method(_LogLevelField, "log_level")
+    datetime: FieldMethod[dt.datetime] = _field2method(ma.fields.DateTime, "datetime")
+    date: FieldMethod[dt.date] = _field2method(ma.fields.Date, "date")
+    time: FieldMethod[dt.time] = _field2method(ma.fields.Time, "time")
+    timedelta: FieldMethod[dt.timedelta] = _field2method(_TimeDeltaField, "timedelta")
+    path: FieldMethod[Path] = _field2method(_PathField, "path")
+    log_level: FieldMethod[_IntType] = _field2method(_LogLevelField, "log_level")
 
-    uuid: Field2MethodType[uuid.UUID] = _field2method(ma.fields.UUID, "uuid")
-    url: Field2MethodType[ParseResult] = _field2method(_URLField, "url")
+    uuid: FieldMethod[uuid.UUID] = _field2method(ma.fields.UUID, "uuid")
+    url: FieldMethod[ParseResult] = _field2method(_URLField, "url")
 
-    enum: Func2MethodEnum = _func2method(_enum_parser, "enum")
+    enum: EnumFuncMethod = _func2method(_enum_parser, "enum")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")

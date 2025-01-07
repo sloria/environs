@@ -23,7 +23,7 @@ FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable[..., T]
 
 
-class Field2MethodType(typing.Generic[T]):
+class FieldMethod(typing.Generic[T]):
     def __call__(
         self,
         name: str,
@@ -44,7 +44,7 @@ class Field2MethodType(typing.Generic[T]):
     ) -> T | None: ...
 
 
-class Field2MethodListType:
+class ListFieldMethod:
     def __call__(
         self,
         name: str,
@@ -66,7 +66,7 @@ class Field2MethodListType:
     ) -> list | None: ...
 
 
-class Field2MethodDictType:
+class DictFieldMethod:
     def __call__(
         self,
         name: str,
@@ -87,7 +87,7 @@ class Field2MethodDictType:
     ) -> dict | None: ...
 
 
-class Func2MethodEnum:
+class EnumFuncMethod:
     def __call__(
         self,
         value,
