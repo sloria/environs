@@ -748,6 +748,11 @@ class TestFailedNestedPrefix:
 class TestDjango:
     def test_dj_db_url(self, env: environs.Env, set_env):
         db_url = "postgresql://localhost:5432/mydb"
+
+        # Default is expected to be unparsed
+        res = env.dj_db_url("DATABASE_URL", default=db_url)
+        assert res == dj_database_url.parse(db_url)
+
         set_env({"DATABASE_URL": db_url})
         res = env.dj_db_url("DATABASE_URL")
         assert res == dj_database_url.parse(db_url)
@@ -760,12 +765,22 @@ class TestDjango:
 
     def test_dj_email_url(self, env: environs.Env, set_env):
         email_url = "smtp://user@domain.com:pass@smtp.example.com:465/?ssl=True"
+
+        # Default is expected to be unparsed
+        res = env.dj_email_url("EMAIL_URL", default=email_url)
+        assert res == dj_email_url.parse(email_url)
+
         set_env({"EMAIL_URL": email_url})
         res = env.dj_email_url("EMAIL_URL")
         assert res == dj_email_url.parse(email_url)
 
     def test_dj_cache_url(self, env: environs.Env, set_env):
         cache_url = "redis://redis:6379/0"
+
+        # Default is expected to be unparsed
+        res = env.dj_cache_url("CACHE_URL", default=cache_url)
+        assert res == django_cache_url.parse(cache_url)
+
         set_env({"CACHE_URL": cache_url})
         res = env.dj_cache_url("CACHE_URL")
         assert res == django_cache_url.parse(cache_url)
