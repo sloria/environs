@@ -13,6 +13,7 @@ import datetime as dt
 import decimal
 import pathlib
 import uuid
+from typing import Any
 from urllib.parse import ParseResult
 
 import environs
@@ -37,3 +38,4 @@ Q: pathlib.Path | None = env.path("FOO", None)
 R: int | None = env.log_level("FOO", None)
 S: uuid.UUID | None = env.uuid("FOO", None)
 T: ParseResult | None = env.url("FOO", None)
+U: Any = env("FOO", None)
