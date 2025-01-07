@@ -193,10 +193,7 @@ class TestCasting:
         assert exc.value.args[0] == 'Environment variable "FOO" not set'
 
     def test_default_set(self, env):
-        if MARSHMALLOW_VERSION >= Version("3.13"):
-            assert env.str("FOO", load_default="foo") == "foo"
-        else:
-            assert env.str("FOO", missing="foo") == "foo"
+        assert env.str("FOO", default="foo") == "foo"
         # Passed positionally
         assert env.str("FOO", "foo") == "foo"
 

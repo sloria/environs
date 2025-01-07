@@ -24,7 +24,7 @@ EnumT = typing.TypeVar("EnumT", bound=enum.Enum)
 ErrorMapping = typing.Mapping[str, list[str]]
 ErrorList = list[str]
 FieldFactory = typing.Callable[..., ma.fields.Field]
-Subcast = typing.Union[type, typing.Callable[..., T], ma.fields.Field]
+Subcast = typing.Union[type[T], typing.Callable[..., T], ma.fields.Field]
 FieldType = type[ma.fields.Field]
 FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable[..., T]
@@ -32,29 +32,84 @@ ParserMethod = typing.Callable[..., T]
 
 class BaseMethodKwargs(typing.TypedDict, total=False):
     # Subset of relevant marshmallow.Field kwargs shared by all parser methods
-    load_default: typing.Any
     validate: (
         typing.Callable[[typing.Any], typing.Any]
         | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
         | None
     )
     required: bool
-    allow_none: bool | None
     error_messages: dict[str, str] | None
     metadata: typing.Mapping[str, typing.Any] | None
 
 
 class FieldMethod(typing.Generic[T]):
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: typing.Any = ...,
+        subcast: Subcast[T] | None = ...,
+        *,
+        allow_none: typing.Literal[False],
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> T: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: T,
+        subcast: Subcast[T] | None = None,
+        *,
+        allow_none: bool | None = None,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> T: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: None = ...,
+        subcast: Subcast[T] | None = ...,
+        *,
+        allow_none: bool | None = ...,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> T | None: ...
+
     def __call__(
         self,
         name: str,
         default: typing.Any = ma.missing,
         subcast: Subcast[T] | None = None,
+        *,
+        allow_none: bool | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> T | None: ...
 
 
 class ListFieldMethod:
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: typing.Any = ma.missing,
+        subcast: None = ...,
+        *,
+        delimiter: str | None = None,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> list[typing.Any] | None: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: typing.Any = ma.missing,
+        subcast: Subcast[T] = ...,
+        *,
+        delimiter: str | None = None,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> list[T] | None: ...
+
     def __call__(
         self,
         name: str,
@@ -63,7 +118,11 @@ class ListFieldMethod:
         *,
         delimiter: str | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
-    ) -> list | None: ...
+    ) -> list[T] | None: ...
+
+
+TKeys = typing.TypeVar("TKeys")
+TValues = typing.TypeVar("TValues")
 
 
 class DictFieldMethod:
@@ -72,11 +131,11 @@ class DictFieldMethod:
         name: str,
         default: typing.Any = ma.missing,
         *,
-        subcast_keys: Subcast[T] | None = None,
-        subcast_values: Subcast[T] | None = None,
+        subcast_keys: Subcast[TKeys] | None = None,
+        subcast_values: Subcast[TValues] | None = None,
         delimiter: str | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
-    ) -> dict | None: ...
+    ) -> dict[TKeys, TValues] | None: ...
 
 
 class EnumFuncMethod:
