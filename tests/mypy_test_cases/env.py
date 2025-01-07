@@ -20,11 +20,9 @@ import environs
 
 env = environs.Env()
 
-INT0: int | None = env.int("FOO")
+INT0: int = env.int("FOO")
 INT1: int | None = env.int("FOO", None)
 INT2: int = env.int("FOO", 42)
-INT3: int | None = env.int("FOO", allow_none=True)
-INT4: int = env.int("FOO", allow_none=False)
 
 BOOL0: bool | None = env.bool("FOO", None)
 STR0: str | None = env.str("FOO", None)

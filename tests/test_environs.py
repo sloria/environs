@@ -47,7 +47,7 @@ class DayEnum(Enum):
 
 
 class TestCasting:
-    def test_call(self, set_env, env):
+    def test_call(self, set_env, env: environs.Env):
         set_env({"STR": "foo", "INT": "42"})
         assert env("STR") == "foo"
         assert env("NOT_SET", "mydefault") == "mydefault"
@@ -56,60 +56,61 @@ class TestCasting:
         ):
             assert env("NOT_SET")
 
-    def test_call_with_default(self, env):
+    def test_call_with_default(self, env: environs.Env):
         assert env("NOT_SET", default="mydefault") == "mydefault"
         assert env("NOT_SET", "mydefault") == "mydefault"
+        assert env("NOT_SET", None) is None
 
-    def test_basic(self, set_env, env):
+    def test_basic(self, set_env, env: environs.Env):
         set_env({"STR": "foo"})
         assert env.str("STR") == "foo"
 
-    def test_empty_str(self, set_env, env):
+    def test_empty_str(self, set_env, env: environs.Env):
         set_env({"STR": ""})
         assert env.str("STR") == ""
 
-    def test_int_cast(self, set_env, env):
+    def test_int_cast(self, set_env, env: environs.Env):
         set_env({"INT": "42"})
         assert env.int("INT") == 42
 
-    def test_invalid_int(self, set_env, env):
+    def test_invalid_int(self, set_env, env: environs.Env):
         set_env({"INT": "invalid"})
         with pytest.raises(
-            environs.EnvError, match='Environment variable "INT" invalid'
+            environs.EnvValidationError, match='Environment variable "INT" invalid'
         ) as excinfo:
             env.int("INT")
         exc = excinfo.value
         assert "Not a valid integer." in exc.error_messages
 
-    def test_float_cast(self, set_env, env):
+    def test_float_cast(self, set_env, env: environs.Env):
         set_env({"FLOAT": "33.3"})
         assert env.float("FLOAT") == 33.3
 
-    def test_list_cast(self, set_env, env):
+    def test_list_cast(self, set_env, env: environs.Env):
         set_env({"LIST": "1,2,3"})
         assert env.list("LIST") == ["1", "2", "3"]
 
-    def test_list_with_default_from_string(self, env):
+    def test_list_with_default_from_string(self, env: environs.Env):
         assert env.list("LIST", "1,2") == ["1", "2"]
 
-    def test_list_with_default_from_list(self, env):
+    def test_list_with_default_from_list(self, env: environs.Env):
         assert env.list("LIST", ["1"]) == ["1"]
 
     # https://github.com/sloria/environs/issues/298
-    def test_list_with_default_none(self, env):
+    def test_list_with_default_none(self, env: environs.Env):
         assert env.list("LIST", default=None) is None
 
-    def test_list_with_subcast(self, set_env, env):
+    def test_list_with_subcast(self, set_env, env: environs.Env):
         set_env({"LIST": "1,2,3"})
         assert env.list("LIST", subcast=int) == [1, 2, 3]
         assert env.list("LIST", subcast=float) == [1.0, 2.0, 3.0]
 
-    def test_list_with_empty_env_and_subcast(self, set_env, env):
+    def test_list_with_empty_env_and_subcast(self, set_env, env: environs.Env):
         set_env({"LIST": ""})
         assert env.list("LIST", subcast=int) == []
         assert env.list("LIST", subcast=float) == []
 
-    def test_bool(self, set_env, env):
+    def test_bool(self, set_env, env: environs.Env):
         set_env({"TRUTHY": "1", "FALSY": "0"})
         assert env.bool("TRUTHY") is True
         assert env.bool("FALSY") is False
@@ -118,35 +119,35 @@ class TestCasting:
         assert env.bool("TRUTHY2") is True
         assert env.bool("FALSY2") is False
 
-    def test_list_with_spaces(self, set_env, env):
+    def test_list_with_spaces(self, set_env, env: environs.Env):
         set_env({"LIST": " 1,  2,3"})
         assert env.list("LIST", subcast=int) == [1, 2, 3]
 
-    def test_list_with_spaces_as_delimiter(self, set_env, env):
+    def test_list_with_spaces_as_delimiter(self, set_env, env: environs.Env):
         set_env({"LIST": "a b c"})
         assert env.list("LIST", delimiter=" ") == ["a", "b", "c"]
 
-    def test_dict(self, set_env, env):
+    def test_dict(self, set_env, env: environs.Env):
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT") == {"key1": "1", "key2": "2"}
 
-    def test_dict_with_spaces_as_delimiter(self, set_env, env):
+    def test_dict_with_spaces_as_delimiter(self, set_env, env: environs.Env):
         set_env({"DICT": "key1=1 key2=2"})
         assert env.dict("DICT", delimiter=" ") == {"key1": "1", "key2": "2"}
 
-    def test_dict_with_subcast_values(self, set_env, env):
+    def test_dict_with_subcast_values(self, set_env, env: environs.Env):
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT", subcast_values=int) == {"key1": 1, "key2": 2}
 
-    def test_dict_without_subcast_keys(self, set_env, env):
+    def test_dict_without_subcast_keys(self, set_env, env: environs.Env):
         set_env({"DICT": "1=value1,2=value2"})
         assert env.dict("DICT") == {"1": "value1", "2": "value2"}
 
-    def test_dict_with_subcast_keys(self, set_env, env):
+    def test_dict_with_subcast_keys(self, set_env, env: environs.Env):
         set_env({"DICT": "1=value1,2=value2"})
         assert env.dict("DICT", subcast_keys=int) == {1: "value1", 2: "value2"}
 
-    def test_custom_subcast_list(self, set_env, env):
+    def test_custom_subcast_list(self, set_env, env: environs.Env):
         class CustomTuple(ma.fields.Field):
             def _deserialize(self, value: str, *args, **kwargs):
                 return tuple(value[1:-1].split(":"))
@@ -164,7 +165,7 @@ class TestCasting:
             ("127.0.0.1", "26379"),
         ]
 
-    def test_custom_subcast_keys_values(self, set_env, env):
+    def test_custom_subcast_keys_values(self, set_env, env: environs.Env):
         def custom_tuple(value: str):
             return tuple(value.split(":"))
 
@@ -173,48 +174,49 @@ class TestCasting:
             "DICT", subcast_keys=custom_tuple, subcast_values=custom_tuple
         ) == {("1", "1"): ("foo", "bar")}
 
-    def test_dict_with_default_from_string(self, set_env, env):
+    def test_dict_with_default_from_string(self, set_env, env: environs.Env):
         assert env.dict("DICT", "key1=1,key2=2") == {"key1": "1", "key2": "2"}
 
-    def test_dict_with_default_from_dict(self, set_env, env):
+    def test_dict_with_default_from_dict(self, set_env, env: environs.Env):
         assert env.dict("DICT", {"key1": "1"}) == {"key1": "1"}
 
-    def test_dict_with_equal(self, set_env, env):
+    def test_dict_with_equal(self, set_env, env: environs.Env):
         set_env({"DICT": "expr1=1 < 2,expr2=(1+1) = 2"})
         assert env.dict("DICT") == {"expr1": "1 < 2", "expr2": "(1+1) = 2"}
 
-    def test_decimal_cast(self, set_env, env):
+    def test_decimal_cast(self, set_env, env: environs.Env):
         set_env({"DECIMAL": "12.34"})
         assert env.decimal("DECIMAL") == Decimal("12.34")
 
-    def test_missing_raises_error(self, env):
+    def test_missing_raises_error(self, env: environs.Env):
         with pytest.raises(environs.EnvError) as exc:
             env.str("FOO")
         assert exc.value.args[0] == 'Environment variable "FOO" not set'
 
-    def test_default_set(self, env):
+    def test_default_set(self, env: environs.Env):
         assert env.str("FOO", default="foo") == "foo"
         # Passed positionally
         assert env.str("FOO", "foo") == "foo"
+        assert env.str("FOO", None) is None
 
-    def test_json_cast(self, set_env, env):
+    def test_json_cast(self, set_env, env: environs.Env):
         set_env({"JSON": '{"foo": "bar", "baz": [1, 2, 3]}'})
         assert env.json("JSON") == {"foo": "bar", "baz": [1, 2, 3]}
 
-    def test_invalid_json_raises_error(self, set_env, env):
+    def test_invalid_json_raises_error(self, set_env, env: environs.Env):
         set_env({"JSON": "foo"})
         with pytest.raises(environs.EnvError) as exc:
             env.json("JSON")
         assert "Not valid JSON." in exc.value.args[0]
 
-    def test_json_default(self, set_env, env):
+    def test_json_default(self, set_env, env: environs.Env):
         assert env.json("JSON", {"foo": "bar"}) == {"foo": "bar"}
         assert env.json("JSON", ["foo", "bar"]) == ["foo", "bar"]
         with pytest.raises(environs.EnvError) as exc:
-            env.json("JSON", int)  # a builtin is not a valid json
+            env.json("JSON", "invalid")  # type: ignore[call-overload]
         assert "Not valid JSON." in exc.value.args[0]
 
-    def test_datetime_cast(self, set_env, env):
+    def test_datetime_cast(self, set_env, env: environs.Env):
         dtime = dt.datetime.now(dt.timezone.utc)
         set_env({"DTIME": dtime.isoformat()})
         result = env.datetime("DTIME")
@@ -223,7 +225,7 @@ class TestCasting:
         assert result.month == dtime.month
         assert result.day == dtime.day
 
-    def test_date_cast(self, set_env, env):
+    def test_date_cast(self, set_env, env: environs.Env):
         date = dt.date.today()
         set_env({"DATE": date.isoformat()})
         assert env.date("DATE") == date
@@ -242,21 +244,22 @@ class TestCasting:
             pytest.param("uuid", uuid.uuid4(), id="uuid"),
         ],
     )
-    def test_default_can_be_set_to_internal_type(self, env, method_name: str, value):
+    def test_default_can_be_set_to_internal_type(
+        self, env: environs.Env, method_name: str, value
+    ):
         method = getattr(env, method_name)
         assert method("NOTFOUND", value) == value
 
-    def test_timedelta_cast(self, set_env, env):
-        # default values
-        assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)
-        assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)
+    def test_timedelta_cast(self, set_env, env: environs.Env):
+        # default values may be in serialized form
+        assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)  # type: ignore[call-overload]
+        assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)  # type: ignore[call-overload]
         # marshmallow 4 preserves float values as microseconds
         if MARSHMALLOW_VERSION.major >= 4:
-            assert env.timedelta("TIMEDELTA", 42.9) == dt.timedelta(
+            set_env({"TIMEDELTA": "42.9"})
+            assert env.timedelta("TIMEDELTA") == dt.timedelta(
                 seconds=42, microseconds=900000
             )
-        else:
-            assert env.timedelta("TIMEDELTA", 42.9) == dt.timedelta(seconds=42)
         # seconds as integer
         set_env({"TIMEDELTA": "0"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()
@@ -300,40 +303,42 @@ class TestCasting:
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
 
-    def test_time_cast(self, set_env, env):
+    def test_time_cast(self, set_env, env: environs.Env):
         set_env({"TIME": "10:30"})
         assert env.time("TIME") == dt.time(hour=10, minute=30, second=0)
 
-    def test_uuid_cast(self, set_env, env):
+    def test_uuid_cast(self, set_env, env: environs.Env):
         uid = uuid.uuid1()
         set_env({"UUID": str(uid)})
         assert env.uuid("UUID") == uid
 
-    def test_url_cast(self, set_env, env):
+    def test_url_cast(self, set_env, env: environs.Env):
         set_env({"URL": "http://stevenloria.com/projects/?foo=42"})
         res = env.url("URL")
         assert isinstance(res, urllib.parse.ParseResult)
 
-    def test_url_db_cast(self, env, set_env):
+    def test_url_db_cast(self, env: environs.Env, set_env):
         mongodb_url = "mongodb://user:pass@mongo.example.local/db?authSource=admin"
         set_env({"MONGODB_URL": mongodb_url})
-        res = env.url(
+        # FIXME: Fix typing of FieldMethod to accept
+        # all the underlying field's constructor arguments
+        res = env.url(  # type: ignore[call-overload]
             "MONGODB_URL", schemes={"mongodb", "mongodb+srv"}, require_tld=False
         )
         assert isinstance(res, urllib.parse.ParseResult)
 
-    def test_path_cast(self, set_env, env):
+    def test_path_cast(self, set_env, env: environs.Env):
         set_env({"PTH": "/home/sloria"})
         res = env.path("PTH")
         assert isinstance(res, pathlib.Path)
 
-    def test_path_default_value(self, env):
+    def test_path_default_value(self, env: environs.Env):
         default_value = pathlib.Path("/home/sloria")
         res = env.path("MISSING_ENV", default_value)
         assert isinstance(res, pathlib.Path)
         assert res == default_value
 
-    def test_log_level_cast(self, set_env, env):
+    def test_log_level_cast(self, set_env, env: environs.Env):
         set_env(
             {
                 "LOG_LEVEL": "WARNING",
@@ -345,7 +350,7 @@ class TestCasting:
         assert env.log_level("LOG_LEVEL") == logging.WARNING
         assert env.log_level("LOG_LEVEL_LOWER") == logging.INFO
 
-    def test_invalid_log_level(self, set_env, env):
+    def test_invalid_log_level(self, set_env, env: environs.Env):
         set_env({"LOG_LEVEL": "INVALID", "LOG_LEVEL_BAD": "getLogger"})
         with pytest.raises(environs.EnvError) as excinfo:
             env.log_level("LOG_LEVEL")
@@ -355,26 +360,26 @@ class TestCasting:
         assert "Not a valid log level" in excinfo.value.args[0]
 
     @pytest.mark.parametrize("url", ["foo", "42", "foo@bar"])
-    def test_invalid_url(self, url, set_env, env):
+    def test_invalid_url(self, url, set_env, env: environs.Env):
         set_env({"URL": url})
         with pytest.raises(environs.EnvError) as excinfo:
             env.url("URL")
         assert 'Environment variable "URL" invalid' in excinfo.value.args[0]
 
-    def test_enum_cast(self, set_env, env):
+    def test_enum_cast(self, set_env, env: environs.Env):
         set_env({"DAY": "SUNDAY"})
         assert env.enum("DAY", type=DayEnum) == DayEnum.SUNDAY
 
-    def test_enum_cast_ignore_case(self, set_env, env):
+    def test_enum_cast_ignore_case(self, set_env, env: environs.Env):
         set_env({"DAY": "suNDay"})
         assert env.enum("DAY", type=DayEnum, ignore_case=True) == DayEnum.SUNDAY
 
-    def test_invalid_enum(self, set_env, env):
+    def test_invalid_enum(self, set_env, env: environs.Env):
         set_env({"DAY": "suNDay"})
         with pytest.raises(environs.EnvError):
             assert env.enum("DAY", type=DayEnum)
 
-    def test_invalid_enum_ignore_case(self, set_env, env):
+    def test_invalid_enum_ignore_case(self, set_env, env: environs.Env):
         set_env({"DAY": "SonDAY"})
         with pytest.raises(environs.EnvError):
             assert env.enum("DAY", type=DayEnum, ignore_case=True)
@@ -386,7 +391,7 @@ class TestCasting:
 
 
 class TestEnvFileReading:
-    def test_read_env(self, env):
+    def test_read_env(self, env: environs.Env):
         if "STRING" in os.environ:
             os.environ.pop("STRING")
         assert env("STRING", "default") == "default"  # sanity check
@@ -396,26 +401,26 @@ class TestEnvFileReading:
         assert env.list("LIST") == ["wat", "wer", "wen"]
         assert env("EXPANDED") == "foo"
 
-    def test_read_env_returns_false_if_file_not_found(self, env):
+    def test_read_env_returns_false_if_file_not_found(self, env: environs.Env):
         result = env.read_env(HERE / ".does_not_exist", verbose=True)
         assert result is False
 
     # Regression test for https://github.com/sloria/environs/issues/96
-    def test_read_env_recurse(self, env):
+    def test_read_env_recurse(self, env: environs.Env):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
         assert env("CUSTOM_STRING", "default") == "default"  # sanity check
         env.read_env(HERE / ".custom.env", recurse=True)
         assert env("CUSTOM_STRING") == "foo"
 
-    def test_read_env_non_recurse(self, env):
+    def test_read_env_non_recurse(self, env: environs.Env):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
         assert env("CUSTOM_STRING", "default") == "default"  # sanity check
         env.read_env(HERE / ".custom.env", recurse=False)
         assert env("CUSTOM_STRING") == "foo"
 
-    def test_read_env_recurse_from_subfolder(self, env, monkeypatch):
+    def test_read_env_recurse_from_subfolder(self, env: environs.Env, monkeypatch):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
         env.read_env(HERE / "subfolder" / ".custom.env", recurse=True)
@@ -424,23 +429,25 @@ class TestEnvFileReading:
     @pytest.mark.parametrize(
         "path", [".custom.env", (HERE / "subfolder" / ".custom.env")]
     )
-    def test_read_env_recurse_start_from_subfolder(self, env, path, monkeypatch):
+    def test_read_env_recurse_start_from_subfolder(
+        self, env: environs.Env, path, monkeypatch
+    ):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
         monkeypatch.chdir(HERE / "subfolder")
         env.read_env(path, recurse=True)
         assert env("CUSTOM_STRING") == "foo"
 
-    def test_read_env_directory(self, env):
+    def test_read_env_directory(self, env: environs.Env):
         with pytest.raises(ValueError, match="path must be a filename"):
             assert env.read_env("tests")
 
-    def test_read_env_return_path(self, env):
+    def test_read_env_return_path(self, env: environs.Env):
         path = env.read_env(return_path=True)
         env_path = str(HERE / ".env")
         assert path == env_path
 
-    def test_read_env_return_path_with_dotenv_in_working_dir(self, env):
+    def test_read_env_return_path_with_dotenv_in_working_dir(self, env: environs.Env):
         working_dir = pathlib.Path(os.getcwd())
         temp_env = working_dir / ".env"
         try:
@@ -454,7 +461,7 @@ class TestEnvFileReading:
         env_path = str(HERE / ".env")
         assert path == env_path
 
-    def test_read_env_return_path_if_env_not_found(self, env, tmp_path):
+    def test_read_env_return_path_if_env_not_found(self, env: environs.Env, tmp_path):
         # Move .env file to temp location
         env_path = HERE / ".env"
         temp_env = tmp_path / ".env"
@@ -473,7 +480,7 @@ def always_fail(value):
 
 
 class TestValidation:
-    def test_can_add_validator(self, set_env, env):
+    def test_can_add_validator(self, set_env, env: environs.Env):
         set_env({"NUM": "3"})
 
         def validate(n):
@@ -484,17 +491,17 @@ class TestValidation:
             env.int("NUM", validate=validate)
         assert "Invalid value." in excinfo.value.args[0]
 
-    def test_can_add_marshmallow_validator(self, set_env, env):
+    def test_can_add_marshmallow_validator(self, set_env, env: environs.Env):
         set_env({"NODE_ENV": "invalid"})
         with pytest.raises(environs.EnvError):
             env("NODE_ENV", validate=validate.OneOf(["development", "production"]))
 
-    def test_validator_can_raise_enverror(self, set_env, env):
+    def test_validator_can_raise_enverror(self, set_env, env: environs.Env):
         with pytest.raises(environs.EnvError) as excinfo:
             env("NODE_ENV", "development", validate=always_fail)
         assert "something went wrong" in excinfo.value.args[0]
 
-    def test_failed_vars_are_not_serialized(self, set_env, env):
+    def test_failed_vars_are_not_serialized(self, set_env, env: environs.Env):
         set_env({"FOO": "42"})
         try:
             env("FOO", validate=always_fail)
@@ -504,7 +511,7 @@ class TestValidation:
 
 
 class TestCustomTypes:
-    def test_add_parser(self, set_env, env):
+    def test_add_parser(self, set_env, env: environs.Env):
         set_env({"URL": "test.test/"})
 
         def https_url(value):
@@ -518,14 +525,14 @@ class TestCustomTypes:
 
         assert env.https_url("NOT_SET", "default.test/") == "https://default.test/"
 
-    def test_cannot_override_built_in_parser(self, set_env, env):
+    def test_cannot_override_built_in_parser(self, set_env, env: environs.Env):
         def https_url(value):
             return "https://" + value
 
         with pytest.raises(environs.ParserConflictError):
             env.add_parser("url", https_url)
 
-    def test_parser_for(self, set_env, env):
+    def test_parser_for(self, set_env, env: environs.Env):
         set_env({"URL": "test.test/"})
 
         @env.parser_for("https_url")
@@ -540,7 +547,7 @@ class TestCustomTypes:
 
         assert env.https_url("NOT_SET", "default.test/") == "https://default.test/"
 
-    def test_parser_function_can_take_extra_arguments(self, set_env, env):
+    def test_parser_function_can_take_extra_arguments(self, set_env, env: environs.Env):
         set_env({"ENV": "dev"})
 
         @env.parser_for("choice")
@@ -555,7 +562,7 @@ class TestCustomTypes:
         with pytest.raises(environs.EnvError):
             env.choice("ENV", choices=["dev", "prod"])
 
-    def test_add_parser_from_field(self, set_env, env):
+    def test_add_parser_from_field(self, set_env, env: environs.Env):
         class HTTPSURL(fields.Field):
             def _deserialize(self, value, *args, **kwargs):
                 return "https://" + value
@@ -571,7 +578,7 @@ class TestCustomTypes:
 
 
 class TestDumping:
-    def test_dump(self, set_env, env):
+    def test_dump(self, set_env, env: environs.Env):
         dtime = dt.datetime.now(dt.timezone.utc)
         set_env(
             {
@@ -602,7 +609,7 @@ class TestDumping:
         assert result["PTH"] == str(pathlib.Path("/home/sloria"))
         assert result["LOG_LEVEL"] == logging.WARNING
 
-    def test_env_with_custom_parser(self, set_env, env):
+    def test_env_with_custom_parser(self, set_env, env: environs.Env):
         @env.parser_for("https_url")
         def https_url(value):
             return "https://" + value
@@ -614,14 +621,14 @@ class TestDumping:
         assert env.dump() == {"URL": "https://test.test"}
 
 
-def test_repr(set_env, env):
+def test_repr(set_env, env: environs.Env):
     env = environs.Env(eager=True, expand_vars=True)
     set_env({"FOO": "foo", "BAR": "42"})
     env.str("FOO")
     assert repr(env) == "<Env(eager=True, expand_vars=True)>"
 
 
-def test_str(set_env, env):
+def test_str(set_env, env: environs.Env):
     env = environs.Env(eager=True, expand_vars=True)
     set_env({"FOO": "foo", "BAR": "42"})
     env.str("FOO")
@@ -649,13 +656,13 @@ class TestPrefix:
     def default_environ(self, set_env):
         set_env({"APP_STR": "foo", "APP_INT": "42"})
 
-    def test_prefixed(self, env):
+    def test_prefixed(self, env: environs.Env):
         with env.prefixed("APP_"):
             assert env.str("STR") == "foo"
             assert env.int("INT") == 42
             assert env("NOT_FOUND", "mydefault") == "mydefault"
 
-    def test_dump_with_prefixed(self, env):
+    def test_dump_with_prefixed(self, env: environs.Env):
         with env.prefixed("APP_"):
             assert env.str("STR") == "foo"
             assert env.int("INT") == 42
@@ -666,7 +673,7 @@ class TestPrefix:
             "APP_NOT_FOUND": "mydefault",
         }
 
-    def test_error_message_for_prefixed_var(self, env):
+    def test_error_message_for_prefixed_var(self, env: environs.Env):
         def validate(val):
             if val >= 42:
                 raise environs.ValidationError("Invalid value.")
@@ -683,7 +690,7 @@ class TestNestedPrefix:
     def default_environ(self, set_env):
         set_env({"APP_STR": "foo", "APP_NESTED_INT": "42"})
 
-    def test_nested_prefixed(self, env):
+    def test_nested_prefixed(self, env: environs.Env):
         with env.prefixed("APP_"):
             with env.prefixed("NESTED_"):
                 assert env.int("INT") == 42
@@ -691,7 +698,7 @@ class TestNestedPrefix:
             assert env.str("STR") == "foo"
             assert env("NOT_FOUND", "mydefault") == "mydefault"
 
-    def test_dump_with_nested_prefixed(self, env):
+    def test_dump_with_nested_prefixed(self, env: environs.Env):
         with env.prefixed("APP_"):
             with env.prefixed("NESTED_"):
                 assert env.int("INT") == 42
@@ -711,7 +718,7 @@ class TestFailedNestedPrefix:
     def default_environ(self, set_env):
         set_env({"APP_STR": "foo", "APP_NESTED_INT": "42"})
 
-    def test_failed_nested_prefixed(self, env):
+    def test_failed_nested_prefixed(self, env: environs.Env):
         # define repeated prefixed steps
         def nested_prefixed(env, fail=False):
             with env.prefixed("APP_"):
@@ -728,7 +735,7 @@ class TestFailedNestedPrefix:
         except FauxTestException:
             nested_prefixed(env, fail=False)
 
-    def test_failed_dump_with_nested_prefixed(self, env):
+    def test_failed_dump_with_nested_prefixed(self, env: environs.Env):
         # define repeated prefixed steps
         def dump_with_nested_prefixed(env, fail=False):
             with env.prefixed("APP_"):
@@ -753,25 +760,25 @@ class TestFailedNestedPrefix:
 
 
 class TestDjango:
-    def test_dj_db_url(self, env, set_env):
+    def test_dj_db_url(self, env: environs.Env, set_env):
         db_url = "postgresql://localhost:5432/mydb"
         set_env({"DATABASE_URL": db_url})
         res = env.dj_db_url("DATABASE_URL")
         assert res == dj_database_url.parse(db_url)
 
-    def test_dj_db_url_passes_kwargs(self, env, set_env):
+    def test_dj_db_url_passes_kwargs(self, env: environs.Env, set_env):
         db_url = "postgresql://localhost:5432/mydb"
         set_env({"DATABASE_URL": db_url})
         res = env.dj_db_url("DATABASE_URL", conn_max_age=600)
         assert res == dj_database_url.parse(db_url, conn_max_age=600)
 
-    def test_dj_email_url(self, env, set_env):
+    def test_dj_email_url(self, env: environs.Env, set_env):
         email_url = "smtp://user@domain.com:pass@smtp.example.com:465/?ssl=True"
         set_env({"EMAIL_URL": email_url})
         res = env.dj_email_url("EMAIL_URL")
         assert res == dj_email_url.parse(email_url)
 
-    def test_dj_cache_url(self, env, set_env):
+    def test_dj_cache_url(self, env: environs.Env, set_env):
         cache_url = "redis://redis:6379/0"
         set_env({"CACHE_URL": cache_url})
         res = env.dj_cache_url("CACHE_URL")
@@ -783,7 +790,7 @@ class TestDeferredValidation:
     def env(self):
         return environs.Env(eager=False)
 
-    def test_valid(self, env, set_env):
+    def test_valid(self, env: environs.Env, set_env):
         set_env({"STR": "foo", "INT": "42"})
         str_val = env.str("STR")
         int_val = env.int("INT")
@@ -791,7 +798,7 @@ class TestDeferredValidation:
         assert str_val == "foo"
         assert int_val == 42
 
-    def test_validation(self, env, set_env):
+    def test_validation(self, env: environs.Env, set_env):
         set_env({"INT": "invalid", "DTIME": "notadatetime"})
         env.int("INT")
         env.datetime("DTIME")
@@ -807,7 +814,7 @@ class TestDeferredValidation:
         assert "INT" in exc.error_messages
         assert "DTIME" in exc.error_messages
 
-    def test_deferred_required_validation(self, env):
+    def test_deferred_required_validation(self, env: environs.Env):
         env.int("STR")
         env.int("INT")
         env.datetime("DTIME")
@@ -820,7 +827,7 @@ class TestDeferredValidation:
             "DTIME": ["Environment variable not set."],
         }
 
-    def test_cannot_add_after_seal(self, env, set_env):
+    def test_cannot_add_after_seal(self, env: environs.Env, set_env):
         set_env({"STR": "foo", "INT": "42"})
         env.str("STR")
         env.seal()
@@ -829,7 +836,7 @@ class TestDeferredValidation:
         ):
             env.int("INT")
 
-    def test_custom_parser_not_called_after_seal(self, env, set_env):
+    def test_custom_parser_not_called_after_seal(self, env: environs.Env, set_env):
         set_env({"URL": "test.test/"})
 
         @env.parser_for("https_url")
@@ -843,7 +850,7 @@ class TestDeferredValidation:
             env.https_url("URL")
 
     # Regression tests for https://github.com/sloria/environs/issues/121
-    def test_dj_db_url_with_deferred_validation_missing(self, env):
+    def test_dj_db_url_with_deferred_validation_missing(self, env: environs.Env):
         env.dj_db_url("DATABASE_URL")
         with pytest.raises(environs.EnvValidationError) as excinfo:
             env.seal()
@@ -851,7 +858,9 @@ class TestDeferredValidation:
         exc = excinfo.value
         assert exc.error_messages == {"DATABASE_URL": ["Environment variable not set."]}
 
-    def test_dj_db_url_with_deferred_validation_invalid(self, env, set_env):
+    def test_dj_db_url_with_deferred_validation_invalid(
+        self, env: environs.Env, set_env
+    ):
         set_env({"DATABASE_URL": "invalid://"})
         env.dj_db_url("DATABASE_URL")
         with pytest.raises(environs.EnvValidationError) as excinfo:
@@ -859,14 +868,14 @@ class TestDeferredValidation:
         exc = excinfo.value
         assert exc.error_messages == {"DATABASE_URL": ["Not a valid database URL."]}
 
-    def test_dj_email_url_with_deferred_validation_missing(self, env):
+    def test_dj_email_url_with_deferred_validation_missing(self, env: environs.Env):
         env.dj_email_url("EMAIL_URL")
         with pytest.raises(environs.EnvValidationError) as excinfo:
             env.seal()
         exc = excinfo.value
         assert exc.error_messages == {"EMAIL_URL": ["Environment variable not set."]}
 
-    def test_dj_cache_url_with_deferred_validation_missing(self, env):
+    def test_dj_cache_url_with_deferred_validation_missing(self, env: environs.Env):
         env.dj_cache_url("CACHE_URL")
         with pytest.raises(environs.EnvValidationError) as excinfo:
             env.seal()
@@ -874,7 +883,9 @@ class TestDeferredValidation:
         exc = excinfo.value
         assert exc.error_messages == {"CACHE_URL": ["Environment variable not set."]}
 
-    def test_dj_cache_url_with_deferred_validation_invalid(self, env, set_env):
+    def test_dj_cache_url_with_deferred_validation_invalid(
+        self, env: environs.Env, set_env
+    ):
         set_env({"CACHE_URL": "invalid://"})
         env.dj_cache_url("CACHE_URL")
         with pytest.raises(environs.EnvValidationError) as excinfo:
@@ -882,7 +893,7 @@ class TestDeferredValidation:
         exc = excinfo.value
         assert exc.error_messages == {"CACHE_URL": ['Unknown backend: "invalid"']}
 
-    def test_custom_parser_with_deferred_validation_missing(self, env):
+    def test_custom_parser_with_deferred_validation_missing(self, env: environs.Env):
         @env.parser_for("always_fail")
         def always_fail(value):
             raise environs.EnvError("Invalid!")
@@ -894,7 +905,9 @@ class TestDeferredValidation:
         exc = excinfo.value
         assert exc.error_messages == {"MY_VAR": ["Environment variable not set."]}
 
-    def test_custom_parser_with_deferred_validation_invalid(self, env, set_env):
+    def test_custom_parser_with_deferred_validation_invalid(
+        self, env: environs.Env, set_env
+    ):
         set_env({"MY_VAR": "foo"})
 
         @env.parser_for("always_fail")
@@ -914,7 +927,7 @@ class TestExpandVars:
     def env(self):
         return environs.Env(expand_vars=True)
 
-    def test_full_expand_vars(self, env, set_env):
+    def test_full_expand_vars(self, env: environs.Env, set_env):
         set_env(
             {
                 "MAIN": "${SUBSTI}",
@@ -940,7 +953,7 @@ class TestExpandVars:
         ):
             env.str("UNDEFINED")
 
-    def test_multiple_expands(self, env, set_env):
+    def test_multiple_expands(self, env: environs.Env, set_env):
         set_env(
             {
                 "PGURL": "postgres://${USER:-sloria}:${PASSWORD:-secret}@localhost",
@@ -958,7 +971,7 @@ class TestExpandVars:
         ):
             env.str("HELLOWORLD")
 
-    def test_recursive_expands(self, env, set_env):
+    def test_recursive_expands(self, env: environs.Env, set_env):
         set_env(
             {
                 "PGURL": "postgres://${PGUSER:-sloria}:${PGPASS:-secret}@localhost",
@@ -968,7 +981,7 @@ class TestExpandVars:
         )
         assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
 
-    def test_default_expands(self, env, set_env):
+    def test_default_expands(self, env: environs.Env, set_env):
         set_env(
             {
                 "MAIN": "${SUBSTI}",
@@ -983,11 +996,11 @@ class TestExpandVars:
         ):
             assert env.str("NOT_SET", "${NOT_SET2}")
 
-    def test_escaped_expand(self, env, set_env):
+    def test_escaped_expand(self, env: environs.Env, set_env):
         set_env({"ESCAPED_EXPAND": r"\${ESCAPED}", "ESCAPED": "fail"})
         assert env.str("ESCAPED_EXPAND") == r"${ESCAPED}"
 
-    def test_composite_types(self, env, set_env):
+    def test_composite_types(self, env: environs.Env, set_env):
         set_env(
             {
                 "ALLOWED_USERS": "god,${USER},root",
