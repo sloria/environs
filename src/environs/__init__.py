@@ -14,13 +14,26 @@ import typing
 import uuid
 from collections.abc import Mapping
 from datetime import timedelta
-from enum import Enum
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
 import marshmallow as ma
 from dj_database_url import DBConfig
 from dotenv.main import _walk_to_root, load_dotenv
+
+from .types import (
+    EnumT,
+    ErrorList,
+    ErrorMapping,
+    Field2MethodDictType,
+    Field2MethodListType,
+    Field2MethodType,
+    FieldFactory,
+    FieldOrFactory,
+    Func2MethodEnum,
+    ParserMethod,
+    Subcast,
+)
 
 if typing.TYPE_CHECKING:
     try:
@@ -36,17 +49,6 @@ _BoolType = bool
 _IntType = int
 _ListType = list
 _DictType = dict
-_EnumT = typing.TypeVar("_EnumT", bound=Enum)
-
-
-ErrorMapping = typing.Mapping[str, list[str]]
-ErrorList = list[str]
-FieldFactory = typing.Callable[..., ma.fields.Field]
-Subcast = typing.Union[type, typing.Callable[..., _T], ma.fields.Field]
-FieldType = type[ma.fields.Field]
-FieldOrFactory = typing.Union[FieldType, FieldFactory]
-ParserMethod = typing.Callable[..., _T]
-
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 # Ordered duration strings, loosely based on the [GEP-2257](https://gateway-api.sigs.k8s.io/geps/gep-2257/) spec
@@ -92,84 +94,6 @@ class ParserConflictError(ValueError):
     """Raised when adding a custom parser that conflicts
     with a built-in parser method.
     """
-
-
-class Field2MethodType(typing.Generic[_T]):
-    def __call__(
-        self,
-        name: str,
-        default: typing.Any = ma.missing,
-        subcast: Subcast[_T] | None = None,
-        *,
-        # Subset of relevant marshmallow.Field kwargs
-        load_default: typing.Any = ma.missing,
-        validate: (
-            typing.Callable[[typing.Any], typing.Any]
-            | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
-            | None
-        ) = None,
-        required: bool = False,
-        allow_none: bool | None = None,
-        error_messages: dict[str, str] | None = None,
-        metadata: typing.Mapping[str, typing.Any] | None = None,
-    ) -> _T | None:
-        pass
-
-
-class Field2MethodListType:
-    def __call__(
-        self,
-        name: str,
-        default: typing.Any = ma.missing,
-        subcast: Subcast[_T] | None = None,
-        *,
-        # Subset of relevant marshmallow.Field kwargs
-        load_default: typing.Any = ma.missing,
-        validate: (
-            typing.Callable[[typing.Any], typing.Any]
-            | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
-            | None
-        ) = None,
-        required: bool = False,
-        allow_none: bool | None = None,
-        error_messages: dict[str, str] | None = None,
-        metadata: typing.Mapping[str, typing.Any] | None = None,
-        delimiter: str | None = None,
-    ) -> list | None:
-        pass
-
-
-class Field2MethodDictType:
-    def __call__(
-        self,
-        name: str,
-        default: typing.Any = ma.missing,
-        *,
-        # Subset of relevant marshmallow.Field kwargs
-        load_default: typing.Any = ma.missing,
-        validate: typing.Callable[[typing.Any], typing.Any]
-        | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
-        | None = None,
-        required: bool = False,
-        allow_none: bool | None = None,
-        error_messages: dict[str, str] | None = None,
-        metadata: typing.Mapping[str, typing.Any] | None = None,
-        subcast_keys: Subcast[_T] | None = None,
-        subcast_values: Subcast[_T] | None = None,
-        delimiter: str | None = None,
-    ) -> dict | None:
-        pass
-
-
-class Func2MethodEnum:
-    def __call__(
-        self,
-        value,
-        type: type[_EnumT],
-        default: _EnumT | None = None,
-        ignore_case: bool = False,
-    ) -> _EnumT | None:
-        pass
 
 
 def _field2method(
@@ -379,7 +303,7 @@ def _preprocess_json(value: str | typing.Mapping | list, **kwargs):
         raise ma.ValidationError("Not valid JSON.") from error
 
 
-def _enum_parser(value, type: type[_EnumT], ignore_case: bool = False) -> _EnumT:
+def _enum_parser(value, type: type[EnumT], ignore_case: bool = False) -> EnumT:
     if isinstance(value, type):
         return value
 
