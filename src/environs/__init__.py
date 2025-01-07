@@ -106,7 +106,7 @@ def _field2method(
     def method(
         self: Env,
         name: str,
-        default: typing.Any = ma.missing,
+        default: typing.Any = ...,
         subcast: Subcast[_T] | None = None,
         *,
         # Subset of relevant marshmallow.Field kwargs
@@ -116,37 +116,36 @@ def _field2method(
             | None
         ) = None,
         required: bool = False,
-        allow_none: bool | None = None,
-        error_messages: dict[str, str] | None = None,
-        metadata: typing.Mapping[str, typing.Any] | None = None,
+        # Additional kwargs are passed to Field constructor
         **kwargs,
     ) -> _T | None:
         if self._sealed:
             raise EnvSealedError(
                 "Env has already been sealed. New values cannot be parsed."
             )
-        field_kwargs = dict(
-            validate=validate,
-            required=required,
-            allow_none=allow_none,
-            load_default=default,
-            error_messages=error_messages,
-            metadata=metadata,
-        )
+        load_default = default if default is not Ellipsis else ma.missing
         preprocess_kwargs = {
             name: kwargs.pop(name) for name in preprocess_kwarg_names if name in kwargs
         }
         if isinstance(field_or_factory, type) and issubclass(
             field_or_factory, ma.fields.Field
         ):
-            field = field_or_factory(**field_kwargs, **kwargs)
+            field = field_or_factory(
+                validate=validate,
+                required=required,
+                load_default=load_default,
+                **kwargs,
+            )
         else:
             parsed_subcast = _make_subcast_field(subcast) if subcast else ma.fields.Raw
             field = typing.cast(FieldFactory, field_or_factory)(
-                subcast=parsed_subcast, **field_kwargs
+                subcast=parsed_subcast,
+                validate=validate,
+                required=required,
+                load_default=load_default,
             )
         parsed_key, value, proxied_key = self._get_from_environ(
-            name, field.load_default
+            name, default=field.load_default
         )
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
@@ -455,7 +454,7 @@ class Env:
         ),
     )
     json: FieldMethod[_ListType | _DictType] = _field2method(
-        ma.fields.Field, "json", preprocess=_preprocess_json
+        ma.fields.Raw, "json", preprocess=_preprocess_json
     )
     datetime: FieldMethod[dt.datetime] = _field2method(ma.fields.DateTime, "datetime")
     date: FieldMethod[dt.date] = _field2method(ma.fields.Date, "date")

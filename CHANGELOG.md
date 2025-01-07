@@ -10,6 +10,8 @@ Features:
 Other changes:
 
 - _Backwards-incompatible_: Remove `load_default` param from parser methods. Use `default` instead.
+- _Backwards-incompatible_: Remove
+  `allow_none`, `error_messages`, and `metadata` params from parser methods.
 
 ## 12.0.0 (2025-01-06)
 

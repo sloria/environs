@@ -20,7 +20,7 @@ import environs
 
 env = environs.Env()
 
-INT0: int | None = env.int("FOO")
+INT0: int = env.int("FOO")
 INT1: int | None = env.int("FOO", None)
 INT2: int = env.int("FOO", 42)
 

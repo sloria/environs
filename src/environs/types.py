@@ -38,8 +38,6 @@ class BaseMethodKwargs(typing.TypedDict, total=False):
         | None
     )
     required: bool
-    error_messages: dict[str, str] | None
-    metadata: typing.Mapping[str, typing.Any] | None
 
 
 class FieldMethod(typing.Generic[T]):
@@ -47,21 +45,6 @@ class FieldMethod(typing.Generic[T]):
     def __call__(
         self,
         name: str,
-        default: typing.Any = ...,
-        subcast: Subcast[T] | None = ...,
-        *,
-        allow_none: typing.Literal[False],
-        **kwargs: Unpack[BaseMethodKwargs],
-    ) -> T: ...
-
-    @typing.overload
-    def __call__(
-        self,
-        name: str,
-        default: T,
-        subcast: Subcast[T] | None = None,
-        *,
-        allow_none: bool | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> T: ...
 
@@ -70,19 +53,22 @@ class FieldMethod(typing.Generic[T]):
         self,
         name: str,
         default: None = ...,
-        subcast: Subcast[T] | None = ...,
-        *,
-        allow_none: bool | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> T | None: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: T = ...,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> T: ...
 
     def __call__(
         self,
         name: str,
-        default: typing.Any = ma.missing,
-        subcast: Subcast[T] | None = None,
-        *,
-        allow_none: bool | None = None,
+        default: typing.Any = ...,
+        subcast: Subcast[T] | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> T | None: ...
 
@@ -92,10 +78,10 @@ class ListFieldMethod:
     def __call__(
         self,
         name: str,
-        default: typing.Any = ma.missing,
+        default: typing.Any = ...,
         subcast: None = ...,
         *,
-        delimiter: str | None = None,
+        delimiter: str | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> list[typing.Any] | None: ...
 
@@ -103,20 +89,20 @@ class ListFieldMethod:
     def __call__(
         self,
         name: str,
-        default: typing.Any = ma.missing,
+        default: typing.Any = ...,
         subcast: Subcast[T] = ...,
         *,
-        delimiter: str | None = None,
+        delimiter: str | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> list[T] | None: ...
 
     def __call__(
         self,
         name: str,
-        default: typing.Any = ma.missing,
-        subcast: Subcast[T] | None = None,
+        default: typing.Any = ...,
+        subcast: Subcast[T] | None = ...,
         *,
-        delimiter: str | None = None,
+        delimiter: str | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> list[T] | None: ...
 
