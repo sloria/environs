@@ -97,21 +97,20 @@ class Field2MethodType(typing.Generic[_T]):
         self,
         name: str,
         default: typing.Any = ma.missing,
-        subcast: typing.Optional[Subcast[_T]] = None,
+        subcast: Subcast[_T] | None = None,
         *,
         # Subset of relevant marshmallow.Field kwargs
         load_default: typing.Any = ma.missing,
-        validate: typing.Optional[
-            typing.Union[
-                typing.Callable[[typing.Any], typing.Any],
-                typing.Iterable[typing.Callable[[typing.Any], typing.Any]],
-            ]
-        ] = None,
+        validate: (
+            typing.Callable[[typing.Any], typing.Any]
+            | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
+            | None
+        ) = None,
         required: bool = False,
-        allow_none: typing.Optional[bool] = None,
-        error_messages: typing.Optional[typing.Dict[str, str]] = None,
-        metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
-    ) -> typing.Optional[_T]:
+        allow_none: bool | None = None,
+        error_messages: dict[str, str] | None = None,
+        metadata: typing.Mapping[str, typing.Any] | None = None,
+    ) -> _T | None:
         pass
 
 
@@ -120,22 +119,21 @@ class Field2MethodListType:
         self,
         name: str,
         default: typing.Any = ma.missing,
-        subcast: typing.Optional[Subcast[_T]] = None,
+        subcast: Subcast[_T] | None = None,
         *,
         # Subset of relevant marshmallow.Field kwargs
         load_default: typing.Any = ma.missing,
-        validate: typing.Optional[
-            typing.Union[
-                typing.Callable[[typing.Any], typing.Any],
-                typing.Iterable[typing.Callable[[typing.Any], typing.Any]],
-            ]
-        ] = None,
+        validate: (
+            typing.Callable[[typing.Any], typing.Any]
+            | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
+            | None
+        ) = None,
         required: bool = False,
-        allow_none: typing.Optional[bool] = None,
-        error_messages: typing.Optional[typing.Dict[str, str]] = None,
-        metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
-        delimiter: typing.Optional[str] = None,
-    ) -> typing.Optional[list]:
+        allow_none: bool | None = None,
+        error_messages: dict[str, str] | None = None,
+        metadata: typing.Mapping[str, typing.Any] | None = None,
+        delimiter: str | None = None,
+    ) -> list | None:
         pass
 
 
@@ -147,20 +145,17 @@ class Field2MethodDictType:
         *,
         # Subset of relevant marshmallow.Field kwargs
         load_default: typing.Any = ma.missing,
-        validate: typing.Optional[
-            typing.Union[
-                typing.Callable[[typing.Any], typing.Any],
-                typing.Iterable[typing.Callable[[typing.Any], typing.Any]],
-            ]
-        ] = None,
+        validate: typing.Callable[[typing.Any], typing.Any]
+        | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
+        | None = None,
         required: bool = False,
-        allow_none: typing.Optional[bool] = None,
-        error_messages: typing.Optional[typing.Dict[str, str]] = None,
-        metadata: typing.Optional[typing.Mapping[str, typing.Any]] = None,
-        subcast_keys: typing.Optional[Subcast[_T]],
-        subcast_values: typing.Optional[Subcast[_T]],
-        delimiter: typing.Optional[str] = None,
-    ) -> typing.Optional[dict]:
+        allow_none: bool | None = None,
+        error_messages: dict[str, str] | None = None,
+        metadata: typing.Mapping[str, typing.Any] | None = None,
+        subcast_keys: Subcast[_T] | None,
+        subcast_values: Subcast[_T] | None,
+        delimiter: str | None = None,
+    ) -> dict | None:
         pass
 
 
@@ -168,10 +163,10 @@ class Func2MethodEnum:
     def __call__(
         self,
         value,
-        type: typing.Type[_EnumT],
-        default: typing.Optional[_EnumT] = None,
+        type: type[_EnumT],
+        default: _EnumT | None = None,
         ignore_case: bool = False,
-    ) -> typing.Optional[_EnumT]:
+    ) -> _EnumT | None:
         pass
 
 
@@ -537,7 +532,7 @@ class Env:
             "delimiter",
         ),
     )
-    json: Field2MethodType[typing.Union[typing.List, typing.Dict]] = _field2method(
+    json: Field2MethodType[list | dict] = _field2method(
         ma.fields.Field, "json", preprocess=_preprocess_json
     )
     datetime: Field2MethodType[dt.datetime] = _field2method(
