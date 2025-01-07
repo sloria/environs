@@ -4,6 +4,8 @@
     This module is considered private API.
 """
 
+from __future__ import annotations
+
 import logging
 import pathlib
 import re
