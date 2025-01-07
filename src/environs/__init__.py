@@ -7,13 +7,11 @@ import decimal
 import functools
 import inspect
 import json as pyjson
-import logging
 import os
 import re
 import typing
 import uuid
 from collections.abc import Mapping
-from datetime import timedelta
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
@@ -21,15 +19,14 @@ import marshmallow as ma
 from dj_database_url import DBConfig
 from dotenv.main import _walk_to_root, load_dotenv
 
+from . import fields
 from .types import (
     DictFieldMethod,
     EnumFuncMethod,
     EnumT,
-    ErrorList,
     ErrorMapping,
     FieldFactory,
     FieldMethod,
-    FieldOrFactory,
     ListFieldMethod,
     ParserMethod,
     Subcast,
@@ -51,23 +48,6 @@ _ListType = list
 _DictType = dict
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
-# Ordered duration strings, loosely based on the [GEP-2257](https://gateway-api.sigs.k8s.io/geps/gep-2257/) spec
-# Discrepancies between this pattern and GEP-2257 duration strings:
-# - this pattern accepts units `w|d|h|m|s|ms|[uµ]s` (all units supported by the datetime.timedelta constructor), GEP-2257 accepts only `h|m|s|ms`
-# - this pattern allows for optional whitespace around the units, GEP-2257 does not
-# - this pattern expects ordered (descending) units, GEP-2257 allows arbitrary order
-# - this pattern does not allow duplicate unit occurrences, GEP-2257 does
-# - this pattern allows for negative integers, GEP-2257 does not
-_TIMEDELTA_PATTERN = re.compile(
-    r"^(?:\s*)"  # optional whitespace at the beginning of the string
-    r"(?:(-?\d+)\s*w\s*)?"  # weeks with optional whitespace around unit
-    r"(?:(-?\d+)\s*d\s*)?"  # days with optional whitespace around unit
-    r"(?:(-?\d+)\s*h\s*)?"  # hours with optional whitespace around unit
-    r"(?:(-?\d+)\s*m\s*)?"  # minutes with optional whitespace around unit
-    r"(?:(-?\d+)\s*s\s*)?"  # seconds with optional whitespace around unit
-    r"(?:(-?\d+)\s*ms\s*)?"  # milliseconds with optional whitespace around unit
-    r"(?:(-?\d+)\s*[µu]s\s*)?$",  # microseconds with optional whitespace around unit
-)
 
 
 # Reexport marshmallow's ValidationError. Custom validators should raise this for invalid input.
@@ -81,7 +61,9 @@ class EnvError(ValueError):
 
 
 class EnvValidationError(EnvError):
-    def __init__(self, message: str, error_messages: ErrorList | ErrorMapping):
+    """Raised when validation fails against one or all of the parsed environment variables."""
+
+    def __init__(self, message: str, error_messages: list[str] | ErrorMapping):
         self.error_messages = error_messages
         super().__init__(message)
 
@@ -97,7 +79,7 @@ class ParserConflictError(ValueError):
 
 
 def _field2method(
-    field_or_factory: FieldOrFactory,
+    field_or_factory: type[ma.fields.Field] | FieldFactory,
     method_name: str,
     *,
     preprocess: typing.Callable | None = None,
@@ -381,51 +363,6 @@ class _URLField(ma.fields.Url):
         return urlparse(ret)
 
 
-# TODO: Change to ma.fields.Field[Path] after dropping marshmallow 3 support
-class _PathField(ma.fields.Field):
-    def _serialize(self, value: Path | None, *args, **kwargs) -> str | None:
-        if value is None:
-            return None
-        return str(value)
-
-    def _deserialize(self, value, *args, **kwargs) -> Path:
-        if isinstance(value, Path):
-            return value
-        ret = super()._deserialize(value, *args, **kwargs)
-        return Path(ret)
-
-
-class _LogLevelField(ma.fields.Integer):
-    def _format_num(self, value) -> int:
-        try:
-            return super()._format_num(value)
-        except (TypeError, ValueError) as error:
-            value = value.upper()
-            if hasattr(logging, value) and isinstance(getattr(logging, value), int):
-                return getattr(logging, value)
-            else:
-                raise ma.ValidationError("Not a valid log level.") from error
-
-
-class _TimeDeltaField(ma.fields.TimeDelta):
-    def _deserialize(self, value, *args, **kwargs) -> timedelta:
-        if isinstance(value, timedelta):
-            return value
-        if isinstance(value, str):
-            match = _TIMEDELTA_PATTERN.match(value)
-            if match is not None and any(groups := match.groups(default=0)):
-                return timedelta(
-                    weeks=int(groups[0]),
-                    days=int(groups[1]),
-                    hours=int(groups[2]),
-                    minutes=int(groups[3]),
-                    seconds=int(groups[4]),
-                    milliseconds=int(groups[5]),
-                    microseconds=int(groups[6]),
-                )
-        return super()._deserialize(value, *args, **kwargs)
-
-
 class Env:
     """An environment variable reader."""
 
@@ -459,9 +396,9 @@ class Env:
     datetime: FieldMethod[dt.datetime] = _field2method(ma.fields.DateTime, "datetime")
     date: FieldMethod[dt.date] = _field2method(ma.fields.Date, "date")
     time: FieldMethod[dt.time] = _field2method(ma.fields.Time, "time")
-    timedelta: FieldMethod[dt.timedelta] = _field2method(_TimeDeltaField, "timedelta")
-    path: FieldMethod[Path] = _field2method(_PathField, "path")
-    log_level: FieldMethod[_IntType] = _field2method(_LogLevelField, "log_level")
+    timedelta: FieldMethod[dt.timedelta] = _field2method(fields.TimeDelta, "timedelta")
+    path: FieldMethod[Path] = _field2method(fields.Path, "path")
+    log_level: FieldMethod[_IntType] = _field2method(fields.LogLevel, "log_level")
 
     uuid: FieldMethod[uuid.UUID] = _field2method(ma.fields.UUID, "uuid")
     url: FieldMethod[ParseResult] = _field2method(_URLField, "url")
