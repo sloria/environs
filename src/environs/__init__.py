@@ -551,3 +551,7 @@ class Env:
 
     def _get_key(self, key: _StrType, *, omit_prefix: _BoolType = False) -> _StrType:
         return self._prefix + key if self._prefix and not omit_prefix else key
+
+
+# Singleton instance, for convenience
+env = Env()

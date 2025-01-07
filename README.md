@@ -67,9 +67,8 @@ export LOG_LEVEL=DEBUG
 Parse them with environs...
 
 ```python
-from environs import Env
+from environs import env
 
-env = Env()
 env.read_env()  # read .env file, if it exists
 # required variables
 gh_user = env("GITHUB_USER")  # => 'sloria'
@@ -128,9 +127,8 @@ PORT=4567
 Call `Env.read_env` before parsing variables.
 
 ```python
-from environs import Env
+from environs import env
 
-env = Env()
 # Read .env into os.environ
 env.read_env()
 
@@ -147,13 +145,12 @@ upwards until a `.env` file is found.
 You can also read a specific file:
 
 ```python
-from environs import Env
+from environs import env
 
 with open(".env.test", "w") as fobj:
     fobj.write("A=foo\n")
     fobj.write("B=123\n")
 
-env = Env()
 env.read_env(".env.test", recurse=False)
 
 assert env("A") == "foo"
@@ -203,10 +200,8 @@ year = env.int("YEAR")  # =>2020
 # export NODE_ENV='invalid'
 # export EMAIL='^_^'
 
-from environs import Env, ValidationError
+from environs import env, ValidationError
 from marshmallow.validate import OneOf, Length, Email
-
-env = Env()
 
 
 # simple validator
