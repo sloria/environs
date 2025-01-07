@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import collections
 import contextlib
+import datetime as dt
+import decimal
 import functools
 import inspect
 import json as pyjson
@@ -9,14 +11,29 @@ import logging
 import os
 import re
 import typing
+import uuid
 from collections.abc import Mapping
 from datetime import timedelta
-from enum import Enum
 from pathlib import Path
 from urllib.parse import ParseResult, urlparse
 
 import marshmallow as ma
+from dj_database_url import DBConfig
 from dotenv.main import _walk_to_root, load_dotenv
+
+from .types import (
+    DictFieldMethod,
+    EnumFuncMethod,
+    EnumT,
+    ErrorList,
+    ErrorMapping,
+    FieldFactory,
+    FieldMethod,
+    FieldOrFactory,
+    ListFieldMethod,
+    ParserMethod,
+    Subcast,
+)
 
 if typing.TYPE_CHECKING:
     try:
@@ -29,15 +46,9 @@ __all__ = ["Env", "EnvError", "ValidationError"]
 _T = typing.TypeVar("_T")
 _StrType = str
 _BoolType = bool
-
-ErrorMapping = typing.Mapping[str, list[str]]
-ErrorList = list[str]
-FieldFactory = typing.Callable[..., ma.fields.Field]
-Subcast = typing.Union[type, typing.Callable[..., _T], ma.fields.Field]
-FieldType = type[ma.fields.Field]
-FieldOrFactory = typing.Union[FieldType, FieldFactory]
-ParserMethod = typing.Callable[..., typing.Any]
-
+_IntType = int
+_ListType = list
+_DictType = dict
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 # Ordered duration strings, loosely based on the [GEP-2257](https://gateway-api.sigs.k8s.io/geps/gep-2257/) spec
@@ -91,12 +102,12 @@ def _field2method(
     *,
     preprocess: typing.Callable | None = None,
     preprocess_kwarg_names: typing.Sequence[str] = tuple(),
-) -> ParserMethod:
+) -> typing.Any:
     def method(
         self: Env,
         name: str,
         default: typing.Any = ma.missing,
-        subcast: Subcast | None = None,
+        subcast: Subcast[_T] | None = None,
         *,
         # Subset of relevant marshmallow.Field kwargs
         load_default: typing.Any = ma.missing,
@@ -161,13 +172,13 @@ def _field2method(
             self._errors[parsed_key].extend(error.messages)
         else:
             self._values[parsed_key] = value
-        return value
+        return typing.cast(typing.Optional[_T], value)
 
     method.__name__ = method_name
     return method
 
 
-def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
+def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any:
     def method(
         self: Env,
         name: str,
@@ -209,7 +220,7 @@ def _func2method(func: typing.Callable, method_name: str) -> ParserMethod:
             self._errors[parsed_key].extend(messages)
         else:
             self._values[parsed_key] = value
-        return value
+        return typing.cast(typing.Optional[_T], value)
 
     method.__name__ = method_name
     return method
@@ -292,10 +303,7 @@ def _preprocess_json(value: str | typing.Mapping | list, **kwargs):
         raise ma.ValidationError("Not valid JSON.") from error
 
 
-_EnumT = typing.TypeVar("_EnumT", bound=Enum)
-
-
-def _enum_parser(value, type: type[_EnumT], ignore_case: bool = False) -> _EnumT:
+def _enum_parser(value, type: type[EnumT], ignore_case: bool = False) -> EnumT:
     if isinstance(value, type):
         return value
 
@@ -371,7 +379,7 @@ class _URLField(ma.fields.Url):
         data: typing.Mapping[str, typing.Any] | None = None,
         **kwargs,
     ) -> ParseResult:
-        ret = super().deserialize(value, attr, data, **kwargs)
+        ret = typing.cast(str, super().deserialize(value, attr, data, **kwargs))
         return urlparse(ret)
 
 
@@ -423,20 +431,20 @@ class _TimeDeltaField(ma.fields.TimeDelta):
 class Env:
     """An environment variable reader."""
 
-    __call__: ParserMethod = _field2method(ma.fields.Raw, "__call__")
+    __call__: FieldMethod[typing.Any] = _field2method(ma.fields.Raw, "__call__")
 
-    int = _field2method(ma.fields.Int, "int")
-    bool = _field2method(ma.fields.Bool, "bool")
-    str = _field2method(ma.fields.Str, "str")
-    float = _field2method(ma.fields.Float, "float")
-    decimal = _field2method(ma.fields.Decimal, "decimal")
-    list = _field2method(
+    int: FieldMethod[int] = _field2method(ma.fields.Int, "int")
+    bool: FieldMethod[bool] = _field2method(ma.fields.Bool, "bool")
+    str: FieldMethod[str] = _field2method(ma.fields.Str, "str")
+    float: FieldMethod[float] = _field2method(ma.fields.Float, "float")
+    decimal: FieldMethod[decimal.Decimal] = _field2method(ma.fields.Decimal, "decimal")
+    list: ListFieldMethod = _field2method(
         _make_list_field,
         "list",
         preprocess=_preprocess_list,
         preprocess_kwarg_names=("subcast", "delimiter"),
     )
-    dict = _field2method(
+    dict: DictFieldMethod = _field2method(
         ma.fields.Dict,
         "dict",
         preprocess=_preprocess_dict,
@@ -448,16 +456,20 @@ class Env:
             "delimiter",
         ),
     )
-    json = _field2method(ma.fields.Field, "json", preprocess=_preprocess_json)
-    datetime = _field2method(ma.fields.DateTime, "datetime")
-    date = _field2method(ma.fields.Date, "date")
-    time = _field2method(ma.fields.Time, "time")
-    path = _field2method(_PathField, "path")
-    log_level = _field2method(_LogLevelField, "log_level")
-    timedelta = _field2method(_TimeDeltaField, "timedelta")
-    uuid = _field2method(ma.fields.UUID, "uuid")
-    url = _field2method(_URLField, "url")
-    enum = _func2method(_enum_parser, "enum")
+    json: FieldMethod[_ListType | _DictType] = _field2method(
+        ma.fields.Field, "json", preprocess=_preprocess_json
+    )
+    datetime: FieldMethod[dt.datetime] = _field2method(ma.fields.DateTime, "datetime")
+    date: FieldMethod[dt.date] = _field2method(ma.fields.Date, "date")
+    time: FieldMethod[dt.time] = _field2method(ma.fields.Time, "time")
+    timedelta: FieldMethod[dt.timedelta] = _field2method(_TimeDeltaField, "timedelta")
+    path: FieldMethod[Path] = _field2method(_PathField, "path")
+    log_level: FieldMethod[_IntType] = _field2method(_LogLevelField, "log_level")
+
+    uuid: FieldMethod[uuid.UUID] = _field2method(ma.fields.UUID, "uuid")
+    url: FieldMethod[ParseResult] = _field2method(_URLField, "url")
+
+    enum: EnumFuncMethod = _func2method(_enum_parser, "enum")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")

@@ -1,5 +1,12 @@
 # Changelog
 
+## 12.1.0 (unreleased)
+
+Features:
+
+- Typing: Add type hints for parser methods ([#367](https://github.com/sloria/environs/issues/367)).
+  Thanks [OkeyDev](https://github/OkeyDev) for the PR.
+
 ## 12.0.0 (2025-01-06)
 
 Features:
