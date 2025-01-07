@@ -17,7 +17,11 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
 ]
 requires-python = ">=3.9"
-dependencies = ["python-dotenv", "marshmallow>=3.13.0"]
+dependencies = [
+  "python-dotenv",
+  "marshmallow>=3.13.0",
+  "typing-extensions; python_version < '3.11'",
+]
 
 [project.urls]
 Changelog = "https://github.com/sloria/environs/blob/master/CHANGELOG.md"

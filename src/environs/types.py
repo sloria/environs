@@ -8,6 +8,11 @@
 import enum
 import typing
 
+try:
+    from typing import Unpack
+except ImportError:  # Remove when dropping Python 3.10
+    from typing_extensions import Unpack
+
 import marshmallow as ma
 
 T = typing.TypeVar("T")
@@ -23,24 +28,27 @@ FieldOrFactory = typing.Union[FieldType, FieldFactory]
 ParserMethod = typing.Callable[..., T]
 
 
+class BaseMethodKwargs(typing.TypedDict, total=False):
+    # Subset of relevant marshmallow.Field kwargs
+    load_default: typing.Any
+    validate: (
+        typing.Callable[[typing.Any], typing.Any]
+        | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
+        | None
+    )
+    required: bool
+    allow_none: bool | None
+    error_messages: dict[str, str] | None
+    metadata: typing.Mapping[str, typing.Any] | None
+
+
 class FieldMethod(typing.Generic[T]):
     def __call__(
         self,
         name: str,
         default: typing.Any = ma.missing,
         subcast: Subcast[T] | None = None,
-        *,
-        # Subset of relevant marshmallow.Field kwargs
-        load_default: typing.Any = ma.missing,
-        validate: (
-            typing.Callable[[typing.Any], typing.Any]
-            | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
-            | None
-        ) = None,
-        required: bool = False,
-        allow_none: bool | None = None,
-        error_messages: dict[str, str] | None = None,
-        metadata: typing.Mapping[str, typing.Any] | None = None,
+        **kwargs: Unpack[BaseMethodKwargs],
     ) -> T | None: ...
 
 
@@ -51,18 +59,8 @@ class ListFieldMethod:
         default: typing.Any = ma.missing,
         subcast: Subcast[T] | None = None,
         *,
-        # Subset of relevant marshmallow.Field kwargs
-        load_default: typing.Any = ma.missing,
-        validate: (
-            typing.Callable[[typing.Any], typing.Any]
-            | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
-            | None
-        ) = None,
-        required: bool = False,
-        allow_none: bool | None = None,
-        error_messages: dict[str, str] | None = None,
-        metadata: typing.Mapping[str, typing.Any] | None = None,
         delimiter: str | None = None,
+        **kwargs: Unpack[BaseMethodKwargs],
     ) -> list | None: ...
 
 
@@ -72,18 +70,8 @@ class DictFieldMethod:
         name: str,
         default: typing.Any = ma.missing,
         *,
-        # Subset of relevant marshmallow.Field kwargs
-        load_default: typing.Any = ma.missing,
-        validate: typing.Callable[[typing.Any], typing.Any]
-        | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
-        | None = None,
-        required: bool = False,
-        allow_none: bool | None = None,
-        error_messages: dict[str, str] | None = None,
-        metadata: typing.Mapping[str, typing.Any] | None = None,
-        subcast_keys: Subcast[T] | None = None,
-        subcast_values: Subcast[T] | None = None,
         delimiter: str | None = None,
+        **kwargs: Unpack[BaseMethodKwargs],
     ) -> dict | None: ...
 
 
