@@ -229,10 +229,6 @@ class TestCasting:
         set_env({"DATE": date.isoformat()})
         assert env.date("DATE") == date
 
-    @pytest.mark.xfail(
-        MARSHMALLOW_VERSION.major < 4,
-        reason="marshmallow 3 does not allow all fields to accept internal types",
-    )
     @pytest.mark.parametrize(
         ("method_name", "value"),
         [
@@ -241,7 +237,7 @@ class TestCasting:
             pytest.param("time", dt.time(1, 2, 3), id="time"),
         ],
     )
-    def test_default_can_be_set_to_internal_type(
+    def test_default_set_to_internal_type(
         self, env: environs.Env, method_name: str, value
     ):
         method = getattr(env, method_name)
