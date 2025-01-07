@@ -448,7 +448,6 @@ class Env:
         "dict",
         preprocess=_preprocess_dict,
         preprocess_kwarg_names=(
-            "subcast",
             "subcast_keys",
             "subcast_key",
             "subcast_values",

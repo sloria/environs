@@ -59,6 +59,7 @@ class TestCasting:
     def test_call_with_default(self, env):
         assert env("NOT_SET", default="mydefault") == "mydefault"
         assert env("NOT_SET", "mydefault") == "mydefault"
+        assert env("NOT_SET", None) is None
 
     def test_basic(self, set_env, env):
         set_env({"STR": "foo"})
@@ -196,6 +197,7 @@ class TestCasting:
         assert env.str("FOO", default="foo") == "foo"
         # Passed positionally
         assert env.str("FOO", "foo") == "foo"
+        assert env.str("FOO", None) is None
 
     def test_json_cast(self, set_env, env):
         set_env({"JSON": '{"foo": "bar", "baz": [1, 2, 3]}'})
