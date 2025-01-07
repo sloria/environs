@@ -2,7 +2,6 @@
 
 [![Latest version](https://badgen.net/pypi/v/environs)](https://pypi.org/project/environs/)
 [![Build Status](https://github.com/sloria/environs/actions/workflows/build-release.yml/badge.svg)](https://github.com/sloria/environs/actions/workflows/build-release.yml)
-[![marshmallow 3 compatible](https://badgen.net/badge/marshmallow/3)](https://marshmallow.readthedocs.io/en/latest/upgrading.html)
 
 **environs** is a Python library for parsing environment variables.
 It allows you to store configuration separate from your code, as per
@@ -114,7 +113,7 @@ The following are all type-casting methods of `Env`:
 - `env.uuid`
 - `env.log_level`
 - `env.path` (casts to a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html))
-- `env.enum` (casts to any given enum type specified in `type` keyword argument, accepts optional `ignore_case` keyword argument)
+- `env.enum` (casts to any given enum type specified in `enum` keyword argument)
 
 ## Reading `.env` files
 
