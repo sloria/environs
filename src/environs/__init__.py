@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import builtins
 import collections
 import contextlib
 import datetime as dt
@@ -34,6 +33,9 @@ __all__ = ["Env", "EnvError", "ValidationError"]
 _T = typing.TypeVar("_T")
 _StrType = str
 _BoolType = bool
+_IntType = int
+_ListType = list
+_DictType = dict
 _EnumT = typing.TypeVar("_EnumT", bound=Enum)
 
 
@@ -152,8 +154,8 @@ class Field2MethodDictType:
         allow_none: bool | None = None,
         error_messages: dict[str, str] | None = None,
         metadata: typing.Mapping[str, typing.Any] | None = None,
-        subcast_keys: Subcast[_T] | None,
-        subcast_values: Subcast[_T] | None,
+        subcast_keys: Subcast[_T] | None = None,
+        subcast_values: Subcast[_T] | None = None,
         delimiter: str | None = None,
     ) -> dict | None:
         pass
@@ -181,7 +183,7 @@ def _field2method(
         self: Env,
         name: str,
         default: typing.Any = ma.missing,
-        subcast: Subcast | None = None,
+        subcast: Subcast[_T] | None = None,
         *,
         # Subset of relevant marshmallow.Field kwargs
         load_default: typing.Any = ma.missing,
@@ -532,7 +534,7 @@ class Env:
             "delimiter",
         ),
     )
-    json: Field2MethodType[typing.List | typing.Dict] = _field2method(  # noqa: UP006
+    json: Field2MethodType[_ListType | _DictType] = _field2method(
         ma.fields.Field, "json", preprocess=_preprocess_json
     )
     datetime: Field2MethodType[dt.datetime] = _field2method(
@@ -544,9 +546,7 @@ class Env:
         _TimeDeltaField, "timedelta"
     )
     path: Field2MethodType[Path] = _field2method(_PathField, "path")
-    log_level: Field2MethodType[builtins.int] = _field2method(
-        _LogLevelField, "log_level"
-    )
+    log_level: Field2MethodType[_IntType] = _field2method(_LogLevelField, "log_level")
 
     uuid: Field2MethodType[uuid.UUID] = _field2method(ma.fields.UUID, "uuid")
     url: Field2MethodType[ParseResult] = _field2method(_URLField, "url")
