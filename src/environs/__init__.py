@@ -486,7 +486,7 @@ class Env:
 
     @staticmethod
     def read_env(
-        path: _StrType | None = None,
+        path: _StrType | Path | None = None,
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
