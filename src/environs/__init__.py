@@ -532,7 +532,7 @@ class Env:
             "delimiter",
         ),
     )
-    json: Field2MethodType[list | dict] = _field2method(
+    json: Field2MethodType[typing.List | typing.Dict] = _field2method(  # noqa: UP006
         ma.fields.Field, "json", preprocess=_preprocess_json
     )
     datetime: Field2MethodType[dt.datetime] = _field2method(
