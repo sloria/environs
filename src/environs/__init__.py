@@ -431,7 +431,7 @@ class _TimeDeltaField(ma.fields.TimeDelta):
 class Env:
     """An environment variable reader."""
 
-    __call__: ParserMethod = _field2method(ma.fields.Raw, "__call__")
+    __call__: FieldMethod[typing.Any] = _field2method(ma.fields.Raw, "__call__")
 
     int: FieldMethod[int] = _field2method(ma.fields.Int, "int")
     bool: FieldMethod[bool] = _field2method(ma.fields.Bool, "bool")

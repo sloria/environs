@@ -72,6 +72,8 @@ class DictFieldMethod:
         name: str,
         default: typing.Any = ma.missing,
         *,
+        subcast_keys: Subcast[T] | None = None,
+        subcast_values: Subcast[T] | None = None,
         delimiter: str | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> dict | None: ...
