@@ -1,5 +1,33 @@
 # Changelog
 
+## 14.0.0 (unreleased)
+
+Changes:
+
+- `default` values are expected to be their in their deserialized form.
+  _Backwards-incompatible_: Passing serialized values to `default`
+  is no longer supported.
+
+```python
+from datetime import date, timedelta
+import environs
+
+# DO
+enable_login = env.bool("ENABLE_LOGIN", True)
+ttl = env.timedelta("TTL", default=timedelta(seconds=600))
+release_date = env.date("RELEASE", date(2025, 1, 7))
+numbers = env.list("FOO", [1.0, 2.0, 3.0], subcast=float)
+
+# DON'T
+enable_login = env.bool("ENABLE_LOGIN", "true")
+ttl = env.timedelta("TTL", default=600)
+release_date = env.date("RELEASE", "2025-01-07")
+numbers = env.list("NUMBERS", "1,2,42", subcast=float)
+```
+
+This fixes [#297](https://github.com/sloria/environs/issues/297)
+and [#270](https://github.com/sloria/environs/issues/270).
+
 ## 13.0.0 (2025-01-07)
 
 Features:

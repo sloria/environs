@@ -90,11 +90,16 @@ class TestCasting:
         set_env({"LIST": "1,2,3"})
         assert env.list("LIST") == ["1", "2", "3"]
 
-    def test_list_with_default_from_string(self, env: environs.Env):
-        assert env.list("LIST", "1,2") == ["1", "2"]
-
     def test_list_with_default_from_list(self, env: environs.Env):
         assert env.list("LIST", ["1"]) == ["1"]
+
+    # https://github.com/sloria/environs/issues/270
+    def test_list_with_default_list_and_subcast(self, set_env, env: environs.Env):
+        expected = [("a", "b"), ("b", "c")]
+        assert (
+            env.list("LIST", expected, subcast=lambda s: tuple(s.split(":")))
+            == expected
+        )
 
     # https://github.com/sloria/environs/issues/298
     def test_list_with_default_none(self, env: environs.Env):
@@ -174,10 +179,7 @@ class TestCasting:
             "DICT", subcast_keys=custom_tuple, subcast_values=custom_tuple
         ) == {("1", "1"): ("foo", "bar")}
 
-    def test_dict_with_default_from_string(self, set_env, env: environs.Env):
-        assert env.dict("DICT", "key1=1,key2=2") == {"key1": "1", "key2": "2"}
-
-    def test_dict_with_default_from_dict(self, set_env, env: environs.Env):
+    def test_dict_with_dict_default(self, env: environs.Env):
         assert env.dict("DICT", {"key1": "1"}) == {"key1": "1"}
 
     def test_dict_with_equal(self, set_env, env: environs.Env):
@@ -212,9 +214,6 @@ class TestCasting:
     def test_json_default(self, set_env, env: environs.Env):
         assert env.json("JSON", {"foo": "bar"}) == {"foo": "bar"}
         assert env.json("JSON", ["foo", "bar"]) == ["foo", "bar"]
-        with pytest.raises(environs.EnvError) as exc:
-            env.json("JSON", "invalid")  # type: ignore[call-overload]
-        assert "Not valid JSON." in exc.value.args[0]
 
     def test_datetime_cast(self, set_env, env: environs.Env):
         dtime = dt.datetime.now(dt.timezone.utc)
@@ -230,10 +229,6 @@ class TestCasting:
         set_env({"DATE": date.isoformat()})
         assert env.date("DATE") == date
 
-    @pytest.mark.xfail(
-        MARSHMALLOW_VERSION.major < 4,
-        reason="marshmallow 3 does not allow all fields to accept internal types",
-    )
     @pytest.mark.parametrize(
         ("method_name", "value"),
         [
@@ -242,16 +237,13 @@ class TestCasting:
             pytest.param("time", dt.time(1, 2, 3), id="time"),
         ],
     )
-    def test_default_can_be_set_to_internal_type(
+    def test_default_set_to_internal_type(
         self, env: environs.Env, method_name: str, value
     ):
         method = getattr(env, method_name)
         assert method("NOTFOUND", value) == value
 
     def test_timedelta_cast(self, set_env, env: environs.Env):
-        # default values may be in serialized form
-        assert env.timedelta("TIMEDELTA", "42") == dt.timedelta(seconds=42)  # type: ignore[call-overload]
-        assert env.timedelta("TIMEDELTA", 42) == dt.timedelta(seconds=42)  # type: ignore[call-overload]
         # marshmallow 4 preserves float values as microseconds
         if MARSHMALLOW_VERSION.major >= 4:
             set_env({"TIMEDELTA": "42.9"})
@@ -490,8 +482,9 @@ class TestValidation:
             env("NODE_ENV", validate=validate.OneOf(["development", "production"]))
 
     def test_validator_can_raise_enverror(self, set_env, env: environs.Env):
+        set_env({"NODE_ENV": "test"})
         with pytest.raises(environs.EnvError) as excinfo:
-            env("NODE_ENV", "development", validate=always_fail)
+            env("NODE_ENV", validate=always_fail)
         assert "something went wrong" in excinfo.value.args[0]
 
     def test_failed_vars_are_not_serialized(self, set_env, env: environs.Env):
@@ -973,21 +966,6 @@ class TestExpandVars:
             }
         )
         assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
-
-    def test_default_expands(self, env: environs.Env, set_env):
-        set_env(
-            {
-                "MAIN": "${SUBSTI}",
-                "SUBSTI": "substivalue",
-            }
-        )
-        assert env.str("NOT_SET", "${SUBSTI}") == "substivalue"
-        assert env.str("NOT_SET", "${MAIN}") == "substivalue"
-        assert env.str("NOT_SET", "${NOT_SET2:-set2}") == "set2"
-        with pytest.raises(
-            environs.EnvError, match='Environment variable "NOT_SET2" not set'
-        ):
-            assert env.str("NOT_SET", "${NOT_SET2}")
 
     def test_escaped_expand(self, env: environs.Env, set_env):
         set_env({"ESCAPED_EXPAND": r"\${ESCAPED}", "ESCAPED": "fail"})

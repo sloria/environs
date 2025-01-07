@@ -107,11 +107,14 @@ def _field2method(
                 load_default=load_default,
             )
         parsed_key, value, proxied_key = self._get_from_environ(
-            name, default=field.load_default
+            name, default=ma.missing
         )
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
         if value is ma.missing:
+            if default is not ...:
+                self._values[parsed_key] = default
+                return default
             if self.eager:
                 raise EnvError(
                     f'Environment variable "{proxied_key or parsed_key}" not set'
