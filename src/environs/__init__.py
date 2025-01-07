@@ -106,13 +106,11 @@ def _field2method(
                 required=required,
                 load_default=load_default,
             )
-        parsed_key, value, proxied_key = self._get_from_environ(
-            name, default=ma.missing
-        )
+        parsed_key, value, proxied_key = self._get_from_environ(name, default=Ellipsis)
         self._fields[parsed_key] = field
         source_key = proxied_key or parsed_key
-        if value is ma.missing:
-            if default is not ...:
+        if value is Ellipsis:
+            if default is not Ellipsis:
                 self._values[parsed_key] = default
                 return default
             if self.eager:
@@ -145,7 +143,7 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
     def method(
         self: Env,
         name: str,
-        default: typing.Any = ma.missing,
+        default: typing.Any = ...,
         **kwargs,
     ) -> _T | None:
         if self._sealed:
@@ -155,7 +153,7 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
         self._fields[parsed_key] = ma.fields.Raw()
         source_key = proxied_key or parsed_key
-        if raw_value is ma.missing:
+        if raw_value is Ellipsis:
             if self.eager:
                 raise EnvError(
                     f'Environment variable "{proxied_key or parsed_key}" not set'
@@ -516,7 +514,7 @@ class Env:
                 elif (
                     value == default
                 ):  # if we have used default, don't use it recursively
-                    default = ma.missing
+                    default = Ellipsis
                 return (
                     key,
                     self._get_from_environ(proxied_key, default, proxied=True)[1],
@@ -539,11 +537,11 @@ class Env:
             env_key = match.group(1)
             env_default = match.group(2)
             if env_default is None:
-                env_default = ma.missing
+                env_default = Ellipsis
             else:
                 env_default = env_default[2:]  # trim ':-' from default
             _, env_value, _ = self._get_from_environ(env_key, env_default, proxied=True)
-            if env_value is ma.missing:
+            if env_value is Ellipsis:
                 return parsed_key, env_value, env_key
             ret += value[prev_start : match.start()] + env_value
             prev_start = match.end()
