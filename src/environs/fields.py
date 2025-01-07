@@ -7,7 +7,9 @@
 import logging
 import pathlib
 import re
+import typing
 from datetime import timedelta
+from urllib.parse import ParseResult, urlparse
 
 from marshmallow import ValidationError, fields
 
@@ -75,3 +77,22 @@ class TimeDelta(fields.TimeDelta):
                     microseconds=int(groups[6]),
                 )
         return super()._deserialize(value, *args, **kwargs)
+
+
+class Url(fields.Url):
+    """Same as `marshmallow.fields.Url` but deserializes to a `urllib.parse.ParseResult`."""
+
+    def _serialize(self, value: ParseResult, *args, **kwargs) -> str:  # type: ignore[override]
+        return value.geturl()
+
+    # Override deserialize rather than _deserialize because we need
+    # to call urlparse *after* validation has occurred
+    def deserialize(  # type: ignore[override]
+        self,
+        value: typing.Any,
+        attr: str | None = None,
+        data: typing.Mapping[str, typing.Any] | None = None,
+        **kwargs,
+    ) -> ParseResult:
+        ret = typing.cast(str, super().deserialize(value, attr, data, **kwargs))
+        return urlparse(ret)

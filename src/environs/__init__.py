@@ -13,7 +13,7 @@ import typing
 import uuid
 from collections.abc import Mapping
 from pathlib import Path
-from urllib.parse import ParseResult, urlparse
+from urllib.parse import ParseResult
 
 import marshmallow as ma
 from dotenv.main import _walk_to_root, load_dotenv
@@ -327,23 +327,6 @@ def _dj_cache_url_parser(value: str, **kwargs) -> dict:
         raise ma.ValidationError(error.args[0]) from error
 
 
-class _URLField(ma.fields.Url):
-    def _serialize(self, value: ParseResult, *args, **kwargs) -> str:  # type: ignore[override]
-        return value.geturl()
-
-    # Override deserialize rather than _deserialize because we need
-    # to call urlparse *after* validation has occurred
-    def deserialize(  # type: ignore[override]
-        self,
-        value: typing.Any,
-        attr: str | None = None,
-        data: typing.Mapping[str, typing.Any] | None = None,
-        **kwargs,
-    ) -> ParseResult:
-        ret = typing.cast(str, super().deserialize(value, attr, data, **kwargs))
-        return urlparse(ret)
-
-
 class Env:
     """An environment variable reader."""
 
@@ -382,7 +365,7 @@ class Env:
     log_level: FieldMethod[_IntType] = _field2method(fields.LogLevel, "log_level")
 
     uuid: FieldMethod[uuid.UUID] = _field2method(ma.fields.UUID, "uuid")
-    url: FieldMethod[ParseResult] = _field2method(_URLField, "url")
+    url: FieldMethod[ParseResult] = _field2method(fields.Url, "url")
 
     enum: EnumFuncMethod = _func2method(_enum_parser, "enum")
     dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
