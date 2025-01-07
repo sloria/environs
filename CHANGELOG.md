@@ -1,6 +1,6 @@
 # Changelog
 
-## 14.0.0 (unreleased)
+## 14.0.0 (2025-06-07)
 
 Features:
 
