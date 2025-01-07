@@ -2,6 +2,15 @@
 
 ## 14.0.0 (unreleased)
 
+Features:
+
+- Add `env` singleton ([#194]).
+  Thanks [AndBondStyle](https://github.com/AndBondStyle) for the suggestion.
+
+```python
+from environs import env
+```
+
 Changes:
 
 - `default` values are expected to be their in their deserialized form.
