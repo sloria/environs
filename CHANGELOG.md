@@ -12,7 +12,7 @@ Bug fixes:
 
 - Typing: Fix typing for `Env.enum` to allow `by_value` to be passed ([#386](https://github.com/sloria/environs/issues/386)).
 
-## 14.0.0 (2025-06-07)
+## 14.0.0 (2025-01-07)
 
 Features:
 
