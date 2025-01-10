@@ -94,7 +94,7 @@ class TestCasting:
         assert env.list("LIST", ["1"]) == ["1"]
 
     # https://github.com/sloria/environs/issues/270
-    def test_list_with_default_list_and_subcast(self, set_env, env: environs.Env):
+    def test_list_with_default_list_and_subcast(self, env: environs.Env):
         expected = [("a", "b"), ("b", "c")]
         assert (
             env.list("LIST", expected, subcast=lambda s: tuple(s.split(":")))
@@ -642,6 +642,12 @@ class TestPrefix:
     def default_environ(self, set_env):
         set_env({"APP_STR": "foo", "APP_INT": "42"})
 
+    def test_prefix_passed_to_constructor(self):
+        env = environs.Env(prefix="APP_")
+        assert env.str("STR") == "foo"
+        assert env.int("INT") == 42
+        assert env("NOT_FOUND", "mydefault") == "mydefault"
+
     def test_prefixed(self, env: environs.Env):
         with env.prefixed("APP_"):
             assert env.str("STR") == "foo"
@@ -675,6 +681,13 @@ class TestNestedPrefix:
     @pytest.fixture(autouse=True)
     def default_environ(self, set_env):
         set_env({"APP_STR": "foo", "APP_NESTED_INT": "42"})
+
+    def test_prefixed_with_prefix_set(self):
+        env = environs.Env(prefix="APP_")
+        assert env.str("STR") == "foo"
+        with env.prefixed("NESTED_"):
+            assert env.int("INT") == 42
+            assert env("NOT_FOUND", "mydefault") == "mydefault"
 
     def test_nested_prefixed(self, env: environs.Env):
         with env.prefixed("APP_"):

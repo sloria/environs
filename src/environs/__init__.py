@@ -353,14 +353,20 @@ class Env:
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 
-    def __init__(self, *, eager: _BoolType = True, expand_vars: _BoolType = False):
+    def __init__(
+        self,
+        *,
+        eager: _BoolType = True,
+        expand_vars: _BoolType = False,
+        prefix: _StrType | None = None,
+    ):
         self.eager = eager
         self._sealed: bool = False
         self.expand_vars = expand_vars
         self._fields: dict[_StrType, ma.fields.Field] = {}
         self._values: dict[_StrType, typing.Any] = {}
         self._errors: ErrorMapping = collections.defaultdict(list)
-        self._prefix: _StrType | None = None
+        self._prefix: _StrType | None = prefix
         self.__custom_parsers__: dict[_StrType, ParserMethod] = {}
 
     def __repr__(self) -> _StrType:
