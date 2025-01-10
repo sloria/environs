@@ -2,7 +2,7 @@
 
 .. warning::
 
-    This module is provisional. Types may be modified, added, and removed between minor releases.
+    This module is private. Types may be modified, added, and removed between minor releases.
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ except ImportError:  # Remove when dropping Python 3.10
     from typing_extensions import Unpack
 
 import marshmallow as ma
+from marshmallow.fields import Field
 
 T = typing.TypeVar("T")
 EnumT = typing.TypeVar("EnumT", bound=enum.Enum)
@@ -137,6 +138,7 @@ class EnumFieldMethod(typing.Generic[EnumT]):
         default: None = ...,
         *,
         enum: type[EnumT],
+        by_value: bool | Field | type[Field] = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> EnumT | None: ...
 
@@ -147,6 +149,7 @@ class EnumFieldMethod(typing.Generic[EnumT]):
         default: EnumT = ...,
         *,
         enum: type[EnumT],
+        by_value: bool | Field | type[Field] = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> EnumT: ...
 
@@ -156,5 +159,6 @@ class EnumFieldMethod(typing.Generic[EnumT]):
         default: EnumT | None = ...,
         *,
         enum: type[EnumT],
+        by_value: bool | Field | type[Field] = False,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> EnumT | None: ...

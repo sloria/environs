@@ -114,6 +114,7 @@ The following are all type-casting methods of `Env`:
 - `env.log_level`
 - `env.path` (casts to a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html))
 - `env.enum` (casts to any given enum type specified in `enum` keyword argument)
+  - Pass `by_value=True` to parse and validate by the Enum's values.
 
 ## Reading `.env` files
 
