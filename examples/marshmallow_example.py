@@ -3,7 +3,7 @@ import pathlib
 
 import marshmallow as ma
 
-from environs import Env
+from environs import env
 
 os.environ["STATIC_PATH"] = "app/static"
 
@@ -16,7 +16,6 @@ class PathField(ma.fields.Field):
         return str(value)
 
 
-env = Env()
 env.parser_from_field("path", PathField)
 
 static_path = env.path("STATIC_PATH")

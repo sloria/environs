@@ -7,6 +7,7 @@ Features:
 - Add `prefix` parameter to `Env` constructor ([#384](https://github.com/sloria/environs/issues/384)).
   Thanks [arthurc0102](https://github.com/sloria/environs/issues/384)
   for the suggestion.
+- Re-export `validate` module from marshmallow ([#385](https://github.com/sloria/environs/issues/385)).
 
 Bug fixes:
 

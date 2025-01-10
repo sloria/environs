@@ -10,9 +10,8 @@ To run this example:
 import os
 from pprint import pprint
 
-import environs
+from environs import env
 
-env = environs.Env()
 env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
