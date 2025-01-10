@@ -219,11 +219,24 @@ year = env.int("YEAR")  # =>2020
 # export NODE_ENV='invalid'
 # export EMAIL='^_^'
 
-from environs import env, ValidationError
-from marshmallow.validate import OneOf, Length, Email
+from environs import env, validate, ValidationError
 
 
-# simple validator
+# built-in validators (provided by marshmallow)
+env.str(
+    "NODE_ENV",
+    validate=validate.OneOf(
+        ["production", "development"], error="NODE_ENV must be one of: {choices}"
+    ),
+)
+# => Environment variable "NODE_ENV" invalid: ['NODE_ENV must be one of: production, development']
+
+# multiple validators
+env.str("EMAIL", validate=[validate.Length(min=4), validate.Email()])
+# => Environment variable "EMAIL" invalid: ['Shorter than minimum length 4.', 'Not a valid email address.']
+
+
+# custom validator
 def validator(n):
     if n <= 0:
         raise ValidationError("Invalid value.")
@@ -231,21 +244,9 @@ def validator(n):
 
 env.int("TTL", validate=validator)
 # => Environment variable "TTL" invalid: ['Invalid value.']
-
-
-# using marshmallow validators
-env.str(
-    "NODE_ENV",
-    validate=OneOf(
-        ["production", "development"], error="NODE_ENV must be one of: {choices}"
-    ),
-)
-# => Environment variable "NODE_ENV" invalid: ['NODE_ENV must be one of: production, development']
-
-# multiple validators
-env.str("EMAIL", validate=[Length(min=4), Email()])
-# => Environment variable "EMAIL" invalid: ['Shorter than minimum length 4.', 'Not a valid email address.']
 ```
+
+`environs.validate` is equivalent to [`marshmallow.validate`](https://marshmallow.readthedocs.io/en/stable/marshmallow.validate.html), so you can use any of the validators provided by that module.
 
 ## Deferred validation
 
