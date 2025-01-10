@@ -62,6 +62,7 @@ Features:
 
 - Typing: Add type hints for parser methods ([#367](https://github.com/sloria/environs/issues/367)).
   Thanks [OkeyDev](https://github/OkeyDev) for the PR.
+- Add `by_value` param to `Env.enum`. Pass `by_value=True` to parse Enum by values instead of names.
 
 Other changes:
 
