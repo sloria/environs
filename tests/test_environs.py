@@ -6,7 +6,12 @@ import pathlib
 import urllib.parse
 import uuid
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, auto
+
+try:
+    from enum import StrEnum
+except ImportError:
+    from backports.strenum import StrEnum  # type: ignore[no-redef]
 
 import dj_database_url
 import dj_email_url
@@ -44,6 +49,11 @@ class DayEnum(Enum):
     SUNDAY = 1
     MONDAY = 2
     TUESDAY = 3
+
+
+class ColorEnum(StrEnum):
+    RED = auto()
+    GREEN = auto()
 
 
 class TestCasting:
@@ -361,6 +371,24 @@ class TestCasting:
     def test_enum_cast(self, set_env, env: environs.Env):
         set_env({"DAY": "SUNDAY"})
         assert env.enum("DAY", enum=DayEnum) == DayEnum.SUNDAY
+
+    def test_enum_by_value_true(self, set_env, env: environs.Env):
+        set_env({"COLOR": "GREEN"})
+        with pytest.raises(
+            environs.EnvError, match='Environment variable "COLOR" invalid:'
+        ):
+            assert env.enum("COLOR", enum=ColorEnum, by_value=True)
+        set_env({"COLOR": "green"})
+        assert env.enum("COLOR", enum=ColorEnum, by_value=True) == ColorEnum.GREEN
+
+    def test_enum_by_value_field(self, set_env, env: environs.Env):
+        set_env({"DAY": "SUNDAY"})
+        with pytest.raises(
+            environs.EnvError, match='Environment variable "DAY" invalid:'
+        ):
+            assert env.enum("DAY", enum=DayEnum, by_value=fields.Int())
+        set_env({"DAY": "1"})
+        assert env.enum("DAY", enum=DayEnum, by_value=fields.Int()) == DayEnum.SUNDAY
 
     def test_invalid_enum(self, set_env, env: environs.Env):
         set_env({"DAY": "suNDay"})
