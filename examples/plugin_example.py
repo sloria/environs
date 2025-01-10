@@ -3,7 +3,7 @@ import os
 from furl import furl as Furl
 from yarl import URL
 
-from environs import Env
+from environs import env
 
 ##### This is the beginning of the plugin code #####
 
@@ -28,7 +28,6 @@ os.environ["GITHUB_URL"] = "https://github.com/sloria/environs"
 
 # Our application activates the plugin using the setup function
 
-env = Env()
 setup(env)
 
 # We now have the 'furl' and 'yurl' methods available

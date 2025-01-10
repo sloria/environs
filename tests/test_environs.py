@@ -18,10 +18,11 @@ import dj_email_url
 import django_cache_url
 import marshmallow as ma
 import pytest
-from marshmallow import fields, validate
+from marshmallow import fields
 from packaging.version import Version
 
 import environs
+from environs import validate
 
 HERE = pathlib.Path(__file__).parent
 MARSHMALLOW_VERSION = Version(importlib.metadata.version("marshmallow"))

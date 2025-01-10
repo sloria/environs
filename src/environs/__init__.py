@@ -54,7 +54,9 @@ _DictType = dict
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
 
-# Reexport marshmallow's ValidationError. Custom validators should raise this for invalid input.
+# Reexport marshmallow's validate module and ValidationError.
+validate = ma.validate
+# Custom validators should raise this for invalid input.
 ValidationError = ma.ValidationError
 
 
