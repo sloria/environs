@@ -29,11 +29,12 @@ Issues = "https://github.com/sloria/environs/issues"
 Source = "https://github.com/sloria/environs"
 
 [project.optional-dependencies]
+django = ["dj-database-url", "dj-email-url", "django-cache-url"]
 tests = [
   "environs[django]",
-  "backports.strenum; python_version < '3.11'",
   "pytest",
   "packaging",
+  "backports.strenum; python_version < '3.11'",
 ]
 dev = ["environs[tests]", "tox", "pre-commit>=4.0,<5.0"]
 
