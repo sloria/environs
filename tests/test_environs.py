@@ -45,13 +45,13 @@ class FauxTestException(Exception):
     pass
 
 
-class DayEnum(Enum):
+class Day(Enum):
     SUNDAY = 1
     MONDAY = 2
     TUESDAY = 3
 
 
-class ColorEnum(StrEnum):
+class Color(StrEnum):
     RED = auto()
     GREEN = auto()
 
@@ -370,37 +370,35 @@ class TestCasting:
 
     def test_enum_cast(self, set_env, env: environs.Env):
         set_env({"DAY": "SUNDAY"})
-        assert env.enum("DAY", enum=DayEnum) == DayEnum.SUNDAY
+        assert env.enum("DAY", enum=Day) == Day.SUNDAY
 
     def test_enum_by_value_true(self, set_env, env: environs.Env):
         set_env({"COLOR": "GREEN"})
         with pytest.raises(
             environs.EnvError, match='Environment variable "COLOR" invalid:'
         ):
-            assert env.enum("COLOR", enum=ColorEnum, by_value=True)
+            assert env.enum("COLOR", enum=Color, by_value=True)
         set_env({"COLOR": "green"})
-        assert env.enum("COLOR", enum=ColorEnum, by_value=True) == ColorEnum.GREEN
+        assert env.enum("COLOR", enum=Color, by_value=True) == Color.GREEN
 
     def test_enum_by_value_field(self, set_env, env: environs.Env):
         set_env({"DAY": "SUNDAY"})
         with pytest.raises(
             environs.EnvError, match='Environment variable "DAY" invalid:'
         ):
-            assert env.enum("DAY", enum=DayEnum, by_value=fields.Int())
+            assert env.enum("DAY", enum=Day, by_value=fields.Int())
         set_env({"DAY": "1"})
-        assert env.enum("DAY", enum=DayEnum, by_value=fields.Int()) == DayEnum.SUNDAY
+        assert env.enum("DAY", enum=Day, by_value=fields.Int()) == Day.SUNDAY
 
     def test_invalid_enum(self, set_env, env: environs.Env):
         set_env({"DAY": "suNDay"})
         with pytest.raises(
             environs.EnvError, match="Must be one of: SUNDAY, MONDAY, TUESDAY"
         ):
-            assert env.enum("DAY", enum=DayEnum)
+            assert env.enum("DAY", enum=Day)
 
     def test_enum_default(self, env: environs.Env):
-        assert (
-            env.enum("NOTFOUND", enum=DayEnum, default=DayEnum.SUNDAY) == DayEnum.SUNDAY
-        )
+        assert env.enum("NOTFOUND", enum=Day, default=Day.SUNDAY) == Day.SUNDAY
 
 
 class TestEnvFileReading:
