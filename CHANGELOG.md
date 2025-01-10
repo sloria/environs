@@ -1,5 +1,13 @@
 # Changelog
 
+## 14.1.0 (unreleased)
+
+Features:
+
+- Add `prefix` parameter to `Env` constructor ([#384](https://github.com/sloria/environs/issues/384)).
+  Thanks [arthurc0102](https://github.com/sloria/environs/issues/384)
+  for the suggestion.
+
 ## 14.0.0 (2025-06-07)
 
 Features:

@@ -158,7 +158,26 @@ assert env.int("B") == 123
 
 ## Handling prefixes
 
+Pass `prefix` to the constructor if all your environment variables have the same prefix.
+
 ```python
+from environs import Env
+
+# export MYAPP_HOST=lolcathost
+# export MYAPP_PORT=3000
+
+
+env = Env(prefix="MYAPP_")
+
+host = env("HOST", "localhost")  # => 'lolcathost'
+port = env.int("PORT", 5000)  # => 3000
+```
+
+Alternatively, you can use the `prefixed` context manager.
+
+```python
+from environs import env
+
 # export MYAPP_HOST=lolcathost
 # export MYAPP_PORT=3000
 
