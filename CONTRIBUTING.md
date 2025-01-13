@@ -2,30 +2,43 @@
 
 ## Setting up for development
 
-- Create and activate a new Python 3 virtual environment
-- `pip install -e '.[dev]'`
-- (Optional but recommended) Install the pre-commit hooks, which will
-  format and lint your git staged files:
+with `venv`:
 
+```console
+$ python -m venv .venv
+$ source .venv/bin/activate
+$ pip install -e '.[dev]'
 ```
-# The pre-commit CLI was installed above
-pre-commit install
+
+with [`uv`](https://docs.astral.sh/uv/getting-started/installation/):
+
+```console
+$ uv sync --extra dev
+$ source .venv/bin/activate
+```
+
+### (Optional but recommended) Install the pre-commit hooks
+
+The pre-commit CLI was installed by the above steps
+
+```console
+$ pre-commit install
 ```
 
 - To run tests:
 
-```
-pytest
+```console
+$ pytest
 ```
 
 - To run syntax checks:
 
-```
-tox -e lint
+```console
+$ tox -e lint
 ```
 
 - (Optional) To run tests on all supported Python 3 versions (must have each interpreter installed):
 
-```
-tox
+```console
+$ tox
 ```
