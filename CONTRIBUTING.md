@@ -25,20 +25,14 @@ The pre-commit CLI was installed by the above steps
 $ pre-commit install
 ```
 
-- To run tests:
+## To run tests
 
 ```console
 $ pytest
 ```
 
-- To run syntax checks:
+## To run syntax checks
 
 ```console
 $ tox -e lint
-```
-
-- (Optional) To run tests on all supported Python 3 versions (must have each interpreter installed):
-
-```console
-$ tox
 ```
