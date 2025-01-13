@@ -13,7 +13,7 @@ $ pip install -e '.[dev]'
 with [`uv`](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```console
-$ uv sync --extra dev
+$ uv sync --frozen --extra dev
 $ source .venv/bin/activate
 ```
 
