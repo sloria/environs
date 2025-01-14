@@ -72,6 +72,7 @@ select = [
 ignore-overlong-task-comments = true
 
 [tool.mypy]
+files = ["src", "tests"]
 ignore_missing_imports = true
 warn_unreachable = true
 warn_redundant_casts = true
