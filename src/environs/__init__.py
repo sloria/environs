@@ -42,7 +42,7 @@ if typing.TYPE_CHECKING:
     except ImportError:
         pass
 
-__all__ = ["Env", "EnvError", "ValidationError"]
+__all__ = ["Env", "env", "EnvError", "ValidationError"]
 
 _T = typing.TypeVar("_T")
 _StrType = str

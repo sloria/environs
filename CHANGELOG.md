@@ -1,5 +1,12 @@
 # Changelog
 
+## (unreleased)
+
+Bug fixes:
+
+- Add `env` to `__all__` ([#396](https://github.com/sloria/environs/issues/396)).
+  Thanks [daveflr](https://github.com/daveflr) for reporting.
+
 ## 14.1.0 (2025-01-10)
 
 Features:
