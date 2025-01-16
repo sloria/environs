@@ -43,7 +43,7 @@ if typing.TYPE_CHECKING:
     except ImportError:
         pass
 
-__all__ = ["Env", "env", "EnvError", "ValidationError"]
+__all__ = ["Env", "EnvError", "ValidationError", "env"]
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -66,7 +66,7 @@ def _field2method(
     method_name: str,
     *,
     preprocess: typing.Callable | None = None,
-    preprocess_kwarg_names: typing.Sequence[str] = tuple(),
+    preprocess_kwarg_names: typing.Sequence[str] = (),
 ) -> typing.Any:
     def method(
         self: Env,
@@ -86,14 +86,15 @@ def _field2method(
     ) -> _T | None:
         if self._sealed:
             raise EnvSealedError(
-                "Env has already been sealed. New values cannot be parsed."
+                "Env has already been sealed. New values cannot be parsed.",
             )
         load_default = default if default is not Ellipsis else ma.missing
         preprocess_kwargs = {
             name: kwargs.pop(name) for name in preprocess_kwarg_names if name in kwargs
         }
         if isinstance(field_or_factory, type) and issubclass(
-            field_or_factory, ma.fields.Field
+            field_or_factory,
+            ma.fields.Field,
         ):
             field = field_or_factory(
                 validate=validate,
@@ -118,11 +119,10 @@ def _field2method(
                 return default
             if self.eager:
                 raise EnvError(
-                    f'Environment variable "{proxied_key or parsed_key}" not set'
+                    f'Environment variable "{proxied_key or parsed_key}" not set',
                 )
-            else:
-                self._errors[parsed_key].append("Environment variable not set.")
-                return None
+            self._errors[parsed_key].append("Environment variable not set.")
+            return None
         try:
             if preprocess:
                 value = preprocess(value, **preprocess_kwargs)
@@ -151,7 +151,7 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
     ) -> _T | None:
         if self._sealed:
             raise EnvSealedError(
-                "Env has already been sealed. New values cannot be parsed."
+                "Env has already been sealed. New values cannot be parsed.",
             )
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
         self._fields[parsed_key] = ma.fields.Raw()
@@ -159,12 +159,11 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
         if raw_value is Ellipsis:
             if self.eager:
                 raise EnvError(
-                    f'Environment variable "{proxied_key or parsed_key}" not set'
+                    f'Environment variable "{proxied_key or parsed_key}" not set',
                 )
-            else:
-                self._errors[parsed_key].append("Environment variable not set.")
-                return None
-        if raw_value or raw_value == "":
+            self._errors[parsed_key].append("Environment variable not set.")
+            return None
+        if raw_value or raw_value == "":  # noqa: SIM108
             value = raw_value
         else:
             value = None
@@ -210,15 +209,15 @@ def _make_subcast_field(
 
 
 def _make_list_field(*, subcast: Subcast | None, **kwargs) -> ma.fields.List:
-    if subcast:
-        inner_field = _make_subcast_field(subcast)
-    else:
-        inner_field = ma.fields.Raw
+    inner_field = _make_subcast_field(subcast) if subcast else ma.fields.Raw
     return ma.fields.List(inner_field, **kwargs)
 
 
 def _preprocess_list(
-    value: str | typing.Iterable, *, delimiter: str = ",", **kwargs
+    value: str | typing.Iterable,
+    *,
+    delimiter: str = ",",
+    **kwargs,
 ) -> typing.Iterable:
     if ma.utils.is_iterable_but_not_string(value) or value is None:
         return value
@@ -248,7 +247,7 @@ def _preprocess_dict(
 
     return {
         subcast_keys_instance.deserialize(
-            key.strip()
+            key.strip(),
         ): subcast_values_instance.deserialize(val.strip())
         for key, val in (item.split("=", 1) for item in value.split(delimiter) if value)
     }
@@ -258,10 +257,9 @@ def _preprocess_json(value: str | typing.Mapping | list, **kwargs):
     try:
         if isinstance(value, str):
             return pyjson.loads(value)
-        elif isinstance(value, dict) or isinstance(value, list) or value is None:
+        if isinstance(value, (dict, list)) or value is None:
             return value
-        else:
-            raise ma.ValidationError("Not valid JSON.")
+        raise ma.ValidationError("Not valid JSON.")
     except pyjson.JSONDecodeError as error:
         raise ma.ValidationError("Not valid JSON.") from error
 
@@ -272,7 +270,7 @@ def _dj_db_url_parser(value: str, **kwargs) -> DBConfig:
     except ImportError as error:
         raise RuntimeError(
             "The dj_db_url parser requires the dj-database-url package. "
-            "You can install it with: pip install dj-database-url"
+            "You can install it with: pip install dj-database-url",
         ) from error
     try:
         return dj_database_url.parse(value, **kwargs)
@@ -286,7 +284,7 @@ def _dj_email_url_parser(value: str, **kwargs) -> dict:
     except ImportError as error:
         raise RuntimeError(
             "The dj_email_url parser requires the dj-email-url package. "
-            "You can install it with: pip install dj-email-url"
+            "You can install it with: pip install dj-email-url",
         ) from error
     try:
         return dj_email_url.parse(value, **kwargs)
@@ -300,7 +298,7 @@ def _dj_cache_url_parser(value: str, **kwargs) -> dict:
     except ImportError as error:
         raise RuntimeError(
             "The dj_cache_url parser requires the django-cache-url package. "
-            "You can install it with: pip install django-cache-url"
+            "You can install it with: pip install django-cache-url",
         ) from error
     try:
         return django_cache_url.parse(value, **kwargs)
@@ -338,7 +336,9 @@ class Env:
         ),
     )
     json: FieldMethod[_ListType | _DictType] = _field2method(
-        ma.fields.Raw, "json", preprocess=_preprocess_json
+        ma.fields.Raw,
+        "json",
+        preprocess=_preprocess_json,
     )
     datetime: FieldMethod[dt.datetime] = _field2method(ma.fields.DateTime, "datetime")
     date: FieldMethod[dt.date] = _field2method(ma.fields.Date, "date")
@@ -372,11 +372,12 @@ class Env:
         self.__custom_parsers__: dict[_StrType, ParserMethod] = {}
 
     def __repr__(self) -> _StrType:
-        return f"<{self.__class__.__name__}(eager={self.eager}, expand_vars={self.expand_vars})>"  # noqa: E501
+        return f"<{self.__class__.__name__}(eager={self.eager}, expand_vars={self.expand_vars})>"
 
     @staticmethod
     def read_env(
         path: _StrType | Path | None = None,
+        *,
         recurse: _BoolType = True,
         verbose: _BoolType = False,
         override: _BoolType = False,
@@ -397,7 +398,7 @@ class Env:
             if current_frame is None:
                 raise RuntimeError("Could not get current call frame.")
             frame = current_frame.f_back
-            assert frame is not None
+            assert frame is not None  # noqa: S101
             caller_dir = Path(frame.f_code.co_filename).parent.resolve()
             start = caller_dir / ".env"
         else:
@@ -412,7 +413,9 @@ class Env:
                 check_path = Path(dirname) / env_name
                 if check_path.exists():
                     is_env_loaded = load_dotenv(
-                        check_path, verbose=verbose, override=override
+                        check_path,
+                        verbose=verbose,
+                        override=override,
                     )
                     env_path = str(check_path)
                     break
@@ -423,8 +426,7 @@ class Env:
 
         if return_path:
             return env_path
-        else:
-            return is_env_loaded
+        return is_env_loaded
 
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator[Env]:
@@ -451,7 +453,8 @@ class Env:
             error_messages = dict(self._errors)
             self._errors = {}
             raise EnvValidationError(
-                f"Environment variables invalid: {error_messages}", error_messages
+                f"Environment variables invalid: {error_messages}",
+                error_messages,
             )
 
     def __getattr__(self, name: _StrType):
@@ -466,13 +469,13 @@ class Env:
         """
         if hasattr(self, name):
             raise ParserConflictError(
-                f"Env already has a method with name '{name}'. Use a different name."
+                f"Env already has a method with name '{name}'. Use a different name.",
             )
         self.__custom_parsers__[name] = _func2method(func, method_name=name)
-        return None
 
     def parser_for(
-        self, name: _StrType
+        self,
+        name: _StrType,
     ) -> typing.Callable[[typing.Callable], typing.Callable]:
         """Decorator that registers a new parser method with the name ``name``.
         The decorated function must receive the input value for an environment variable.
@@ -498,7 +501,11 @@ class Env:
         return schema.dump(self._values)
 
     def _get_from_environ(
-        self, key: _StrType, default: typing.Any, *, proxied: _BoolType = False
+        self,
+        key: _StrType,
+        default: typing.Any,
+        *,
+        proxied: _BoolType = False,
     ) -> tuple[_StrType, typing.Any, _StrType | None]:
         """Access a value from os.environ. Handles proxied variables,
         e.g. SMTP_LOGIN={{MAILGUN_LOGIN}}.
@@ -544,7 +551,7 @@ class Env:
         for match in _EXPANDED_VAR_PATTERN.finditer(value):
             env_key = match.group(1)
             env_default = match.group(2)
-            if env_default is None:
+            if env_default is None:  # noqa: SIM108
                 env_default = Ellipsis
             else:
                 env_default = env_default[2:]  # trim ':-' from default

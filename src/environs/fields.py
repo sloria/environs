@@ -38,8 +38,7 @@ class LogLevel(fields.Integer):
             value = value.upper()
             if hasattr(logging, value) and isinstance(getattr(logging, value), int):
                 return getattr(logging, value)
-            else:
-                raise ValidationError("Not a valid log level.") from error
+            raise ValidationError("Not a valid log level.") from error
 
 
 class TimeDelta(fields.TimeDelta):

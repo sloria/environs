@@ -1,6 +1,6 @@
 import os
 
-from furl import furl as Furl
+from furl import furl as Furl  # noqa: N812
 from yarl import URL
 
 from environs import env

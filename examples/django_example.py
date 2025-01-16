@@ -27,7 +27,7 @@ DATABASES = {
         "DATABASE_URL",
         default="sqlite:///" + os.path.join(BASE_DIR, "db.sqlite3"),
         ssl_require=not DEBUG,
-    )
+    ),
 }
 
 TIME_ZONE = env.str("TIME_ZONE", default="America/Chicago")

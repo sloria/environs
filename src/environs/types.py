@@ -26,7 +26,7 @@ EnumT = typing.TypeVar("EnumT", bound=enum.Enum)
 ErrorMapping: typing.TypeAlias = typing.Mapping[str, list[str]]
 FieldFactory: typing.TypeAlias = typing.Callable[..., ma.fields.Field]
 Subcast: typing.TypeAlias = typing.Union[
-    type[T], typing.Callable[[typing.Any], T], ma.fields.Field
+    type[T], typing.Callable[[typing.Any], T], ma.fields.Field,
 ]
 ParserMethod: typing.TypeAlias = typing.Callable[..., typing.Any]
 

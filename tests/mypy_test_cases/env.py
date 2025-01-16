@@ -9,15 +9,19 @@ Or ::
     tox -e mypy-marshmallowdev
 """
 
-import datetime as dt
-import decimal
+from __future__ import annotations
+
 import enum
-import pathlib
-import uuid
-from typing import Any
-from urllib.parse import ParseResult
+from typing import TYPE_CHECKING, Any
 
 import environs
+
+if TYPE_CHECKING:
+    import datetime as dt
+    import decimal
+    import pathlib
+    import uuid
+    from urllib.parse import ParseResult
 
 env = environs.Env()
 
@@ -39,7 +43,10 @@ LIST0: list | None = env.list("FOO", None)
 LIST1: list[int] | None = env.list("FOO", None, subcast=int)
 DICT0: dict | None = env.dict("FOO", None)
 DICT1: dict[str, int] | None = env.dict(
-    "FOO", None, subcast_keys=str, subcast_values=int
+    "FOO",
+    None,
+    subcast_keys=str,
+    subcast_values=int,
 )
 JSON0: list | dict | None = env.json("FOO", None)
 DATETIME0: dt.datetime | None = env.datetime("FOO", None)
