@@ -110,8 +110,7 @@ class TestCasting:
     def test_list_with_default_list_and_subcast(self, env: environs.Env):
         expected = [("a", "b"), ("b", "c")]
         assert (
-            env.list("LIST", expected, subcast=lambda s: tuple(s.split(":")))
-            == expected
+            env.list("LIST", expected, subcast=lambda s: tuple(s.split(":"))) == expected
         )
 
     # https://github.com/sloria/environs/issues/298

@@ -47,6 +47,7 @@ include = ["tests/", "CHANGELOG.md", "CONTRIBUTING.md", "tox.ini"]
 
 [tool.ruff]
 src = ["src"]
+line-length = 90
 fix = true
 show-fixes = true
 output-format = "full"
