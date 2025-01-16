@@ -37,12 +37,12 @@ def set_env(monkeypatch):
     return _set_env
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def env():
     return environs.Env()
 
 
-class FauxTestException(Exception):
+class FauxTestError(Exception):
     pass
 
 
@@ -63,7 +63,8 @@ class TestCasting:
         assert env("STR") == "foo"
         assert env("NOT_SET", "mydefault") == "mydefault"
         with pytest.raises(
-            environs.EnvError, match='Environment variable "NOT_SET" not set'
+            environs.EnvError,
+            match='Environment variable "NOT_SET" not set',
         ):
             assert env("NOT_SET")
 
@@ -87,7 +88,8 @@ class TestCasting:
     def test_invalid_int(self, set_env, env: environs.Env):
         set_env({"INT": "invalid"})
         with pytest.raises(
-            environs.EnvValidationError, match='Environment variable "INT" invalid'
+            environs.EnvValidationError,
+            match='Environment variable "INT" invalid',
         ) as excinfo:
             env.int("INT")
         exc = excinfo.value
@@ -108,8 +110,7 @@ class TestCasting:
     def test_list_with_default_list_and_subcast(self, env: environs.Env):
         expected = [("a", "b"), ("b", "c")]
         assert (
-            env.list("LIST", expected, subcast=lambda s: tuple(s.split(":")))
-            == expected
+            env.list("LIST", expected, subcast=lambda s: tuple(s.split(":"))) == expected
         )
 
     # https://github.com/sloria/environs/issues/298
@@ -187,7 +188,9 @@ class TestCasting:
 
         set_env({"DICT": "1:1=foo:bar"})
         assert env.dict(
-            "DICT", subcast_keys=custom_tuple, subcast_values=custom_tuple
+            "DICT",
+            subcast_keys=custom_tuple,
+            subcast_values=custom_tuple,
         ) == {("1", "1"): ("foo", "bar")}
 
     def test_dict_with_dict_default(self, env: environs.Env):
@@ -249,7 +252,10 @@ class TestCasting:
         ],
     )
     def test_default_set_to_internal_type(
-        self, env: environs.Env, method_name: str, value
+        self,
+        env: environs.Env,
+        method_name: str,
+        value,
     ):
         method = getattr(env, method_name)
         assert method("NOTFOUND", value) == value
@@ -259,7 +265,8 @@ class TestCasting:
         if MARSHMALLOW_VERSION.major >= 4:
             set_env({"TIMEDELTA": "42.9"})
             assert env.timedelta("TIMEDELTA") == dt.timedelta(
-                seconds=42, microseconds=900000
+                seconds=42,
+                microseconds=900000,
             )
         # seconds as integer
         set_env({"TIMEDELTA": "0"})
@@ -326,7 +333,9 @@ class TestCasting:
         # FIXME: Fix typing of FieldMethod to accept
         # all the underlying field's constructor arguments
         res = env.url(  # type: ignore[call-overload]
-            "MONGODB_URL", schemes={"mongodb", "mongodb+srv"}, require_tld=False
+            "MONGODB_URL",
+            schemes={"mongodb", "mongodb+srv"},
+            require_tld=False,
         )
         assert isinstance(res, urllib.parse.ParseResult)
 
@@ -347,7 +356,7 @@ class TestCasting:
                 "LOG_LEVEL": "WARNING",
                 "LOG_LEVEL_INT": str(logging.WARNING),
                 "LOG_LEVEL_LOWER": "info",
-            }
+            },
         )
         assert env.log_level("LOG_LEVEL_INT") == logging.WARNING
         assert env.log_level("LOG_LEVEL") == logging.WARNING
@@ -376,7 +385,8 @@ class TestCasting:
     def test_enum_by_value_true(self, set_env, env: environs.Env):
         set_env({"COLOR": "GREEN"})
         with pytest.raises(
-            environs.EnvError, match='Environment variable "COLOR" invalid:'
+            environs.EnvError,
+            match='Environment variable "COLOR" invalid:',
         ):
             assert env.enum("COLOR", enum=Color, by_value=True)
         set_env({"COLOR": "green"})
@@ -385,7 +395,8 @@ class TestCasting:
     def test_enum_by_value_field(self, set_env, env: environs.Env):
         set_env({"DAY": "SUNDAY"})
         with pytest.raises(
-            environs.EnvError, match='Environment variable "DAY" invalid:'
+            environs.EnvError,
+            match='Environment variable "DAY" invalid:',
         ):
             assert env.enum("DAY", enum=Day, by_value=fields.Int())
         set_env({"DAY": "1"})
@@ -394,7 +405,8 @@ class TestCasting:
     def test_invalid_enum(self, set_env, env: environs.Env):
         set_env({"DAY": "suNDay"})
         with pytest.raises(
-            environs.EnvError, match="Must be one of: SUNDAY, MONDAY, TUESDAY"
+            environs.EnvError,
+            match="Must be one of: SUNDAY, MONDAY, TUESDAY",
         ):
             assert env.enum("DAY", enum=Day)
 
@@ -439,10 +451,14 @@ class TestEnvFileReading:
         assert env("CUSTOM_STRING") == "foo"
 
     @pytest.mark.parametrize(
-        "path", [".custom.env", (HERE / "subfolder" / ".custom.env")]
+        "path",
+        [".custom.env", (HERE / "subfolder" / ".custom.env")],
     )
     def test_read_env_recurse_start_from_subfolder(
-        self, env: environs.Env, path, monkeypatch
+        self,
+        env: environs.Env,
+        path,
+        monkeypatch,
     ):
         if "CUSTOM_STRING" in os.environ:
             os.environ.pop("CUSTOM_STRING")
@@ -601,7 +617,7 @@ class TestDumping:
                 "URLPARSE": "http://stevenloria.com/projects/?foo=42",
                 "PTH": "/home/sloria",
                 "LOG_LEVEL": "WARNING",
-            }
+            },
         )
 
         env.str("STR")
@@ -699,7 +715,8 @@ class TestPrefix:
 
         with env.prefixed("APP_"):
             with pytest.raises(
-                environs.EnvError, match='Environment variable "APP_INT" invalid'
+                environs.EnvError,
+                match='Environment variable "APP_INT" invalid',
             ):
                 env.int("INT", validate=validate)
 
@@ -746,7 +763,7 @@ class TestFailedNestedPrefix:
 
     def test_failed_nested_prefixed(self, env: environs.Env):
         # define repeated prefixed steps
-        def nested_prefixed(env, fail=False):
+        def nested_prefixed(env, *, fail=False):
             with env.prefixed("APP_"):
                 with env.prefixed("NESTED_"):
                     assert env.int("INT") == 42
@@ -754,16 +771,16 @@ class TestFailedNestedPrefix:
                 assert env.str("STR") == "foo"
                 assert env("NOT_FOUND", "mydefault") == "mydefault"
                 if fail:
-                    raise FauxTestException
+                    raise FauxTestError
 
         try:
             nested_prefixed(env, fail=True)
-        except FauxTestException:
+        except FauxTestError:
             nested_prefixed(env, fail=False)
 
     def test_failed_dump_with_nested_prefixed(self, env: environs.Env):
         # define repeated prefixed steps
-        def dump_with_nested_prefixed(env, fail=False):
+        def dump_with_nested_prefixed(env, *, fail=False):
             with env.prefixed("APP_"):
                 with env.prefixed("NESTED_"):
                     assert env.int("INT") == 42
@@ -771,7 +788,7 @@ class TestFailedNestedPrefix:
                 assert env.str("STR") == "foo"
                 assert env("NOT_FOUND", "mydefault") == "mydefault"
                 if fail:
-                    raise FauxTestException
+                    raise FauxTestError
             assert env.dump() == {
                 "APP_STR": "foo",
                 "APP_NOT_FOUND": "mydefault",
@@ -781,7 +798,7 @@ class TestFailedNestedPrefix:
 
         try:
             dump_with_nested_prefixed(env, fail=True)
-        except FauxTestException:
+        except FauxTestError:
             dump_with_nested_prefixed(env, fail=False)
 
 
@@ -873,7 +890,8 @@ class TestDeferredValidation:
         env.str("STR")
         env.seal()
         with pytest.raises(
-            environs.EnvSealedError, match="Env has already been sealed"
+            environs.EnvSealedError,
+            match="Env has already been sealed",
         ):
             env.int("INT")
 
@@ -886,7 +904,8 @@ class TestDeferredValidation:
 
         env.seal()
         with pytest.raises(
-            environs.EnvSealedError, match="Env has already been sealed"
+            environs.EnvSealedError,
+            match="Env has already been sealed",
         ):
             env.https_url("URL")
 
@@ -900,7 +919,9 @@ class TestDeferredValidation:
         assert exc.error_messages == {"DATABASE_URL": ["Environment variable not set."]}
 
     def test_dj_db_url_with_deferred_validation_invalid(
-        self, env: environs.Env, set_env
+        self,
+        env: environs.Env,
+        set_env,
     ):
         set_env({"DATABASE_URL": "invalid://"})
         env.dj_db_url("DATABASE_URL")
@@ -925,7 +946,9 @@ class TestDeferredValidation:
         assert exc.error_messages == {"CACHE_URL": ["Environment variable not set."]}
 
     def test_dj_cache_url_with_deferred_validation_invalid(
-        self, env: environs.Env, set_env
+        self,
+        env: environs.Env,
+        set_env,
     ):
         set_env({"CACHE_URL": "invalid://"})
         env.dj_cache_url("CACHE_URL")
@@ -947,7 +970,9 @@ class TestDeferredValidation:
         assert exc.error_messages == {"MY_VAR": ["Environment variable not set."]}
 
     def test_custom_parser_with_deferred_validation_invalid(
-        self, env: environs.Env, set_env
+        self,
+        env: environs.Env,
+        set_env,
     ):
         set_env({"MY_VAR": "foo"})
 
@@ -980,7 +1005,7 @@ class TestExpandVars:
                 "SUBS_INT": "48",
                 "USE_DEFAULT": "${FOOBAR}",
                 "UNDEFINED": "${MYVAR}",
-            }
+            },
         )
         assert env.str("MAIN") == "substivalue"
         assert env.int("MAIN_INT") == 48
@@ -990,7 +1015,8 @@ class TestExpandVars:
         assert env.str("USE_DEFAULT", "main_default") == "main_default"
 
         with pytest.raises(
-            environs.EnvError, match='Environment variable "MYVAR" not set'
+            environs.EnvError,
+            match='Environment variable "MYVAR" not set',
         ):
             env.str("UNDEFINED")
 
@@ -1002,13 +1028,14 @@ class TestExpandVars:
                 "HELLOCOUNTRY": "Hello ${COUNTRY}",
                 "COUNTRY": "Argentina",
                 "HELLOWORLD": "Hello ${WORLD}",
-            }
+            },
         )
         assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
         assert env.str("HELLOCOUNTRY") == "Hello Argentina"
 
         with pytest.raises(
-            environs.EnvError, match='Environment variable "WORLD" not set'
+            environs.EnvError,
+            match='Environment variable "WORLD" not set',
         ):
             env.str("HELLOWORLD")
 
@@ -1018,7 +1045,7 @@ class TestExpandVars:
                 "PGURL": "postgres://${PGUSER:-sloria}:${PGPASS:-secret}@localhost",
                 "PGUSER": "${USER}",
                 "USER": "gnarvaja",
-            }
+            },
         )
         assert env.str("PGURL") == "postgres://gnarvaja:secret@localhost"
 
@@ -1033,7 +1060,7 @@ class TestExpandVars:
                 "USER": "gnarvaja",
                 "MYCLASS_KARGS": "foo=bar,wget_params=${WGET_PARAMS}",
                 "WGET_PARAMS": '--header="Referer: https://radiocut.fm/"',
-            }
+            },
         )
         assert env.list("ALLOWED_USERS") == ["god", "gnarvaja", "root"]
         assert env.dict("MYCLASS_KARGS") == {

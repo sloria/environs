@@ -7,6 +7,11 @@ Bug fixes:
 - Add `env` to `__all__` ([#396](https://github.com/sloria/environs/issues/396)).
   Thanks [daveflr](https://github.com/daveflr) for reporting.
 
+Changes:
+
+- _Backwards-incompatible_: `recurse`, `verbose`, `override`,
+  and `return_path` parameters to `Env.read_env` are now keyword-only.
+
 ## 14.1.0 (2025-01-10)
 
 Features:

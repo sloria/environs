@@ -13,7 +13,8 @@ TTL = env.int("TTL", validate=validate.Range(min=0, max=100))
 NODE_ENV = env.str(
     "NODE_ENV",
     validate=validate.OneOf(
-        ["production", "development"], error="NODE_ENV must be one of: {choices}"
+        ["production", "development"],
+        error="NODE_ENV must be one of: {choices}",
     ),
 )
 EMAIL = env.str("EMAIL", validate=[validate.Length(min=4), validate.Email()])
