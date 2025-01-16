@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from .types import ErrorMapping
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .types import ErrorMapping
 
 
 class EnvError(ValueError):

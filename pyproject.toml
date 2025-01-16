@@ -61,6 +61,7 @@ select = [
   "E",  # pycodestyle error
   "F",  # pyflakes
   "I",  # isort
+  "TC", # flake8-type-checking
   "UP", # pyupgrade
   "W",  # pycodestyle warning
 ]
