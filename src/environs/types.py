@@ -16,15 +16,19 @@ except ImportError:  # Remove when dropping Python 3.10
     from typing_extensions import Unpack
 
 import marshmallow as ma
-from marshmallow.fields import Field
+
+if typing.TYPE_CHECKING:
+    from marshmallow.fields import Field
 
 T = typing.TypeVar("T")
 EnumT = typing.TypeVar("EnumT", bound=enum.Enum)
 
-ErrorMapping = typing.Mapping[str, list[str]]
-FieldFactory = typing.Callable[..., ma.fields.Field]
-Subcast = typing.Union[type[T], typing.Callable[..., T], ma.fields.Field]
-ParserMethod = typing.Callable[..., T]
+ErrorMapping: typing.TypeAlias = typing.Mapping[str, list[str]]
+FieldFactory: typing.TypeAlias = typing.Callable[..., ma.fields.Field]
+Subcast: typing.TypeAlias = typing.Union[
+    type[T], typing.Callable[[typing.Any], T], ma.fields.Field
+]
+ParserMethod: typing.TypeAlias = typing.Callable[..., typing.Any]
 
 
 class BaseMethodKwargs(typing.TypedDict, total=False):
@@ -104,8 +108,8 @@ class ListFieldMethod:
     ) -> list[T] | None: ...
 
 
-TKeys = typing.TypeVar("TKeys")
-TValues = typing.TypeVar("TValues")
+KeysT = typing.TypeVar("KeysT")
+ValuesT = typing.TypeVar("ValuesT")
 
 
 class DictFieldMethod:
@@ -114,11 +118,11 @@ class DictFieldMethod:
         name: str,
         default: typing.Any = ...,
         *,
-        subcast_keys: Subcast[TKeys] | None = None,
-        subcast_values: Subcast[TValues] | None = None,
+        subcast_keys: Subcast[KeysT] | None = None,
+        subcast_values: Subcast[ValuesT] | None = None,
         delimiter: str | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
-    ) -> dict[TKeys, TValues] | None: ...
+    ) -> dict[KeysT, ValuesT] | None: ...
 
 
 class EnumFieldMethod(typing.Generic[EnumT]):

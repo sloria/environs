@@ -2,18 +2,14 @@ from __future__ import annotations
 
 import collections
 import contextlib
-import datetime as dt
-import decimal
 import functools
 import inspect
 import json as pyjson
 import os
 import re
 import typing
-import uuid
 from collections.abc import Mapping
 from pathlib import Path
-from urllib.parse import ParseResult
 
 import marshmallow as ma
 from dotenv.main import _walk_to_root, load_dotenv
@@ -37,6 +33,11 @@ from .types import (
 )
 
 if typing.TYPE_CHECKING:
+    import datetime as dt
+    import decimal
+    import uuid
+    from urllib.parse import ParseResult
+
     try:
         from dj_database_url import DBConfig
     except ImportError:
@@ -200,8 +201,7 @@ def _make_subcast_field(
 
         class SubcastField(ma.fields.Field):
             def _deserialize(self, value, *args, **kwargs):
-                func = typing.cast(typing.Callable[..., _T], subcast)
-                return func(value)
+                return subcast(value)
 
         inner_field = SubcastField
     else:
