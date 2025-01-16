@@ -11,7 +11,8 @@ try:
     env.str(
         "NODE_ENV",
         validate=validate.OneOf(
-            ["production", "development"], error="NODE_ENV must be one of: {choices}",
+            ["production", "development"],
+            error="NODE_ENV must be one of: {choices}",
         ),
     )
 except EnvError as err:
