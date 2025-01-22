@@ -110,6 +110,31 @@ The following are all type-casting methods of `Env`:
 - `env.time`
 - `env.timedelta` (assumes value is an integer in seconds, or an ordered duration string like `7h7s` or `7w 7d 7h 7m 7s 7ms 7us`)
 - `env.url`
+  - This returns a `urllib.parse.ParseResult` and therefore expects a `ParseResult` for its default.
+
+```python
+from urllib.parse import urlparse
+
+from environs import env
+
+MY_API_URL = env.url(
+    "MY_API_URL",
+    default=urlparse("http://api.example.com"),
+)
+```
+
+If you want the return value to be a string, use `env.str` with `validate.URL` instead.
+
+```python
+from environs import env, validate
+
+MY_API_URL = env.str(
+    "MY_API_URL",
+    default="http://api.example.com",
+    validate=validate.URL(),
+)
+```
+
 - `env.uuid`
 - `env.log_level`
 - `env.path` (casts to a [`pathlib.Path`](https://docs.python.org/3/library/pathlib.html))
@@ -284,8 +309,10 @@ env.seal()
 `env.url()` supports non-standard URL schemes via the `schemes` argument.
 
 ```python
+from urllib.parse import urlparse
+
 REDIS_URL = env.url(
-    "REDIS_URL", "redis://redis:6379", schemes=["redis"], require_tld=False
+    "REDIS_URL", urlparse("redis://redis:6379"), schemes=["redis"], require_tld=False
 )
 ```
 
