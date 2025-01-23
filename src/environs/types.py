@@ -34,13 +34,12 @@ ParserMethod: typing.TypeAlias = typing.Callable[..., typing.Any]
 
 
 class BaseMethodKwargs(typing.TypedDict, total=False):
-    # Subset of relevant marshmallow.Field kwargs shared by all parser methods
+    # Relevant marshmallow.Field kwargs shared by all parser methods
     validate: (
         typing.Callable[[typing.Any], typing.Any]
         | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
         | None
     )
-    required: bool
 
 
 class FieldMethod(typing.Generic[T]):

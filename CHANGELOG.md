@@ -11,6 +11,8 @@ Changes:
 
 - _Backwards-incompatible_: `recurse`, `verbose`, `override`,
   and `return_path` parameters to `Env.read_env` are now keyword-only.
+- _Backwards-incompatible_: The `required` argument to parser methods
+  is removed. Call a parser method without a default value to make it required.
 
 ## 14.1.0 (2025-01-10)
 
