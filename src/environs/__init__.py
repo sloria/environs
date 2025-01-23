@@ -80,7 +80,6 @@ def _field2method(
             | typing.Iterable[typing.Callable[[typing.Any], typing.Any]]
             | None
         ) = None,
-        required: bool = False,
         # Additional kwargs are passed to Field constructor
         **kwargs,
     ) -> _T | None:
@@ -98,7 +97,6 @@ def _field2method(
         ):
             field = field_or_factory(
                 validate=validate,
-                required=required,
                 load_default=load_default,
                 **kwargs,
             )
@@ -107,7 +105,6 @@ def _field2method(
             field = typing.cast(FieldFactory, field_or_factory)(
                 subcast=parsed_subcast,
                 validate=validate,
-                required=required,
                 load_default=load_default,
             )
         parsed_key, value, proxied_key = self._get_from_environ(name, default=Ellipsis)
