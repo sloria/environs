@@ -21,6 +21,7 @@ if typing.TYPE_CHECKING:
     from marshmallow.fields import Field
 
 T = typing.TypeVar("T")
+SubcastT = typing.TypeVar("SubcastT")
 EnumT = typing.TypeVar("EnumT", bound=enum.Enum)
 
 ErrorMapping: typing.TypeAlias = typing.Mapping[str, list[str]]
@@ -70,7 +71,6 @@ class FieldMethod(typing.Generic[T]):
         self,
         name: str,
         default: typing.Any = ...,
-        subcast: Subcast[T] | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> T | None: ...
 
@@ -91,33 +91,33 @@ class ListFieldMethod:
     def __call__(
         self,
         name: str,
-        default: typing.Any = ...,
+        default: T = ...,
         subcast: None = ...,
         *,
         delimiter: str | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
-    ) -> list[typing.Any] | None: ...
+    ) -> list[typing.Any] | T: ...
 
     @typing.overload
     def __call__(
         self,
         name: str,
-        default: typing.Any = ...,
-        subcast: Subcast[T] = ...,
+        default: T = ...,
+        subcast: Subcast[SubcastT] = ...,
         *,
         delimiter: str | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
-    ) -> list[T] | None: ...
+    ) -> list[SubcastT] | T: ...
 
     def __call__(
         self,
         name: str,
-        default: typing.Any = ...,
-        subcast: Subcast[T] | None = ...,
+        default: T = ...,
+        subcast: Subcast[SubcastT] | None = ...,
         *,
         delimiter: str | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
-    ) -> list[T] | None: ...
+    ) -> list[SubcastT] | list[typing.Any] | T | None: ...
 
 
 KeysT = typing.TypeVar("KeysT")
@@ -136,6 +136,18 @@ class DictFieldMethod:
         delimiter: str | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> dict[KeysT, ValuesT]: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: None = ...,
+        *,
+        subcast_keys: Subcast[KeysT] | None = None,
+        subcast_values: Subcast[ValuesT] | None = None,
+        delimiter: str | None = None,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> dict[KeysT, ValuesT] | None: ...
 
     def __call__(
         self,
