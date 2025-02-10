@@ -41,10 +41,17 @@ FLOAT0: float | None = env.float("FOO", None)
 DECIMAL0: decimal.Decimal | None = env.decimal("FOO", None)
 LIST0: list | None = env.list("FOO", None)
 LIST1: list[int] | None = env.list("FOO", None, subcast=int)
+LIST2: list[int] = env.list("FOO", [1, 2, 3], subcast=int)
 DICT0: dict | None = env.dict("FOO", None)
 DICT1: dict[str, int] | None = env.dict(
     "FOO",
     None,
+    subcast_keys=str,
+    subcast_values=int,
+)
+DICT2: dict[str, int] = env.dict(
+    "FOO",
+    {"a": 1, "b": 2},
     subcast_keys=str,
     subcast_values=int,
 )

@@ -80,6 +80,17 @@ class ListFieldMethod:
     def __call__(
         self,
         name: str,
+        default: list[T] = ...,
+        subcast: Subcast[T] = ...,
+        *,
+        delimiter: str | None = ...,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> list[T]: ...
+
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
         default: typing.Any = ...,
         subcast: None = ...,
         *,
@@ -114,6 +125,18 @@ ValuesT = typing.TypeVar("ValuesT")
 
 
 class DictFieldMethod:
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: dict[KeysT, ValuesT] = ...,
+        *,
+        subcast_keys: Subcast[KeysT] | None = None,
+        subcast_values: Subcast[ValuesT] | None = None,
+        delimiter: str | None = None,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> dict[KeysT, ValuesT]: ...
+
     def __call__(
         self,
         name: str,
