@@ -1,6 +1,6 @@
 # Changelog
 
-## (unreleased)
+## 14.1.1 (2025-02-10)
 
 Bug fixes:
 
