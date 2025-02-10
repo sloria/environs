@@ -41,11 +41,28 @@ FLOAT0: float | None = env.float("FOO", None)
 DECIMAL0: decimal.Decimal | None = env.decimal("FOO", None)
 LIST0: list | None = env.list("FOO", None)
 LIST1: list[int] | None = env.list("FOO", None, subcast=int)
+LIST2: list[Any] = env.list("FOO")
+LIST3: list[int] = env.list("FOO", subcast=int)
+LIST4: list[int] | bool = env.list("FOO", default=False, subcast=int)
+LIST5: list[int] = env.list("FOO", default=[], subcast=int)
 DICT0: dict | None = env.dict("FOO", None)
 DICT1: dict[str, int] | None = env.dict(
     "FOO",
     None,
     subcast_keys=str,
+    subcast_values=int,
+)
+DICT2: dict[str, int] = env.dict(
+    "FOO",
+    subcast_keys=str,
+    subcast_values=int,
+)
+DICT3: dict[int, Any] = env.dict(
+    "FOO",
+    subcast_keys=int,
+)
+DICT4: dict[Any, int] = env.dict(
+    "FOO",
     subcast_values=int,
 )
 JSON0: list | dict | None = env.json("FOO", None)

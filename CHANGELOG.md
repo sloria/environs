@@ -4,6 +4,9 @@
 
 Bug fixes:
 
+- Typing: Fix typing for `env.list` and `env.dict` to properly handle
+  `default` and `subcast` arguments ([#406](https://github.com/sloria/environs/issues/406)).
+  Thanks [lucas-bremond](https://github.com/lucas-bremond) for the PR.
 - Add `env` to `__all__` ([#396](https://github.com/sloria/environs/issues/396)).
   Thanks [daveflr](https://github.com/daveflr) for reporting.
 
