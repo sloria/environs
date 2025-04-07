@@ -95,5 +95,5 @@ class Url(fields.Url):
         data: typing.Mapping[str, typing.Any] | None = None,
         **kwargs,
     ) -> ParseResult:
-        ret = typing.cast(str, super().deserialize(value, attr, data, **kwargs))
+        ret = typing.cast("str", super().deserialize(value, attr, data, **kwargs))
         return urlparse(ret)
