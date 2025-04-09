@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.9"
 resolution-markers = [
     "python_full_version >= '3.10'",
@@ -139,7 +140,7 @@ wheels = [
 
 [[package]]
 name = "environs"
-version = "14.1.0"
+version = "14.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "marshmallow" },
@@ -188,6 +189,7 @@ requires-dist = [
     { name = "tox", marker = "extra == 'dev'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
+provides-extras = ["django", "tests", "dev"]
 
 [[package]]
 name = "exceptiongroup"

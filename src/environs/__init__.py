@@ -21,22 +21,23 @@ from .exceptions import (
     EnvValidationError,
     ParserConflictError,
 )
-from .types import (
-    DictFieldMethod,
-    EnumFieldMethod,
-    ErrorMapping,
-    FieldFactory,
-    FieldMethod,
-    ListFieldMethod,
-    ParserMethod,
-    Subcast,
-)
 
 if typing.TYPE_CHECKING:
     import datetime as dt
     import decimal
     import uuid
     from urllib.parse import ParseResult
+
+    from .types import (
+        DictFieldMethod,
+        EnumFieldMethod,
+        ErrorMapping,
+        FieldFactory,
+        FieldMethod,
+        ListFieldMethod,
+        ParserMethod,
+        Subcast,
+    )
 
     try:
         from dj_database_url import DBConfig
