@@ -21,22 +21,23 @@ from .exceptions import (
     EnvValidationError,
     ParserConflictError,
 )
-from .types import (
-    DictFieldMethod,
-    EnumFieldMethod,
-    ErrorMapping,
-    FieldFactory,
-    FieldMethod,
-    ListFieldMethod,
-    ParserMethod,
-    Subcast,
-)
 
 if typing.TYPE_CHECKING:
     import datetime as dt
     import decimal
     import uuid
     from urllib.parse import ParseResult
+
+    from .types import (
+        DictFieldMethod,
+        EnumFieldMethod,
+        ErrorMapping,
+        FieldFactory,
+        FieldMethod,
+        ListFieldMethod,
+        ParserMethod,
+        Subcast,
+    )
 
     try:
         from dj_database_url import DBConfig
@@ -102,7 +103,7 @@ def _field2method(
             )
         else:
             parsed_subcast = _make_subcast_field(subcast) if subcast else ma.fields.Raw
-            field = typing.cast(FieldFactory, field_or_factory)(
+            field = typing.cast("FieldFactory", field_or_factory)(
                 subcast=parsed_subcast,
                 validate=validate,
                 load_default=load_default,
@@ -133,7 +134,7 @@ def _field2method(
             self._errors[parsed_key].extend(error.messages)
         else:
             self._values[parsed_key] = value
-        return typing.cast(typing.Optional[_T], value)
+        return typing.cast("typing.Optional[_T]", value)
 
     method.__name__ = method_name
     return method
@@ -180,7 +181,7 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
             self._errors[parsed_key].extend(messages)
         else:
             self._values[parsed_key] = value
-        return typing.cast(typing.Optional[_T], value)
+        return typing.cast("typing.Optional[_T]", value)
 
     method.__name__ = method_name
     return method
@@ -218,7 +219,7 @@ def _preprocess_list(
 ) -> typing.Iterable:
     if ma.utils.is_iterable_but_not_string(value) or value is None:
         return value
-    return typing.cast(str, value).split(delimiter) if value != "" else []
+    return typing.cast("str", value).split(delimiter) if value != "" else []
 
 
 def _preprocess_dict(
