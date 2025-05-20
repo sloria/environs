@@ -228,6 +228,7 @@ def _preprocess_dict(
     subcast_keys: Subcast | None = None,
     subcast_values: Subcast | None = None,
     delimiter: str = ",",
+    key_value_delimiter: str = "=",
     **kwargs,
 ) -> typing.Mapping:
     if isinstance(value, Mapping):
@@ -247,7 +248,9 @@ def _preprocess_dict(
         subcast_keys_instance.deserialize(
             key.strip(),
         ): subcast_values_instance.deserialize(val.strip())
-        for key, val in (item.split("=", 1) for item in value.split(delimiter) if value)
+        for key, val in (
+            item.split(key_value_delimiter, 1) for item in value.split(delimiter) if value
+        )
     }
 
 
@@ -331,6 +334,7 @@ class Env:
             "subcast_key",
             "subcast_values",
             "delimiter",
+            "key_value_delimiter",
         ),
     )
     json: FieldMethod[_ListType | _DictType] = _field2method(

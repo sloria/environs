@@ -152,6 +152,10 @@ class TestCasting:
         set_env({"DICT": "key1=1 key2=2"})
         assert env.dict("DICT", delimiter=" ") == {"key1": "1", "key2": "2"}
 
+    def test_dict_with_colon_key_value_delimiter(self, set_env, env: environs.Env):
+        set_env({"DICT": "key1:1,key2:2"})
+        assert env.dict("DICT", key_value_delimiter=":") == {"key1": "1", "key2": "2"}
+
     def test_dict_with_subcast_values(self, set_env, env: environs.Env):
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT", subcast_values=int) == {"key1": 1, "key2": 2}
