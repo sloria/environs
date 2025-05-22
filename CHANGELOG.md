@@ -1,5 +1,12 @@
 # Changelog
 
+## 14.2.0 (unreleased)
+
+Features:
+
+- Add `key_value_delimiter` argument to `env.dict` ([#419](https://github.com/sloria/environs/issues/419)).
+  Thanks [jerr0328](https://github.com/jerr0328) for the suggestion and PR.
+
 ## 14.1.1 (2025-02-10)
 
 Bug fixes:

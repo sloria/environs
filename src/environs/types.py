@@ -134,6 +134,7 @@ class DictFieldMethod:
         subcast_keys: Subcast[KeysT] | None = None,
         subcast_values: Subcast[ValuesT] | None = None,
         delimiter: str | None = None,
+        key_value_delimiter: str | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> dict[KeysT, ValuesT]: ...
 
@@ -146,6 +147,7 @@ class DictFieldMethod:
         subcast_keys: Subcast[KeysT] | None = None,
         subcast_values: Subcast[ValuesT] | None = None,
         delimiter: str | None = None,
+        key_value_delimiter: str | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> dict[KeysT, ValuesT] | None: ...
 
@@ -157,6 +159,7 @@ class DictFieldMethod:
         subcast_keys: Subcast[KeysT] | None = None,
         subcast_values: Subcast[ValuesT] | None = None,
         delimiter: str | None = None,
+        key_value_delimiter: str | None = None,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> dict[KeysT, ValuesT] | None: ...
 

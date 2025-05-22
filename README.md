@@ -59,6 +59,7 @@ export TTL=42
 export ENABLE_LOGIN=true
 export GITHUB_REPOS=webargs,konch,ped
 export GITHUB_REPO_PRIORITY="webargs=2,konch=3"
+export LOCATIONS="x:234 y:123"
 export COORDINATES=23.3,50.0
 export LOG_LEVEL=DEBUG
 ```
@@ -91,6 +92,11 @@ coords = env.list("COORDINATES", subcast=float)  # => [23.3, 50.0]
 gh_repos_priorities = env.dict(
     "GITHUB_REPO_PRIORITY", subcast_values=int
 )  # => {'webargs': 2, 'konch': 3}
+
+# parsing dicts with different delimiters
+locations = env.dict(
+    "LOCATIONS", subcast_values=int, delimiter=" ", key_value_delimiter=":"
+)  # => {'x': 234, 'y': 123}
 ```
 
 ## Supported types
@@ -103,7 +109,7 @@ The following are all type-casting methods of `Env`:
 - `env.float`
 - `env.decimal`
 - `env.list` (accepts optional `subcast` and `delimiter` keyword arguments)
-- `env.dict` (accepts optional `subcast_keys`, `subcast_values` and `delimiter` keyword arguments)
+- `env.dict` (accepts optional `subcast_keys`, `subcast_values`, `delimiter`, and `key_value_delimiter` keyword arguments)
 - `env.json`
 - `env.datetime`
 - `env.date`
