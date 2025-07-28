@@ -267,7 +267,7 @@ def _preprocess_json(value: str | typing.Mapping | list, **kwargs):
 
 def _dj_db_url_parser(value: str, **kwargs) -> DBConfig:
     try:
-        import dj_database_url
+        import dj_database_url  # noqa: PLC0415
     except ImportError as error:
         raise RuntimeError(
             "The dj_db_url parser requires the dj-database-url package. "
@@ -281,7 +281,7 @@ def _dj_db_url_parser(value: str, **kwargs) -> DBConfig:
 
 def _dj_email_url_parser(value: str, **kwargs) -> dict:
     try:
-        import dj_email_url
+        import dj_email_url  # noqa: PLC0415
     except ImportError as error:
         raise RuntimeError(
             "The dj_email_url parser requires the dj-email-url package. "
@@ -295,7 +295,7 @@ def _dj_email_url_parser(value: str, **kwargs) -> dict:
 
 def _dj_cache_url_parser(value: str, **kwargs) -> dict:
     try:
-        import django_cache_url
+        import django_cache_url  # noqa: PLC0415
     except ImportError as error:
         raise RuntimeError(
             "The dj_cache_url parser requires the django-cache-url package. "
