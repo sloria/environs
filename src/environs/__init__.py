@@ -44,7 +44,7 @@ if typing.TYPE_CHECKING:
     except ImportError:
         pass
 
-__all__ = ["Env", "EnvError", "ValidationError", "env"]
+__all__ = ["Env", "EnvError", "FileAwareEnv", "ValidationError", "env"]
 
 _T = typing.TypeVar("_T")
 _StrType = str
