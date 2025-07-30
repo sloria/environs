@@ -1071,3 +1071,38 @@ class TestExpandVars:
             "foo": "bar",
             "wget_params": '--header="Referer: https://radiocut.fm/"',
         }
+
+
+class TestFileAwareEnv:
+    @pytest.fixture
+    def fa_env(self):
+        return environs.FileAwareEnv()
+
+    @pytest.fixture
+    def set_env_file(self, tmp_path, set_env):
+        def _set_env_file(env_key, value):
+            # create file with contents
+            file = tmp_path / "secret_file"
+            file.write_text(value)
+            # set env var with path to file
+            file_env_key = f"{env_key}_FILE"
+            set_env(
+                {
+                    file_env_key: str(file),
+                }
+            )
+
+        return _set_env_file
+
+    def test_read_from_file(self, fa_env, set_env_file):
+        set_env_file("KEY", "value from file")
+        assert fa_env.str("KEY") == "value from file"
+
+    def test_read_from_file_overrides_key(self, fa_env, set_env_file, set_env):
+        set_env_file("KEY", "value from file")
+        set_env(
+            {
+                "KEY": "value from env",
+            }
+        )
+        assert fa_env.str("KEY") == "value from file"
