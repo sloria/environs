@@ -1080,12 +1080,12 @@ class TestFileAwareEnv:
 
     @pytest.fixture
     def set_env_file(self, tmp_path, set_env):
-        def _set_env_file(env_key, value):
+        def _set_env_file(env_key, value, suffix="_FILE"):
             # create file with contents
             file = tmp_path / f"{env_key}_secret"
             file.write_text(value)
             # set env var with path to file
-            file_env_key = f"{env_key}_FILE"
+            file_env_key = f"{env_key}{suffix}"
             set_env(
                 {
                     file_env_key: str(file),
@@ -1181,3 +1181,15 @@ class TestFileAwareEnv:
 
     def test_read_from_file_fall_back_to_default(self, fa_env, set_env_file):
         assert fa_env.str("KEY", default="default value") == "default value"
+
+    def test_different_env_var_suffix(self, set_env_file):
+        # create env var KEY_SECRETFILE pointing to a file
+        set_env_file("KEY", "value from file", suffix="_SECRETFILE")
+
+        default_fa_env = environs.FileAwareEnv()
+        with pytest.raises(environs.EnvError):
+            # using the default suffix will not work
+            default_fa_env.str("KEY")
+
+        custom_fa_env = environs.FileAwareEnv(file_suffix="_SECRETFILE")
+        assert custom_fa_env.str("KEY") == "value from file"
