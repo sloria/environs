@@ -1082,7 +1082,7 @@ class TestFileAwareEnv:
     def set_env_file(self, tmp_path, set_env):
         def _set_env_file(env_key, value):
             # create file with contents
-            file = tmp_path / "secret_file"
+            file = tmp_path / f"{env_key}_secret"
             file.write_text(value)
             # set env var with path to file
             file_env_key = f"{env_key}_FILE"
@@ -1142,3 +1142,31 @@ class TestFileAwareEnv:
 
         with pytest.raises(ValueError, match="path should exist and be a readable file"):
             assert fa_env.str("KEY")
+
+    def test_read_from_file_types(self, fa_env, set_env_file):
+        set_env_file("KEY_BOOL", "true")
+        set_env_file("KEY_INT", "123")
+        set_env_file("KEY_FLOAT", "12.34")
+        set_env_file("KEY_DECIMAL", "12.345")
+        set_env_file("KEY_LIST", "foo,bar")
+        set_env_file("KEY_TIMEDELTA", "123")
+        # etc
+
+        assert fa_env.bool("KEY_BOOL") is True
+        assert fa_env.int("KEY_INT") == 123
+        assert fa_env.float("KEY_FLOAT") == 12.34
+        assert fa_env.decimal("KEY_DECIMAL") == Decimal("12.345")
+        assert fa_env.list("KEY_LIST") == ["foo", "bar"]
+        assert fa_env.timedelta("KEY_TIMEDELTA") == dt.timedelta(seconds=123)
+
+    def test_request_suffixed_env_var(self, fa_env, set_env_file):
+        """The env var with the _FILE suffix should be usable as a normal var."""
+        set_env_file("KEY", "value from file")
+
+        # use it as a path
+        file_as_path = fa_env.path("KEY_FILE")
+        assert file_as_path.exists()
+
+        # use it as a string
+        file_as_str = fa_env.str("KEY_FILE")
+        assert str(file_as_path) == file_as_str
