@@ -1170,3 +1170,14 @@ class TestFileAwareEnv:
         # use it as a string
         file_as_str = fa_env.str("KEY_FILE")
         assert str(file_as_path) == file_as_str
+
+    def test_expand_value_from_file(self, set_env, set_env_file):
+        fa_env = environs.FileAwareEnv(expand_vars=True)
+
+        set_env({"DATABASE_URL": "postgres://user:${PASSWORD}@host:5432/dbname"})
+        set_env_file("PASSWORD", "secret")
+
+        assert fa_env.str("DATABASE_URL") == "postgres://user:secret@host:5432/dbname"
+
+    def test_read_from_file_fall_back_to_default(self, fa_env, set_env_file):
+        assert fa_env.str("KEY", default="default value") == "default value"
