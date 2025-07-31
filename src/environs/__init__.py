@@ -582,7 +582,10 @@ class FileAwareEnv(Env):
         """Return the contents of the file referenced in key <env_key>_FILE, if present."""
         file_key = env_key + "_FILE"
         if file_path := os.environ.get(file_key, None):
-            return Path(file_path).read_text()
+            try:
+                return Path(file_path).read_text()
+            except (FileNotFoundError, IsADirectoryError, PermissionError) as err:
+                raise ValueError("path should exist and be a readable file") from err
         return super()._get_value(env_key, default)
 
 

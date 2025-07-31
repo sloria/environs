@@ -1106,3 +1106,39 @@ class TestFileAwareEnv:
             }
         )
         assert fa_env.str("KEY") == "value from file"
+
+    def test_read_from_non_existent_file(self, fa_env, set_env):
+        """When an env var exists that points to a file, that file should exist."""
+        set_env(
+            {
+                "KEY_FILE": "/path/to/non_existent/file",
+            }
+        )
+
+        with pytest.raises(ValueError, match="path should exist and be a readable file"):
+            fa_env.str("KEY")
+
+    def test_read_from_file_path_is_not_a_file(self, fa_env, tmp_path, set_env):
+        dir_path = tmp_path / "directory"
+        dir_path.mkdir()
+        set_env(
+            {
+                "KEY_FILE": str(dir_path),
+            }
+        )
+
+        with pytest.raises(ValueError, match="path should exist and be a readable file"):
+            fa_env.str("KEY")
+
+    def test_read_from_file_path_is_unreadable(self, fa_env, tmp_path, set_env):
+        file_path = tmp_path / "secret_file"
+        file_path.write_text("value from file")
+        file_path.chmod(0o000)
+        set_env(
+            {
+                "KEY_FILE": str(file_path),
+            }
+        )
+
+        with pytest.raises(ValueError, match="path should exist and be a readable file"):
+            assert fa_env.str("KEY")
