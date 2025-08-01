@@ -594,7 +594,7 @@ class FileAwareEnv(Env):
             try:
                 return Path(file_path).read_text()
             except (FileNotFoundError, IsADirectoryError, PermissionError) as err:
-                raise ValueError("path should exist and be a readable file") from err
+                raise ValueError(f"The value of {file_key} must be a readable file path.") from err
         return super()._get_value(env_key, default)
 
 
