@@ -24,6 +24,7 @@ It allows you to store configuration separate from your code, as per
 - [Deferred validation](#deferred-validation)
 - [URL schemes](#url-schemes)
 - [Serialization](#serialization)
+- [Reading Docker-style secret files](#reading-docker-style-secret-files)
 - [Defining custom parser behavior](#defining-custom-parser-behavior)
 - [Usage with Flask](#usage-with-flask)
 - [Usage with Django](#usage-with-django)
@@ -337,6 +338,36 @@ env.dump()
 # 'MYAPP_PORT': 3000,
 # 'SHIP_DATE': '1984-06-25',
 # 'TTL': 42}
+```
+
+## Reading Docker-style secret files
+
+Some values should not be stored in the environment. For this use case a commonly
+used technique is to store the value (f.i. a password) in a file, and set the path
+to that file in an environment variable. Use `FileAwareEnv` in place of `Env` and
+it will automatically check for environment variables with `_FILE` appended. If the
+file is found, its contents will be read and returned.
+
+```python
+from environs import FileAwareEnv
+
+# echo 'my secret password' > /run/secrets/password
+# export PASSWORD_FILE=/run/secrets/password
+
+env = FileAwareEnv()
+password = env.str("PASSWORD")  # => 'my secret  password'
+```
+
+It's also possible to set a different suffix for the variable names:
+
+```python
+from environs import FileAwareEnv
+
+# echo 'my secret password' > /run/secrets/password
+# export PASSWORD_SECRET=/run/secrets/password
+
+env = FileAwareEnv(file_suffix="_SECRET")
+password = env.str("PASSWORD")  #  => 'my secret password'
 ```
 
 ## Defining custom parser behavior
