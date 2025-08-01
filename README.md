@@ -344,8 +344,7 @@ env.dump()
 
 Some values should not be stored in the environment. For this use case a commonly
 used technique is to store the value (e.g., a password) in a file and set the path
-to that file in an environment variable. Use `FileAwareEnv` in place of `Env` and
-it will automatically check for environment variables with `_FILE` appended. If the
+to that file in an environment variable. Use `FileAwareEnv` in place of `Env` to automatically check for environment variables with the `_FILE` suffix. If the
 file is found, its contents will be read and returned.
 
 ```python
