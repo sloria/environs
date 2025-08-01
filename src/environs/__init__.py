@@ -576,9 +576,16 @@ class Env:
 class FileAwareEnv(Env):
     """An environment variable reader that supports reading values from files."""
 
-    def __init__(self, *, file_suffix: _StrType = "_FILE", **kwargs):
+    def __init__(
+        self, 
+        *, 
+        file_suffix: _StrType = "_FILE", 
+        eager: _BoolType = True,
+        expand_vars: _BoolType = False,
+        prefix: _StrType | None = None,
+    :
         self.file_suffix = file_suffix
-        super().__init__(**kwargs)
+        super().__init__(eager=eager, expand_vars=expand_vars, prefix=prefix)
 
     def _get_value(self, env_key: _StrType, default: typing.Any) -> typing.Any:
         """Return the contents of the file referenced in key <env_key>_FILE, if present."""
