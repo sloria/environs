@@ -1115,7 +1115,9 @@ class TestFileAwareEnv:
             }
         )
 
-        with pytest.raises(ValueError, match="path should exist and be a readable file"):
+        with pytest.raises(
+            ValueError, match="The value of KEY_FILE must be a readable file path."
+        ):
             fa_env.str("KEY")
 
     def test_read_from_file_path_is_not_a_file(self, fa_env, tmp_path, set_env):
@@ -1127,7 +1129,9 @@ class TestFileAwareEnv:
             }
         )
 
-        with pytest.raises(ValueError, match="path should exist and be a readable file"):
+        with pytest.raises(
+            ValueError, match="The value of KEY_FILE must be a readable file path."
+        ):
             fa_env.str("KEY")
 
     def test_read_from_file_path_is_unreadable(self, fa_env, tmp_path, set_env):
@@ -1140,7 +1144,9 @@ class TestFileAwareEnv:
             }
         )
 
-        with pytest.raises(ValueError, match="path should exist and be a readable file"):
+        with pytest.raises(
+            ValueError, match="The value of KEY_FILE must be a readable file path."
+        ):
             assert fa_env.str("KEY")
 
     def test_read_from_file_types(self, fa_env, set_env_file):

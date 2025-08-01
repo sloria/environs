@@ -577,13 +577,13 @@ class FileAwareEnv(Env):
     """An environment variable reader that supports reading values from files."""
 
     def __init__(
-        self, 
-        *, 
-        file_suffix: _StrType = "_FILE", 
+        self,
+        *,
+        file_suffix: _StrType = "_FILE",
         eager: _BoolType = True,
         expand_vars: _BoolType = False,
         prefix: _StrType | None = None,
-    :
+    ):
         self.file_suffix = file_suffix
         super().__init__(eager=eager, expand_vars=expand_vars, prefix=prefix)
 
@@ -594,7 +594,9 @@ class FileAwareEnv(Env):
             try:
                 return Path(file_path).read_text()
             except (FileNotFoundError, IsADirectoryError, PermissionError) as err:
-                raise ValueError(f"The value of {file_key} must be a readable file path.") from err
+                raise ValueError(
+                    f"The value of {file_key} must be a readable file path."
+                ) from err
         return super()._get_value(env_key, default)
 
 
