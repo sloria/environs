@@ -44,7 +44,7 @@ if typing.TYPE_CHECKING:
     except ImportError:
         pass
 
-__all__ = ["Env", "EnvError", "ValidationError", "env"]
+__all__ = ["Env", "EnvError", "FileAwareEnv", "ValidationError", "env"]
 
 _T = typing.TypeVar("_T")
 _StrType = str
@@ -520,7 +520,7 @@ class Env:
         to get a proxy env key.
         """
         env_key = self._get_key(key, omit_prefix=proxied)
-        value = os.environ.get(env_key, default)
+        value = self._get_value(env_key, default)
         if hasattr(value, "strip"):
             expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
             if expand_match:  # Full match expand_vars - special case keep default
@@ -568,6 +568,36 @@ class Env:
 
     def _get_key(self, key: _StrType, *, omit_prefix: _BoolType = False) -> _StrType:
         return self._prefix + key if self._prefix and not omit_prefix else key
+
+    def _get_value(self, env_key: _StrType, default: typing.Any) -> typing.Any:
+        return os.environ.get(env_key, default)
+
+
+class FileAwareEnv(Env):
+    """An environment variable reader that supports reading values from files."""
+
+    def __init__(
+        self,
+        *,
+        file_suffix: _StrType = "_FILE",
+        eager: _BoolType = True,
+        expand_vars: _BoolType = False,
+        prefix: _StrType | None = None,
+    ):
+        self.file_suffix = file_suffix
+        super().__init__(eager=eager, expand_vars=expand_vars, prefix=prefix)
+
+    def _get_value(self, env_key: _StrType, default: typing.Any) -> typing.Any:
+        """Return the contents of the file referenced in key <env_key>_FILE, if present."""
+        file_key = f"{env_key}{self.file_suffix}"
+        if file_path := os.environ.get(file_key, None):
+            try:
+                return Path(file_path).read_text()
+            except (FileNotFoundError, IsADirectoryError, PermissionError) as err:
+                raise ValueError(
+                    f"The value of {file_key} must be a readable file path."
+                ) from err
+        return super()._get_value(env_key, default)
 
 
 # Singleton instance, for convenience
