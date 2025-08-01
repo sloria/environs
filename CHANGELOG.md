@@ -1,5 +1,13 @@
 # Changelog
 
+## 14.3.0 (unreleased)
+
+Features:
+
+- Add `environs.FileAwareEnv` for reading secret files ([#410](https://github.com/sloria/environs/pull/410)).
+  Thanks [holtgrewe](https://github.com/holtgrewe) for the suggestion.
+  Thanks [whyscream](https://github.com/whyscream) and [avilaton](https://github.com/avilaton) for the PRs.
+
 ## 14.2.0 (2025-05-22)
 
 Features:
