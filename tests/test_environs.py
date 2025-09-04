@@ -315,6 +315,23 @@ class TestCasting:
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
 
+        # ISO 8601 durations
+        set_env({"TIMEDELTA": "P2W"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(weeks=2)
+        set_env({"TIMEDELTA": "-P1W"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(weeks=-1)
+        set_env({"TIMEDELTA": "P3DT4H"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(days=3, hours=4)
+        set_env({"TIMEDELTA": "PT4.2S"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(
+            seconds=4,
+            microseconds=200000,
+        )
+        set_env({"TIMEDELTA": "-P1DT2H"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(days=-1, hours=-2)
+        set_env({"TIMEDELTA": "PT0S"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta()
+
     def test_time_cast(self, set_env, env: environs.Env):
         set_env({"TIME": "10:30"})
         assert env.time("TIME") == dt.time(hour=10, minute=30, second=0)
