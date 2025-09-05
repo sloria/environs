@@ -67,10 +67,20 @@ class FieldMethod(typing.Generic[T]):
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> T: ...
 
+    @typing.overload
+    def __call__(
+        self,
+        name: str,
+        default: T = ...,
+        format: str | None = ...,
+        **kwargs: Unpack[BaseMethodKwargs],
+    ) -> T: ...
+
     def __call__(
         self,
         name: str,
         default: typing.Any = ...,
+        format: str | None = ...,  # noqa: A002
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> T | None: ...
 
