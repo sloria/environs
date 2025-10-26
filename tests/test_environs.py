@@ -110,7 +110,8 @@ class TestCasting:
     def test_list_with_default_list_and_subcast(self, env: environs.Env):
         expected = [("a", "b"), ("b", "c")]
         assert (
-            env.list("LIST", expected, subcast=lambda s: tuple(s.split(":"))) == expected
+            env.list("LIST", expected, subcast=lambda s: tuple(s.split(":")))
+            == expected
         )
 
     # https://github.com/sloria/environs/issues/298
@@ -279,6 +280,8 @@ class TestCasting:
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=42)
         set_env({"TIMEDELTA": "-42"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta(seconds=-42)
+
+        # GEP-2257 durations
         # seconds as duration string
         set_env({"TIMEDELTA": "0s"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()
@@ -314,23 +317,30 @@ class TestCasting:
         set_env({"TIMEDELTA": "4.2s"})
         with pytest.raises(environs.EnvError):
             env.timedelta("TIMEDELTA")
+        # explicit format
+        set_env({"TIMEDELTA": "42s"})
+        assert env.timedelta("TIMEDELTA", format="gep2257") == dt.timedelta(seconds=42)
 
         # ISO 8601 durations
         set_env({"TIMEDELTA": "P2W"})
-        assert env.timedelta("TIMEDELTA") == dt.timedelta(weeks=2)
+        assert env.timedelta("TIMEDELTA", format="iso8601") == dt.timedelta(weeks=2)
         set_env({"TIMEDELTA": "-P1W"})
-        assert env.timedelta("TIMEDELTA") == dt.timedelta(weeks=-1)
+        assert env.timedelta("TIMEDELTA", format="iso8601") == dt.timedelta(weeks=-1)
         set_env({"TIMEDELTA": "P3DT4H"})
-        assert env.timedelta("TIMEDELTA") == dt.timedelta(days=3, hours=4)
+        assert env.timedelta("TIMEDELTA", format="iso8601") == dt.timedelta(
+            days=3, hours=4
+        )
         set_env({"TIMEDELTA": "PT4.2S"})
-        assert env.timedelta("TIMEDELTA") == dt.timedelta(
+        assert env.timedelta("TIMEDELTA", format="iso8601") == dt.timedelta(
             seconds=4,
             microseconds=200000,
         )
         set_env({"TIMEDELTA": "-P1DT2H"})
-        assert env.timedelta("TIMEDELTA") == dt.timedelta(days=-1, hours=-2)
+        assert env.timedelta("TIMEDELTA", format="iso8601") == dt.timedelta(
+            days=-1, hours=-2
+        )
         set_env({"TIMEDELTA": "PT0S"})
-        assert env.timedelta("TIMEDELTA") == dt.timedelta()
+        assert env.timedelta("TIMEDELTA", format="iso8601") == dt.timedelta()
 
     def test_time_cast(self, set_env, env: environs.Env):
         set_env({"TIME": "10:30"})

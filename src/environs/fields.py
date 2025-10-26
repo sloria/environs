@@ -49,6 +49,8 @@ class TimeDelta(fields.TimeDelta):
     "P[n]W" or "P[n]DT[n]H[n]M[n]S". Fractional seconds are supported.
     """
 
+    DEFAULT_FORMAT = "gep2257"
+
     # Ordered duration strings, loosely based on the [GEP-2257](https://gateway-api.sigs.k8s.io/geps/gep-2257/) spec
     # Discrepancies between this pattern and GEP-2257 duration strings:
     # - this pattern accepts units `w|d|h|m|s|ms|[uµ]s` (all units supported by the datetime.timedelta constructor), GEP-2257 accepts only `h|m|s|ms`
@@ -83,40 +85,53 @@ class TimeDelta(fields.TimeDelta):
         r")?)\s*$",
     )
 
+    def __init__(
+        self,
+        format: str | None = None,  # noqa: A002
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.format = format
+
     def _deserialize(self, value, *args, **kwargs) -> timedelta:
         if isinstance(value, timedelta):
             return value
-        if isinstance(value, str):
-            # Try GEP-2257 matching
-            match = self._GEP_2257_REGEX.match(value)
-            if match is not None and any(groups := match.groups(default=0)):
-                return timedelta(
-                    weeks=int(groups[0]),
-                    days=int(groups[1]),
-                    hours=int(groups[2]),
-                    minutes=int(groups[3]),
-                    seconds=int(groups[4]),
-                    milliseconds=int(groups[5]),
-                    microseconds=int(groups[6]),
-                )
 
-            # Try ISO 8601 matching
-            if iso_match := self._ISO_8601_REGEX.match(value):
-                parts = iso_match.groupdict()
-                sign = -1.0 if parts.get("sign") == "-" else 1.0
-                total_seconds = 0.0
-                if parts.get("weeks") is not None:
-                    total_seconds += float(parts["weeks"]) * 7 * 24 * 3600
-                else:
-                    if parts.get("days") is not None:
-                        total_seconds += float(parts["days"]) * 24 * 3600
-                    if parts.get("hours") is not None:
-                        total_seconds += float(parts["hours"]) * 3600
-                    if parts.get("minutes") is not None:
-                        total_seconds += float(parts["minutes"]) * 60
-                    if parts.get("seconds") is not None:
-                        total_seconds += float(parts["seconds"])
-                return timedelta(seconds=sign * total_seconds)
+        if isinstance(value, str):
+            data_format = self.format or self.DEFAULT_FORMAT
+
+            if data_format == "gep2257":
+                # Try GEP-2257 matching
+                match = self._GEP_2257_REGEX.match(value)
+                if match is not None and any(groups := match.groups(default=0)):
+                    return timedelta(
+                        weeks=int(groups[0]),
+                        days=int(groups[1]),
+                        hours=int(groups[2]),
+                        minutes=int(groups[3]),
+                        seconds=int(groups[4]),
+                        milliseconds=int(groups[5]),
+                        microseconds=int(groups[6]),
+                    )
+
+            elif data_format == "iso8601":
+                # Try ISO 8601 matching
+                if iso_match := self._ISO_8601_REGEX.match(value):
+                    parts = iso_match.groupdict()
+                    sign = -1.0 if parts.get("sign") == "-" else 1.0
+                    total_seconds = 0.0
+                    if parts.get("weeks") is not None:
+                        total_seconds += float(parts["weeks"]) * 7 * 24 * 3600
+                    else:
+                        if parts.get("days") is not None:
+                            total_seconds += float(parts["days"]) * 24 * 3600
+                        if parts.get("hours") is not None:
+                            total_seconds += float(parts["hours"]) * 3600
+                        if parts.get("minutes") is not None:
+                            total_seconds += float(parts["minutes"]) * 60
+                        if parts.get("seconds") is not None:
+                            total_seconds += float(parts["seconds"])
+                    return timedelta(seconds=sign * total_seconds)
 
         return super()._deserialize(value, *args, **kwargs)
 
