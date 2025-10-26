@@ -244,6 +244,6 @@ class TimeDeltaFieldMethod:
         name: str,
         default: typing.Any = ...,
         *,
-        format: str | None = ...,
+        format: str | None = ...,  # noqa: A002
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> timedelta | None: ...
