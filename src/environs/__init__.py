@@ -37,6 +37,7 @@ if typing.TYPE_CHECKING:
         ListFieldMethod,
         ParserMethod,
         Subcast,
+        TimeDeltaFieldMethod,
     )
 
     try:
@@ -345,7 +346,7 @@ class Env:
     datetime: FieldMethod[dt.datetime] = _field2method(ma.fields.DateTime, "datetime")
     date: FieldMethod[dt.date] = _field2method(ma.fields.Date, "date")
     time: FieldMethod[dt.time] = _field2method(ma.fields.Time, "time")
-    timedelta: FieldMethod[dt.timedelta] = _field2method(fields.TimeDelta, "timedelta")
+    timedelta: TimeDeltaFieldMethod = _field2method(fields.TimeDelta, "timedelta")
     path: FieldMethod[Path] = _field2method(fields.Path, "path")
     log_level: FieldMethod[_IntType] = _field2method(fields.LogLevel, "log_level")
 
