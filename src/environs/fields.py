@@ -87,7 +87,7 @@ class TimeDelta(fields.TimeDelta):
 
     def __init__(
         self,
-        format: str | None = None,  # noqa: A002
+        format: typing.Literal["gep2257", "iso8601"] | None = None,  # noqa: A002
         **kwargs,
     ) -> None:
         super().__init__(**kwargs)

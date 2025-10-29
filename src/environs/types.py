@@ -215,7 +215,7 @@ class TimeDeltaFieldMethod:
         self,
         name: str,
         *,
-        format: str | None = ...,
+        format: typing.Literal["gep2257", "iso8601"] | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> timedelta: ...
 
@@ -225,7 +225,7 @@ class TimeDeltaFieldMethod:
         name: str,
         default: None = ...,
         *,
-        format: str | None = ...,
+        format: typing.Literal["gep2257", "iso8601"] | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> timedelta | None: ...
 
@@ -235,7 +235,7 @@ class TimeDeltaFieldMethod:
         name: str,
         default: timedelta = ...,
         *,
-        format: str | None = ...,
+        format: typing.Literal["gep2257", "iso8601"] | None = ...,
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> timedelta: ...
 
@@ -244,6 +244,6 @@ class TimeDeltaFieldMethod:
         name: str,
         default: typing.Any = ...,
         *,
-        format: str | None = ...,  # noqa: A002
+        format: typing.Literal["gep2257", "iso8601"] | None = ...,  # noqa: A002
         **kwargs: Unpack[BaseMethodKwargs],
     ) -> timedelta | None: ...
