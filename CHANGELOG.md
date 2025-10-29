@@ -1,5 +1,12 @@
 # Changelog
 
+## unreleased
+
+Features:
+
+- Add support for ISO 8601 durations to `env.timedelta`. ([#434](https://github.com/sloria/environs/pull/434)).
+  Thanks [lucas-bremond](https://github.com/lucas-bremond) for the suggestion and PR.
+
 ## 14.3.0 (2025-08-01)
 
 Features:
