@@ -64,7 +64,7 @@ class TestCasting:
         assert env("NOT_SET", "mydefault") == "mydefault"
         with pytest.raises(
             environs.EnvError,
-            match='Environment variable "NOT_SET" not set',
+            match=r'Environment variable "NOT_SET" not set',
         ):
             assert env("NOT_SET")
 
@@ -89,7 +89,7 @@ class TestCasting:
         set_env({"INT": "invalid"})
         with pytest.raises(
             environs.EnvValidationError,
-            match='Environment variable "INT" invalid',
+            match=r'Environment variable "INT" invalid',
         ) as excinfo:
             env.int("INT")
         exc = excinfo.value
@@ -390,7 +390,7 @@ class TestCasting:
         set_env({"COLOR": "GREEN"})
         with pytest.raises(
             environs.EnvError,
-            match='Environment variable "COLOR" invalid:',
+            match=r'Environment variable "COLOR" invalid:',
         ):
             assert env.enum("COLOR", enum=Color, by_value=True)
         set_env({"COLOR": "green"})
@@ -400,7 +400,7 @@ class TestCasting:
         set_env({"DAY": "SUNDAY"})
         with pytest.raises(
             environs.EnvError,
-            match='Environment variable "DAY" invalid:',
+            match=r'Environment variable "DAY" invalid:',
         ):
             assert env.enum("DAY", enum=Day, by_value=fields.Int())
         set_env({"DAY": "1"})
@@ -410,7 +410,7 @@ class TestCasting:
         set_env({"DAY": "suNDay"})
         with pytest.raises(
             environs.EnvError,
-            match="Must be one of: SUNDAY, MONDAY, TUESDAY",
+            match=r"Must be one of: SUNDAY, MONDAY, TUESDAY",
         ):
             assert env.enum("DAY", enum=Day)
 
@@ -471,7 +471,7 @@ class TestEnvFileReading:
         assert env("CUSTOM_STRING") == "foo"
 
     def test_read_env_directory(self, env: environs.Env):
-        with pytest.raises(ValueError, match="path must be a filename"):
+        with pytest.raises(ValueError, match=r"path must be a filename"):
             assert env.read_env("tests")
 
     def test_read_env_return_path(self, env: environs.Env):
@@ -720,7 +720,7 @@ class TestPrefix:
         with env.prefixed("APP_"):
             with pytest.raises(
                 environs.EnvError,
-                match='Environment variable "APP_INT" invalid',
+                match=r'Environment variable "APP_INT" invalid',
             ):
                 env.int("INT", validate=validate)
 
@@ -895,7 +895,7 @@ class TestDeferredValidation:
         env.seal()
         with pytest.raises(
             environs.EnvSealedError,
-            match="Env has already been sealed",
+            match=r"Env has already been sealed",
         ):
             env.int("INT")
 
@@ -909,7 +909,7 @@ class TestDeferredValidation:
         env.seal()
         with pytest.raises(
             environs.EnvSealedError,
-            match="Env has already been sealed",
+            match=r"Env has already been sealed",
         ):
             env.https_url("URL")
 
@@ -1020,7 +1020,7 @@ class TestExpandVars:
 
         with pytest.raises(
             environs.EnvError,
-            match='Environment variable "MYVAR" not set',
+            match=r'Environment variable "MYVAR" not set',
         ):
             env.str("UNDEFINED")
 
@@ -1039,7 +1039,7 @@ class TestExpandVars:
 
         with pytest.raises(
             environs.EnvError,
-            match='Environment variable "WORLD" not set',
+            match=r'Environment variable "WORLD" not set',
         ):
             env.str("HELLOWORLD")
 
@@ -1116,7 +1116,7 @@ class TestFileAwareEnv:
         )
 
         with pytest.raises(
-            ValueError, match="The value of KEY_FILE must be a readable file path."
+            ValueError, match=r"The value of KEY_FILE must be a readable file path."
         ):
             fa_env.str("KEY")
 
@@ -1130,7 +1130,7 @@ class TestFileAwareEnv:
         )
 
         with pytest.raises(
-            ValueError, match="The value of KEY_FILE must be a readable file path."
+            ValueError, match=r"The value of KEY_FILE must be a readable file path."
         ):
             fa_env.str("KEY")
 
@@ -1145,7 +1145,7 @@ class TestFileAwareEnv:
         )
 
         with pytest.raises(
-            ValueError, match="The value of KEY_FILE must be a readable file path."
+            ValueError, match=r"The value of KEY_FILE must be a readable file path."
         ):
             assert fa_env.str("KEY")
 
