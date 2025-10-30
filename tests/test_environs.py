@@ -1120,9 +1120,34 @@ class TestFileAwareEnv:
 
         return _set_env_file
 
-    def test_read_from_file(self, fa_env, set_env_file):
-        set_env_file("KEY", "value from file")
-        assert fa_env.str("KEY") == "value from file"
+    @pytest.mark.parametrize(
+        ("key", "value", "kwargs", "expected"),
+        [
+            ("KEY", "value from file", {}, "value from file"),
+            (
+                "DO_NOT_STRIP_WHITESPACE",
+                " value from file with leading and trailing whitespaces \n",
+                {},
+                " value from file with leading and trailing whitespaces \n",
+            ),
+            (
+                "STRIP_WHITESPACE",
+                "\n  value from file with leading and trailing whitespaces \n",
+                {"strip_whitespace": True},
+                "value from file with leading and trailing whitespaces",
+            ),
+        ],
+    )
+    def test_read_from_file(
+        self,
+        set_env_file,
+        key: str,
+        value: str,
+        kwargs: dict[str, "bool | str"],
+        expected: str,
+    ):
+        set_env_file(key, value)
+        assert environs.FileAwareEnv(**kwargs).str(key) == expected
 
     def test_read_from_file_overrides_key(self, fa_env, set_env_file, set_env):
         set_env_file("KEY", "value from file")
