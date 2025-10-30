@@ -593,7 +593,7 @@ class FileAwareEnv(Env):
         file_key = f"{env_key}{self.file_suffix}"
         if file_path := os.environ.get(file_key, None):
             try:
-                return Path(file_path).read_text()
+                return Path(file_path).read_text().strip("\n")
             except (FileNotFoundError, IsADirectoryError, PermissionError) as err:
                 raise ValueError(
                     f"The value of {file_key} must be a readable file path."
