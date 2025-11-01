@@ -1120,9 +1120,22 @@ class TestFileAwareEnv:
 
         return _set_env_file
 
-    def test_read_from_file(self, fa_env, set_env_file):
-        set_env_file("KEY", "value from file")
-        assert fa_env.str("KEY") == "value from file"
+    @pytest.mark.parametrize(
+        ("key", "value"),
+        [
+            ("KEY", "value from file"),
+            ("ANOTHER_KEY", "value from file with trailing newline\n"),
+        ],
+    )
+    def test_read_from_file(
+        self,
+        fa_env: environs.FileAwareEnv,
+        set_env_file,
+        key: str,
+        value: str,
+    ):
+        set_env_file(key, value)
+        assert fa_env.str(key) == value.strip("\n")
 
     def test_read_from_file_overrides_key(self, fa_env, set_env_file, set_env):
         set_env_file("KEY", "value from file")
