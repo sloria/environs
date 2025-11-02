@@ -7,6 +7,10 @@ Features:
 - Add `strip_whitespace` param to `FileAwareEnv` ([#431](https://github.com/sloria/environs/issues/431)).
   Thanks [eandersons](https://github.com/eandersons) for the suggestion and PR.
 
+Other changes:
+
+- Drop support for Python 3.9, which is EOL.
+
 ## 14.4.0 (2025-10-29)
 
 Features:
