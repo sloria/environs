@@ -350,7 +350,7 @@ file is found, its contents will be read and returned.
 ```python
 from environs import FileAwareEnv
 
-# echo 'my secret password' > /run/secrets/password
+# printf 'my secret password' >/run/secrets/password
 # export PASSWORD_FILE=/run/secrets/password
 
 env = FileAwareEnv()
@@ -362,11 +362,23 @@ It's also possible to set a different suffix for the variable names:
 ```python
 from environs import FileAwareEnv
 
-# echo 'my secret password' > /run/secrets/password
+# printf 'my secret password' >/run/secrets/password
 # export PASSWORD_SECRET=/run/secrets/password
 
 env = FileAwareEnv(file_suffix="_SECRET")
 password = env.str("PASSWORD")  #  => 'my secret password'
+```
+
+To strip leading and trailing whitespaces from the value:
+
+```python
+from environs import FileAwareEnv
+
+# printf '  value with leading and trailing whitespaces \n' >/run/secrets/password
+# export PASSWORD_SECRET=/run/secrets/password
+
+env: FileAwareEnv = FileAwareEnv(strip_whitespace=True)
+password: str = env.str("PASSWORD")  # => `value with leading and trailing whitespaces`
 ```
 
 ## Defining custom parser behavior
