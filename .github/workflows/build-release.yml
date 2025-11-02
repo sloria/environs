@@ -15,7 +15,7 @@ jobs:
         include:
           - { name: "3.10", python: "3.10", tox: py310-marshmallow3 }
           - { name: "3.14", python: "3.14", tox: py314-marshmallow3 }
-          - { name: "lowest", python: "3.9", tox: py39-marshmallowlowest }
+          - { name: "lowest", python: "3.10", tox: py310-marshmallowlowest }
           - { name: "highest", python: "3.14", tox: py314-marshmallowdev }
           - { name: "mypy-ma3", python: "3.14", tox: mypy-marshmallow3 }
           - { name: "mypy-madev", python: "3.14", tox: mypy-marshmallowdev }
