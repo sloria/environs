@@ -3,6 +3,7 @@ import importlib.metadata
 import logging
 import os
 import pathlib
+import typing
 import urllib.parse
 import uuid
 from decimal import Decimal
@@ -1143,7 +1144,7 @@ class TestFileAwareEnv:
         set_env_file,
         key: str,
         value: str,
-        kwargs: dict[str, "bool | str"],
+        kwargs: dict[str, typing.Any],
         expected: str,
     ):
         set_env_file(key, value)
