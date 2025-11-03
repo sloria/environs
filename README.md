@@ -375,7 +375,7 @@ To strip leading and trailing whitespaces from the value:
 from environs import FileAwareEnv
 
 # printf '  value with leading and trailing whitespaces \n' >/run/secrets/password
-# export PASSWORD_SECRET=/run/secrets/password
+# export PASSWORD_FILE=/run/secrets/password
 
 env: FileAwareEnv = FileAwareEnv(strip_whitespace=True)
 password: str = env.str("PASSWORD")  # => `value with leading and trailing whitespaces`
