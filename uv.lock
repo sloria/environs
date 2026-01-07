@@ -115,7 +115,7 @@ wheels = [
 
 [[package]]
 name = "environs"
-version = "14.4.0"
+version = "14.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "marshmallow" },
@@ -156,7 +156,7 @@ requires-dist = [
     { name = "django-cache-url", marker = "extra == 'django'" },
     { name = "environs", extras = ["django"], marker = "extra == 'tests'" },
     { name = "environs", extras = ["tests"], marker = "extra == 'dev'" },
-    { name = "marshmallow", specifier = ">=3.18.0" },
+    { name = "marshmallow", specifier = ">=3.26.2" },
     { name = "packaging", marker = "extra == 'tests'" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0,<5.0" },
     { name = "pytest", marker = "extra == 'tests'" },
@@ -204,14 +204,14 @@ wheels = [
 
 [[package]]
 name = "marshmallow"
-version = "3.25.1"
+version = "3.26.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b8/85/43b8e95251312e8d0d3389263e87e368a5a015db475e140d5dd8cb8dcb47/marshmallow-3.25.1.tar.gz", hash = "sha256:f4debda3bb11153d81ac34b0d582bf23053055ee11e791b54b4b35493468040a", size = 217295, upload-time = "2025-01-11T23:36:48.442Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/79/de6c16cc902f4fc372236926b0ce2ab7845268dcc30fb2fbb7f71b418631/marshmallow-3.26.2.tar.gz", hash = "sha256:bbe2adb5a03e6e3571b573f42527c6fe926e17467833660bebd11593ab8dfd57", size = 222095, upload-time = "2025-12-22T06:53:53.309Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8e/25/5b300f0400078d9783fbe44d30fedd849a130fc3aff01f18278c12342b6f/marshmallow-3.25.1-py3-none-any.whl", hash = "sha256:ec5d00d873ce473b7f2ffcb7104286a376c354cab0c2fa12f5573dab03e87210", size = 49624, upload-time = "2025-01-11T23:36:46.258Z" },
+    { url = "https://files.pythonhosted.org/packages/be/2f/5108cb3ee4ba6501748c4908b908e55f42a5b66245b4cfe0c99326e1ef6e/marshmallow-3.26.2-py3-none-any.whl", hash = "sha256:013fa8a3c4c276c24d26d84ce934dc964e2aa794345a0f8c7e5a7191482c8a73", size = 50964, upload-time = "2025-12-22T06:53:51.801Z" },
 ]
 
 [[package]]
