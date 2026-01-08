@@ -1,5 +1,12 @@
 # Changelog
 
+## next
+
+Other changes:
+
+- Update lowest supported marshmallow version to 3.26.2 ([#448](https://github.com/sloria/environs/pull/448)).
+  Thanks [whyscream](https://github.com/whyscream) for the PR.
+
 ## 14.5.0 (2025-11-02)
 
 Features:
