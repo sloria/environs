@@ -523,7 +523,7 @@ class Env:
         env_key = self._get_key(key, omit_prefix=proxied)
         value = self._get_value(env_key, default)
         if hasattr(value, "strip"):
-            expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.match(value)
+            expand_match = self.expand_vars and _EXPANDED_VAR_PATTERN.fullmatch(value)
             if expand_match:  # Full match expand_vars - special case keep default
                 proxied_key: _StrType = expand_match.groups()[0]
                 subs_default: _StrType | None = expand_match.groups()[1]
