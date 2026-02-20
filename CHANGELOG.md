@@ -1,6 +1,6 @@
 # Changelog
 
-## next
+## 14.6.0 (2026-02-19)
 
 Bug fixes:
 
