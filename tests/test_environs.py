@@ -1099,6 +1099,16 @@ class TestExpandVars:
             "wget_params": '--header="Referer: https://radiocut.fm/"',
         }
 
+    def test_expand_var_at_start_with_trailing_content(self, env: environs.Env, set_env):
+        """Regression test for https://github.com/sloria/environs/issues/359"""
+        set_env(
+            {
+                "A": "Val_A",
+                "B": "${A};Val_B;",
+            },
+        )
+        assert env.str("B") == "Val_A;Val_B;"
+
 
 class TestFileAwareEnv:
     @pytest.fixture

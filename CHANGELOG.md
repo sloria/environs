@@ -2,6 +2,11 @@
 
 ## next
 
+Bug fixes:
+
+- Fix variable expansion with other characters ([#359](https://github.com/sloria/environs/issues/359)).
+  Thanks [flymanzhao](https://github.com/flymanzhao) for reporting and [veeceey](https://github.com/veeceey) for the PR.
+
 Other changes:
 
 - Update lowest supported marshmallow version to 3.26.2 ([#448](https://github.com/sloria/environs/pull/448)).
