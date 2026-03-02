@@ -28,7 +28,7 @@ It allows you to store configuration separate from your code, as per
 - [Defining custom parser behavior](#defining-custom-parser-behavior)
 - [Usage with Flask](#usage-with-flask)
 - [Usage with Django](#usage-with-django)
-- [Why\...?](#why%5C)
+- [Why\...?](#why)
   - [Why envvars?](#why-envvars)
   - [Why not `os.environ`?](#why-not-osenviron)
   - [Why another library?](#why-another-library)
