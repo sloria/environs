@@ -2,37 +2,28 @@
 
 ## Setting up for development
 
-with `venv`:
+Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/), then:
 
 ```console
-$ python -m venv .venv
-$ source .venv/bin/activate
-$ pip install -e '.[dev]'
-```
-
-with [`uv`](https://docs.astral.sh/uv/getting-started/installation/):
-
-```console
-$ uv sync --frozen --extra dev
-$ source .venv/bin/activate
+$ uv sync
 ```
 
 ### (Optional but recommended) Install the pre-commit hooks
 
-The pre-commit CLI was installed by the above steps
+The pre-commit CLI was installed by the above steps.
 
 ```console
-$ pre-commit install
+$ uv run pre-commit install
 ```
 
 ## To run tests
 
 ```console
-$ pytest
+$ uv run pytest
 ```
 
 ## To run syntax checks
 
 ```console
-$ tox -e lint
+$ uv run tox -e lint
 ```
