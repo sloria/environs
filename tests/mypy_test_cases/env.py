@@ -2,10 +2,6 @@
 
 To run these, use: ::
 
-    tox -e mypy-marshmallow3
-
-Or ::
-
     tox -e mypy-marshmallowdev
 """
 

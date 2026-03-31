@@ -114,6 +114,18 @@ def _field2method(
         source_key = proxied_key or parsed_key
         if value is Ellipsis:
             if default is not Ellipsis:
+                if default is not None:
+                    try:
+                        default = field.deserialize(default)
+                    except ma.ValidationError as error:
+                        if self.eager:
+                            raise EnvValidationError(
+                                f'Environment variable "{source_key}" invalid '
+                                f"default: {error.args[0]}",
+                                error.messages,
+                            ) from error
+                        self._errors[parsed_key].extend(error.messages)
+                        return typing.cast("_T | None", default)
                 self._values[parsed_key] = default
                 return default
             if self.eager:
@@ -199,6 +211,8 @@ def _make_subcast_field(
 
         class SubcastField(ma.fields.Field):
             def _deserialize(self, value, *args, **kwargs):
+                if not isinstance(value, str):
+                    return value
                 return subcast(value)
 
         inner_field = SubcastField

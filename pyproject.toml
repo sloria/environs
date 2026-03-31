@@ -3,11 +3,10 @@ name = "environs"
 version = "14.6.0"
 description = "simplified environment variable parsing"
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
 authors = [{ name = "Steven Loria", email = "oss@stevenloria.com" }]
 classifiers = [
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
@@ -19,7 +18,7 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
   "python-dotenv",
-  "marshmallow>=3.26.2",
+  "marshmallow>=4.0.0",
   "typing-extensions; python_version < '3.11'",
 ]
 
@@ -34,17 +33,11 @@ django = ["dj-database-url", "dj-email-url", "django-cache-url"]
 [dependency-groups]
 django = ["dj-database-url", "dj-email-url", "django-cache-url"]
 tests = [
-  {include-group = "django"},
+  { include-group = "django" },
   "pytest",
-  "packaging",
   "backports.strenum; python_version < '3.11'",
 ]
-dev = [
-  {include-group = "tests"},
-  "tox",
-  "tox-uv",
-  "pre-commit>=4.0,<5.0",
-]
+dev = [{ include-group = "tests" }, "tox", "tox-uv", "pre-commit>=4.0,<5.0"]
 
 [build-system]
 requires = ["flit_core<4"]
@@ -74,6 +67,7 @@ ignore = [
   "ARG",     # unused arguments are common w/ interfaces
   "COM",     # let formatter take care commas
   "C901",    # don't enforce complexity level
+  "PLR0912", # don't enforce max branches
   "D",       # don't require docstrings
   "E501",    # leave line-length enforcement to formatter
   "EM",      # allow string messages in exceptions
@@ -98,10 +92,6 @@ ignore = [
   "S", # allow asserts
   "T", # allow prints
 ]
-
-
-[tool.ruff.lint.pycodestyle]
-ignore-overlong-task-comments = true
 
 [tool.mypy]
 files = ["src", "tests"]
