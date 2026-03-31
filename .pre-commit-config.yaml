@@ -15,6 +15,10 @@ repos:
   hooks:
   - id: blacken-docs
     additional_dependencies: [black==25.1.0]
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.7.8
+  hooks:
+    - id: uv-lock
 - repo: https://github.com/thlorenz/doctoc.git
   rev: v2.3.0
   hooks:
