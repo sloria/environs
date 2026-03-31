@@ -262,14 +262,6 @@ class TestCasting:
         method = getattr(env, method_name)
         assert method("NOTFOUND", value) == value
 
-    def test_validator_runs_on_default(self, env: environs.Env):
-        with pytest.raises(environs.EnvError):
-            env.int(
-                "UNSET",
-                default=99,
-                validate=validate.OneOf([1, 2, 3]),
-            )
-
     def test_url_with_parseresult_default(self, env: environs.Env):
         default = urllib.parse.urlparse("https://example.com")
         result = env.url("UNSET_URL", default=default)

@@ -2,12 +2,6 @@
 
 ## unreleased
 
-Features:
-
-- Default values are now validated through marshmallow field deserialization.
-  This ensures the return type is always correct ([#423](https://github.com/sloria/environs/issues/423)).
-  Thanks [lucas-bremond](https://github.com/lucas-bremond) for reporting.
-
 Other changes:
 
 - Drop support for marshmallow 3. marshmallow>=4.0.0 is now required.
