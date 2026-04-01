@@ -39,7 +39,7 @@ It allows you to store configuration separate from your code, as per
 ## Features
 
 - Type-casting
-- Read `.env` files into `os.environ` (useful for local development)
+- Read `.env` files without mutating `os.environ`
 - Validation
 - Define custom parser behavior
 - Framework-agnostic, but integrates well with [Flask](#usage-with-flask) and [Django](#usage-with-django)
@@ -161,12 +161,14 @@ Call `Env.read_env` before parsing variables.
 ```python
 from environs import env
 
-# Read .env into os.environ
 env.read_env()
 
 env.bool("DEBUG")  # => True
 env.int("PORT")  # => 4567
 ```
+> [!NOTE]
+> `read_env` loads values into the `Env` instance without modifying `os.environ`.
+
 
 ### Reading a specific file
 
