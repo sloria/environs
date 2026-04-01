@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 15.0.0 (2026-03-31)
 
 Features:
 
