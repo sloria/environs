@@ -160,7 +160,6 @@ dev = [
     { name = "dj-database-url" },
     { name = "dj-email-url" },
     { name = "django-cache-url" },
-    { name = "packaging" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "tox" },
@@ -176,7 +175,6 @@ tests = [
     { name = "dj-database-url" },
     { name = "dj-email-url" },
     { name = "django-cache-url" },
-    { name = "packaging" },
     { name = "pytest" },
 ]
 
@@ -185,7 +183,7 @@ requires-dist = [
     { name = "dj-database-url", marker = "extra == 'django'" },
     { name = "dj-email-url", marker = "extra == 'django'" },
     { name = "django-cache-url", marker = "extra == 'django'" },
-    { name = "marshmallow", specifier = ">=3.26.2" },
+    { name = "marshmallow", specifier = ">=4.0.0" },
     { name = "python-dotenv" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
@@ -197,7 +195,6 @@ dev = [
     { name = "dj-database-url" },
     { name = "dj-email-url" },
     { name = "django-cache-url" },
-    { name = "packaging" },
     { name = "pre-commit", specifier = ">=4.0,<5.0" },
     { name = "pytest" },
     { name = "tox" },
@@ -213,7 +210,6 @@ tests = [
     { name = "dj-database-url" },
     { name = "dj-email-url" },
     { name = "django-cache-url" },
-    { name = "packaging" },
     { name = "pytest" },
 ]
 

@@ -1,5 +1,4 @@
 import datetime as dt
-import importlib.metadata
 import logging
 import os
 import pathlib
@@ -20,13 +19,11 @@ import django_cache_url
 import marshmallow as ma
 import pytest
 from marshmallow import fields
-from packaging.version import Version
 
 import environs
 from environs import validate
 
 HERE = pathlib.Path(__file__).parent
-MARSHMALLOW_VERSION = Version(importlib.metadata.version("marshmallow"))
 
 
 @pytest.fixture
@@ -265,14 +262,24 @@ class TestCasting:
         method = getattr(env, method_name)
         assert method("NOTFOUND", value) == value
 
+    def test_url_with_parseresult_default(self, env: environs.Env):
+        default = urllib.parse.urlparse("https://example.com")
+        result = env.url("UNSET_URL", default=default)
+        assert result == default
+        assert isinstance(result, urllib.parse.ParseResult)
+
+    def test_none_default_unchanged(self, env: environs.Env):
+        assert env.int("UNSET_NONE1", default=None) is None
+        assert env.list("UNSET_NONE2", default=None) is None
+        assert env.timedelta("UNSET_NONE3", default=None) is None
+
     def test_timedelta_cast(self, set_env, env: environs.Env):
-        # marshmallow 4 preserves float values as microseconds
-        if MARSHMALLOW_VERSION.major >= 4:
-            set_env({"TIMEDELTA": "42.9"})
-            assert env.timedelta("TIMEDELTA") == dt.timedelta(
-                seconds=42,
-                microseconds=900000,
-            )
+        # marshmallow preserves float values as microseconds
+        set_env({"TIMEDELTA": "42.9"})
+        assert env.timedelta("TIMEDELTA") == dt.timedelta(
+            seconds=42,
+            microseconds=900000,
+        )
         # seconds as integer
         set_env({"TIMEDELTA": "0"})
         assert env.timedelta("TIMEDELTA") == dt.timedelta()

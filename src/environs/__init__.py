@@ -199,6 +199,8 @@ def _make_subcast_field(
 
         class SubcastField(ma.fields.Field):
             def _deserialize(self, value, *args, **kwargs):
+                if not isinstance(value, str):
+                    return value
                 return subcast(value)
 
         inner_field = SubcastField

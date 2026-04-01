@@ -1,5 +1,11 @@
 # Changelog
 
+## unreleased
+
+Other changes:
+
+- Drop support for marshmallow 3. marshmallow>=4.0.0 is now required.
+
 ## 14.6.0 (2026-02-19)
 
 Bug fixes:

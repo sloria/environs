@@ -16,8 +16,7 @@ from urllib.parse import ParseResult, urlparse
 from marshmallow import ValidationError, fields
 
 
-# TODO: Change to ma.fields.Field[Path] after dropping marshmallow 3 support
-class Path(fields.Field):
+class Path(fields.Field[pathlib.Path]):
     def _serialize(self, value: pathlib.Path | None, *args, **kwargs) -> str | None:
         if value is None:
             return None
@@ -151,5 +150,7 @@ class Url(fields.Url):
         data: typing.Mapping[str, typing.Any] | None = None,
         **kwargs,
     ) -> ParseResult:
+        if isinstance(value, ParseResult):
+            return value
         ret = typing.cast("str", super().deserialize(value, attr, data, **kwargs))
         return urlparse(ret)
