@@ -2,9 +2,16 @@
 
 ## unreleased
 
+Features:
+
+- `Env.read_env` no longer mutates `os.environ` ([#393](https://github.com/sloria/environs/issues/393)). Values from `.env` files are loaded into the `Env` instance only. This comes with **two breaking changes**:
+  - `Env.read_env` is now an instance method rather than a `@staticmethod`.
+    `Env.read_env()` -> `env.read_env()`
+  - The `verbose` parameter of `read_env` is been removed.
+
 Other changes:
 
-- Drop support for marshmallow 3. marshmallow>=4.0.0 is now required.
+- Drop support for marshmallow 3, which is EOL. marshmallow>=4.0.0 is supported.
 
 ## 14.6.0 (2026-02-19)
 

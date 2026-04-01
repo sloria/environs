@@ -464,7 +464,7 @@ class TestEnvFileReading:
         assert env("EXPANDED") == "foo"
 
     def test_read_env_returns_false_if_file_not_found(self, env: environs.Env):
-        result = env.read_env(HERE / ".does_not_exist", verbose=True)
+        result = env.read_env(HERE / ".does_not_exist")
         assert result is False
 
     # Regression test for https://github.com/sloria/environs/issues/96
@@ -539,6 +539,54 @@ class TestEnvFileReading:
             # Restore .env file
             if temp_env.exists():
                 temp_env.rename(env_path)
+
+    def test_read_env_does_not_mutate_os_environ(self, env: environs.Env):
+        if "STRING" in os.environ:
+            os.environ.pop("STRING")
+        env.read_env()
+        assert env("STRING") == "foo"
+        assert "STRING" not in os.environ
+
+    def test_read_env_override(self, tmp_path):
+        (tmp_path / "first.env").write_text("A=first\n")
+        (tmp_path / "second.env").write_text("A=second\n")
+        env = environs.Env()
+        env.read_env(tmp_path / "first.env")
+        env.read_env(tmp_path / "second.env", override=True)
+        assert env("A") == "second"
+
+    def test_read_env_no_override(self, tmp_path):
+        (tmp_path / "first.env").write_text("A=first\n")
+        (tmp_path / "second.env").write_text("A=second\n")
+        env = environs.Env()
+        env.read_env(tmp_path / "first.env")
+        env.read_env(tmp_path / "second.env")
+        assert env("A") == "first"
+
+    def test_read_env_expand_vars(self):
+        env = environs.Env(expand_vars=True)
+        env.read_env()
+        assert env("EXPANDED") == "foo"
+
+    def test_read_env_multiple_files(self, tmp_path):
+        (tmp_path / "base.env").write_text("A=base_a\nB=base_b\n")
+        (tmp_path / "override.env").write_text("B=override_b\nC=override_c\n")
+        env = environs.Env()
+        env.read_env(tmp_path / "base.env")
+        env.read_env(tmp_path / "override.env", override=True)
+        assert env("A") == "base_a"
+        assert env("B") == "override_b"
+        assert env("C") == "override_c"
+
+    def test_env_instances_are_isolated(self, tmp_path):
+        (tmp_path / "a.env").write_text("VAR=a\n")
+        (tmp_path / "b.env").write_text("VAR=b\n")
+        env_a = environs.Env()
+        env_b = environs.Env()
+        env_a.read_env(tmp_path / "a.env")
+        env_b.read_env(tmp_path / "b.env")
+        assert env_a("VAR") == "a"
+        assert env_b("VAR") == "b"
 
 
 def always_fail(value):
@@ -1268,3 +1316,12 @@ class TestFileAwareEnv:
 
         custom_fa_env = environs.FileAwareEnv(file_suffix="_SECRETFILE")
         assert custom_fa_env.str("KEY") == "value from file"
+
+    def test_read_from_file_via_read_env(self, tmp_path):
+        secret_file = tmp_path / "secret.txt"
+        secret_file.write_text("secret_value")
+        env_file = tmp_path / ".env"
+        env_file.write_text(f"MY_KEY_FILE={secret_file}\n")
+        fa_env = environs.FileAwareEnv()
+        fa_env.read_env(env_file)
+        assert fa_env.str("MY_KEY") == "secret_value"
