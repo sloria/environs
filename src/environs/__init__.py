@@ -393,6 +393,12 @@ class Env:
         If .env is not found in the directory from which this method is called,
         the default behavior is to recurse up the directory tree until a .env
         file is found. To disable this behavior, pass ``recurse=False``.
+
+        Pass ``override=True`` to overwrite previously loaded values when
+        loading multiple .env files.
+
+        If ``return_path`` is ``True``, return the path to the loaded .env
+        file (or ``None`` if no file was found) instead of a boolean.
         """
         env_path = None
         is_env_loaded = False
