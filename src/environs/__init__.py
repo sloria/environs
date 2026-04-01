@@ -48,11 +48,12 @@ if typing.TYPE_CHECKING:
 __all__ = ["Env", "EnvError", "FileAwareEnv", "ValidationError", "env"]
 
 _T = typing.TypeVar("_T")
-_StrType = str
-_BoolType = bool
-_IntType = int
-_ListType = list
-_DictType = dict
+# Aliases for built-in types that are shadowed by Env class attributes
+_StrType: typing.TypeAlias = str
+_BoolType: typing.TypeAlias = bool
+_IntType: typing.TypeAlias = int
+_ListType: typing.TypeAlias = list
+_DictType: typing.TypeAlias = dict
 
 _EXPANDED_VAR_PATTERN = re.compile(r"(?<!\\)\$\{([A-Za-z0-9_]+)(:-[^\}:]*)?\}")
 
@@ -201,7 +202,7 @@ def _make_subcast_field(
             def _deserialize(self, value, *args, **kwargs):
                 if not isinstance(value, str):
                     return value
-                return subcast(value)
+                return subcast(value)  # type: ignore[operator]
 
         inner_field = SubcastField
     else:
@@ -257,7 +258,7 @@ def _preprocess_dict(
     }
 
 
-def _preprocess_json(value: str | typing.Mapping | list, **kwargs):
+def _preprocess_json(value: str | typing.Mapping | list, **kwargs) -> typing.Any:
     try:
         if isinstance(value, str):
             return pyjson.loads(value)
@@ -464,7 +465,7 @@ class Env:
             self._prefix = None
         self._prefix = old_prefix
 
-    def seal(self):
+    def seal(self) -> None:
         """Validate parsed values and prevent new values from being added.
 
         :raises: environs.EnvValidationError
@@ -478,7 +479,7 @@ class Env:
                 error_messages,
             )
 
-    def __getattr__(self, name: _StrType):
+    def __getattr__(self, name: _StrType) -> typing.Any:
         try:
             return functools.partial(self.__custom_parsers__[name], self)
         except KeyError as error:
@@ -508,7 +509,9 @@ class Env:
 
         return decorator
 
-    def add_parser_from_field(self, name: _StrType, field_cls: type[ma.fields.Field]):
+    def add_parser_from_field(
+        self, name: _StrType, field_cls: type[ma.fields.Field]
+    ) -> None:
         """Register a new parser method with name ``name``,
         given a marshmallow ``Field``.
         """
@@ -566,7 +569,9 @@ class Env:
                 value = value.replace(r"\$", "$")
         return env_key, value, None
 
-    def _expand_vars(self, parsed_key, value):
+    def _expand_vars(
+        self, parsed_key: _StrType, value: _StrType
+    ) -> tuple[_StrType, typing.Any, _StrType | None]:
         ret = ""
         prev_start = 0
         for match in _EXPANDED_VAR_PATTERN.finditer(value):
