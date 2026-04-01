@@ -506,7 +506,7 @@ SECRET_KEY="not so secret"
 ```
 
 For a more complete example, see
-[django_example.py](https://github.com/sloria/environs/blob/master/examples/django_example.py)
+[django_example.py](https://github.com/sloria/environs/blob/main/examples/django_example.py)
 in the `examples/` directory.
 
 ## Why\...?
@@ -554,5 +554,5 @@ which details specific differences with envparse.
 ## License
 
 MIT licensed. See the
-[LICENSE](https://github.com/sloria/environs/blob/master/LICENSE) file
+[LICENSE](https://github.com/sloria/environs/blob/main/LICENSE) file
 for more details.

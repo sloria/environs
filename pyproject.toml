@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [project.urls]
-Changelog = "https://github.com/sloria/environs/blob/master/CHANGELOG.md"
+Changelog = "https://github.com/sloria/environs/blob/main/CHANGELOG.md"
 Issues = "https://github.com/sloria/environs/issues"
 Source = "https://github.com/sloria/environs"
 
