@@ -12,6 +12,7 @@ Features:
 Other changes:
 
 - Drop support for marshmallow 3, which is EOL. marshmallow>=4.0.0 is supported.
+- Minor typing improvements ([#463](https://github.com/sloria/environs/pull/463)).
 
 ## 14.6.0 (2026-02-19)
 
