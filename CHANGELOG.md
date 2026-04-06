@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 15.0.1 (2026-04-06)
 
 Bug fixes:
 
