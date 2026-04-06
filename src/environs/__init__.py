@@ -595,9 +595,9 @@ class Env:
 
     def _get_value(self, env_key: _StrType, default: typing.Any) -> typing.Any:
         try:
-            return self._environ[env_key]
+            return os.environ[env_key]
         except KeyError:
-            return os.environ.get(env_key, default)
+            return self._environ.get(env_key, default)
 
 
 class FileAwareEnv(Env):
@@ -619,7 +619,7 @@ class FileAwareEnv(Env):
     def _get_value(self, env_key: _StrType, default: typing.Any) -> typing.Any:
         """Return the contents of the file referenced in key <env_key>_FILE, if present."""
         file_key = f"{env_key}{self.file_suffix}"
-        if file_path := self._environ.get(file_key) or os.environ.get(file_key):
+        if file_path := os.environ.get(file_key) or self._environ.get(file_key):
             try:
                 value: _StrType = Path(file_path).read_text()
                 return value.strip() if self.strip_whitespace else value
