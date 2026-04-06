@@ -1,5 +1,12 @@
 # Changelog
 
+## unreleased
+
+Bug fixes:
+
+- Exported environment variables take precedence over `.env` files (regression from 15.0.0) ([#464](https://github.com/sloria/environs/issues/464)).
+  Thanks [DougEdey-Slice](https://github.com/DougEdey-Slice) for reporting.
+
 ## 15.0.0 (2026-03-31)
 
 Features:

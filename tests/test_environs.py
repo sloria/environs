@@ -547,6 +547,22 @@ class TestEnvFileReading:
         assert env("STRING") == "foo"
         assert "STRING" not in os.environ
 
+    def test_read_env_os_environ_takes_precedence(self, env: environs.Env, monkeypatch):
+        monkeypatch.setenv("STRING", "from_os")
+        env.read_env()
+        assert env("STRING") == "from_os"
+
+    def test_read_env_os_environ_takes_precedence_with_override(
+        self, tmp_path, monkeypatch
+    ):
+        monkeypatch.setenv("A", "from_os")
+        (tmp_path / "first.env").write_text("A=first\n")
+        (tmp_path / "second.env").write_text("A=second\n")
+        env = environs.Env()
+        env.read_env(tmp_path / "first.env")
+        env.read_env(tmp_path / "second.env", override=True)
+        assert env("A") == "from_os"
+
     def test_read_env_override(self, tmp_path):
         (tmp_path / "first.env").write_text("A=first\n")
         (tmp_path / "second.env").write_text("A=second\n")
