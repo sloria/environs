@@ -142,10 +142,14 @@ def _field2method(
     return method
 
 
-def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any:
+def _func2method(
+    func: typing.Callable[..., _T],
+    method_name: str,
+    default_name: str | None = None,
+) -> typing.Any:
     def method(
         self: Env,
-        name: str,
+        name: str | None = None,
         default: typing.Any = ...,
         **kwargs,
     ) -> _T | None:
@@ -153,6 +157,12 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
             raise EnvSealedError(
                 "Env has already been sealed. New values cannot be parsed.",
             )
+        if name is None:
+            if default_name is None:
+                raise TypeError(
+                    f"{method_name}() missing required argument: 'name'",
+                )
+            name = default_name
         parsed_key, raw_value, proxied_key = self._get_from_environ(name, default)
         self._fields[parsed_key] = ma.fields.Raw()
         source_key = proxied_key or parsed_key
@@ -357,7 +367,7 @@ class Env:
     url: FieldMethod[ParseResult] = _field2method(fields.Url, "url")
 
     enum: EnumFieldMethod = _field2method(ma.fields.Enum, "enum")
-    dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url")
+    dj_db_url = _func2method(_dj_db_url_parser, "dj_db_url", default_name="DATABASE_URL")
     dj_email_url = _func2method(_dj_email_url_parser, "dj_email_url")
     dj_cache_url = _func2method(_dj_cache_url_parser, "dj_cache_url")
 

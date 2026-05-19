@@ -916,6 +916,12 @@ class TestDjango:
         res = env.dj_db_url("DATABASE_URL")
         assert res == dj_database_url.parse(db_url)
 
+    def test_dj_db_url_defaults_to_database_url(self, env: environs.Env, set_env):
+        db_url = "postgresql://localhost:5432/mydb"
+        set_env({"DATABASE_URL": db_url})
+        res = env.dj_db_url()
+        assert res == dj_database_url.parse(db_url)
+
     def test_dj_db_url_passes_kwargs(self, env: environs.Env, set_env):
         db_url = "postgresql://localhost:5432/mydb"
         set_env({"DATABASE_URL": db_url})
