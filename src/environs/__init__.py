@@ -453,17 +453,15 @@ class Env:
     @contextlib.contextmanager
     def prefixed(self, prefix: _StrType) -> typing.Iterator[Env]:
         """Context manager for parsing envvars with a common prefix."""
+        old_prefix = self._prefix
+        if old_prefix is None:
+            self._prefix = prefix
+        else:
+            self._prefix = f"{old_prefix}{prefix}"
         try:
-            old_prefix = self._prefix
-            if old_prefix is None:
-                self._prefix = prefix
-            else:
-                self._prefix = f"{old_prefix}{prefix}"
             yield self
         finally:
-            # explicitly reset the stored prefix on completion and exceptions
-            self._prefix = None
-        self._prefix = old_prefix
+            self._prefix = old_prefix
 
     def seal(self) -> None:
         """Validate parsed values and prevent new values from being added.
