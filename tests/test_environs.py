@@ -903,7 +903,9 @@ class TestFailedNestedPrefix:
         except FauxTestError:
             dump_with_nested_prefixed(env, fail=False)
 
-    def test_exception_inside_inner_prefixed_restores_outer_prefix(self, env: environs.Env):
+    def test_exception_inside_inner_prefixed_restores_outer_prefix(
+        self, env: environs.Env
+    ):
         # When an exception is raised inside the inner prefixed() context,
         # the outer prefix must be restored on exit.
         with env.prefixed("APP_"):
