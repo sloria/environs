@@ -906,18 +906,13 @@ class TestFailedNestedPrefix:
     def test_exception_inside_inner_prefixed_restores_outer_prefix(
         self, env: environs.Env
     ):
-        # When an exception is raised inside the inner prefixed() context,
-        # the outer prefix must be restored on exit.
+        def raise_inside_inner_prefix():
+            with env.prefixed("NESTED_"):
+                raise FauxTestError
+
         with env.prefixed("APP_"):
-            try:
-                with env.prefixed("NESTED_"):
-                    raise FauxTestError
-            except FauxTestError:
-                pass
-            # Outer prefix must still be active after the inner one raised
-            assert env._prefix == "APP_", (
-                f"Outer prefix was lost after exception in inner context; got {env._prefix!r}"
-            )
+            with pytest.raises(FauxTestError):
+                raise_inside_inner_prefix()
             assert env.str("STR") == "foo"
 
 
