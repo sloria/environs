@@ -903,6 +903,20 @@ class TestFailedNestedPrefix:
         except FauxTestError:
             dump_with_nested_prefixed(env, fail=False)
 
+    def test_failed_prefixed_restores_configured_prefix(self, set_env):
+        set_env({"APP_STR": "foo", "APP_NESTED_INT": "42"})
+        env = environs.Env(prefix="APP_")
+
+        def raise_inside_prefixed():
+            with env.prefixed("NESTED_"):
+                assert env.int("INT") == 42
+                raise FauxTestError
+
+        with pytest.raises(FauxTestError):
+            raise_inside_prefixed()
+
+        assert env.str("STR") == "foo"
+
 
 class TestDjango:
     def test_dj_db_url(self, env: environs.Env, set_env):

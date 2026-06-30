@@ -462,8 +462,7 @@ class Env:
             yield self
         finally:
             # explicitly reset the stored prefix on completion and exceptions
-            self._prefix = None
-        self._prefix = old_prefix
+            self._prefix = old_prefix
 
     def seal(self) -> None:
         """Validate parsed values and prevent new values from being added.
