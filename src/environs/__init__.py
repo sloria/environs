@@ -17,6 +17,7 @@ from dotenv.main import _walk_to_root, dotenv_values
 from . import fields
 from .exceptions import (
     EnvError,
+    EnvNotSetError,
     EnvSealedError,
     EnvValidationError,
     ParserConflictError,
@@ -118,7 +119,7 @@ def _field2method(
                 self._values[parsed_key] = default
                 return default
             if self.eager:
-                raise EnvError(
+                raise EnvNotSetError(
                     f'Environment variable "{proxied_key or parsed_key}" not set',
                 )
             self._errors[parsed_key].append("Environment variable not set.")
@@ -158,7 +159,7 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
         source_key = proxied_key or parsed_key
         if raw_value is Ellipsis:
             if self.eager:
-                raise EnvError(
+                raise EnvNotSetError(
                     f'Environment variable "{proxied_key or parsed_key}" not set',
                 )
             self._errors[parsed_key].append("Environment variable not set.")
