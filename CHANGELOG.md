@@ -1,5 +1,12 @@
 # Changelog
 
+## 15.1.0 (unreleased)
+
+Features:
+
+- Add a specific exception, `EnvNotSetError`, for missing environment variables ([#480](https://github.com/sloria/environs/issues/480)).
+  Thanks [paduszyk](https://github.com/paduszyk) for the suggestion and [w3lld1](https://github.com/sloria/environs/pull/481) for the PR.
+
 ## 15.0.1 (2026-04-06)
 
 Bug fixes:
