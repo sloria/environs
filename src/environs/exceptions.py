@@ -7,9 +7,11 @@ if TYPE_CHECKING:
 
 
 class EnvError(ValueError):
-    """Raised when an environment variable or
-    if a required environment variable is unset.
-    """
+    """Base exception for errors raised while parsing environment variables."""
+
+
+class EnvNotSetError(EnvError):
+    """Raised when a required environment variable is unset."""
 
 
 class EnvValidationError(EnvError):

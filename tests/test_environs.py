@@ -71,6 +71,12 @@ class TestCasting:
         assert env("NOT_SET", "mydefault") == "mydefault"
         assert env("NOT_SET", None) is None
 
+    def test_missing_variable_raises_not_set_error(self, env: environs.Env):
+        with pytest.raises(environs.EnvNotSetError) as excinfo:
+            env.str("NOT_SET")
+
+        assert isinstance(excinfo.value, environs.EnvError)
+
     def test_basic(self, set_env, env: environs.Env):
         set_env({"STR": "foo"})
         assert env.str("STR") == "foo"
@@ -672,7 +678,7 @@ class TestCustomTypes:
 
         assert env.https_url("URL") == "https://test.test/"
 
-        with pytest.raises(environs.EnvError) as excinfo:
+        with pytest.raises(environs.EnvNotSetError) as excinfo:
             env.https_url("NOT_SET")
         assert excinfo.value.args[0] == 'Environment variable "NOT_SET" not set'
 
