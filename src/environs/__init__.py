@@ -135,6 +135,7 @@ def _field2method(
                     error.messages,
                 ) from error
             self._errors[parsed_key].extend(error.messages)
+            return None
         else:
             self._values[parsed_key] = value
         return typing.cast("_T | None", value)
@@ -182,6 +183,7 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
                     messages,
                 ) from error
             self._errors[parsed_key].extend(messages)
+            return None
         else:
             self._values[parsed_key] = value
         return typing.cast("_T | None", value)
