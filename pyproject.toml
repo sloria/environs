@@ -1,6 +1,6 @@
 [project]
 name = "environs"
-version = "15.1.0"
+version = "15.2.0"
 description = "simplified environment variable parsing"
 readme = "README.md"
 license = "MIT"
