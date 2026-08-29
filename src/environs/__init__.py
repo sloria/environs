@@ -46,7 +46,17 @@ if typing.TYPE_CHECKING:
     except ImportError:
         pass
 
-__all__ = ["Env", "EnvError", "FileAwareEnv", "ValidationError", "env"]
+__all__ = [
+    "Env",
+    "EnvError",
+    "EnvNotSetError",
+    "EnvSealedError",
+    "EnvValidationError",
+    "FileAwareEnv",
+    "ParserConflictError",
+    "ValidationError",
+    "env",
+]
 
 _T = typing.TypeVar("_T")
 # Aliases for built-in types that are shadowed by Env class attributes

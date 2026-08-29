@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## unreleased
+
+Features:
+
+- Export exception classes in `environs.__all__` ([#488](https://github.com/sloria/environs/issues/488)).
+  Thanks [paduszyk](https://github.com/paduszyk) for the suggestion and the PR.
 
 Bug fixes:
 
