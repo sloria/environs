@@ -6,6 +6,7 @@ Bug fixes:
 
 - Return `None` for invalid values when `eager=False`, matching the documented
   `T | None` return type and the missing-variable case ([#486](https://github.com/sloria/environs/issues/486)).
+  Thanks [VANDRANKI](https://github.com/VANDRANKI) for reporting.
 
 ## 15.1.0 (2026-07-31)
 

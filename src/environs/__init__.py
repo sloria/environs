@@ -165,10 +165,6 @@ def _func2method(func: typing.Callable[..., _T], method_name: str) -> typing.Any
                 )
             self._errors[parsed_key].append("Environment variable not set.")
             return None
-        if raw_value or raw_value == "":  # noqa: SIM108
-            value = raw_value
-        else:
-            value = None
         try:
             value = func(raw_value, **kwargs)
         except (EnvError, ma.ValidationError) as error:
