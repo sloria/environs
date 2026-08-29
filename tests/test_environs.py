@@ -980,6 +980,20 @@ class TestDeferredValidation:
         assert "INT" in exc.error_messages
         assert "DTIME" in exc.error_messages
 
+    def test_invalid_value_returns_none(self, env: environs.Env, set_env):
+        set_env(
+            {
+                "INT": "not-an-int",
+                "TTL": "-2",
+                "MYLIST": "a,b,c",
+            },
+        )
+        assert env.int("INT") is None
+        assert env.int("TTL", validate=validate.Range(min=0, max=100)) is None
+        assert env.list("MYLIST", validate=validate.Length(min=10)) is None
+        with pytest.raises(environs.EnvValidationError):
+            env.seal()
+
     def test_deferred_required_validation(self, env: environs.Env):
         env.int("STR")
         env.int("INT")
@@ -1088,7 +1102,7 @@ class TestDeferredValidation:
         def always_fail(value):
             raise environs.EnvError("Invalid!")
 
-        env.always_fail("MY_VAR")
+        assert env.always_fail("MY_VAR") is None
 
         with pytest.raises(environs.EnvValidationError) as excinfo:
             env.seal()

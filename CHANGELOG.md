@@ -7,6 +7,13 @@ Features:
 - Export exception classes in `environs.__all__` ([#488](https://github.com/sloria/environs/issues/488)).
   Thanks [paduszyk](https://github.com/paduszyk) for the suggestion and the PR.
 
+Bug fixes:
+
+- Return `None` for invalid values when `eager=False`, matching the documented
+  `T | None` return type and the missing-variable case ([#486](https://github.com/sloria/environs/issues/486)).
+  Thanks [VANDRANKI](https://github.com/VANDRANKI) for reporting and [gyanu2507](https://github.com/gyanu2507)
+  for the PR.
+
 ## 15.1.0 (2026-07-31)
 
 Features:
