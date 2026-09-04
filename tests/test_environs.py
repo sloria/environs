@@ -208,6 +208,21 @@ class TestCasting:
         set_env({"DICT": "expr1=1 < 2,expr2=(1+1) = 2"})
         assert env.dict("DICT") == {"expr1": "1 < 2", "expr2": "(1+1) = 2"}
 
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "key1=1,key2=2,",  # trailing delimiter
+            "key1=1,,key2=2",  # empty item
+            "foo",  # item missing the key-value delimiter
+        ],
+    )
+    def test_invalid_dict_raises_validation_error(
+        self, value, set_env, env: environs.Env
+    ):
+        set_env({"DICT": value})
+        with pytest.raises(environs.EnvValidationError):
+            env.dict("DICT")
+
     def test_decimal_cast(self, set_env, env: environs.Env):
         set_env({"DECIMAL": "12.34"})
         assert env.decimal("DECIMAL") == Decimal("12.34")
