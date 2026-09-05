@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+Bug fixes:
+
+- `env.dict` now raises `EnvValidationError` for malformed input (an entry
+  missing the key-value delimiter, e.g. a trailing delimiter, an empty entry,
+  or a bare key) instead of leaking an uncaught `ValueError`.
+
 ## 15.2.0 (2026-08-29)
 
 Features:
