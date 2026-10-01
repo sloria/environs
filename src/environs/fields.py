@@ -74,10 +74,10 @@ class TimeDelta(fields.TimeDelta):
     _ISO_8601_REGEX = re.compile(
         r"^(?:\s*)"  # optional leading whitespace
         r"(?P<sign>[+-]?)"  # optional sign
-        r"P"  # designator
+        r"P(?=\d|T\d)"  # designator followed by at least one component
         r"(?:(?P<weeks>\d+(?:\.\d+)?)W|"  # weeks variant
         r"(?:(?P<days>\d+(?:\.\d+)?)D)?"  # days
-        r"(?:T"  # time designator
+        r"(?:T(?=\d)"  # time designator must be followed by a component
         r"(?:(?P<hours>\d+(?:\.\d+)?)H)?"  # hours
         r"(?:(?P<minutes>\d+(?:\.\d+)?)M)?"  # minutes
         r"(?:(?P<seconds>\d+(?:\.\d+)?)S)?"  # seconds (can be fractional)
