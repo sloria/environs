@@ -257,14 +257,18 @@ def _preprocess_dict(
     else:
         subcast_values_instance = ma.fields.Raw()
 
-    return {
-        subcast_keys_instance.deserialize(
-            key.strip(),
-        ): subcast_values_instance.deserialize(val.strip())
-        for key, val in (
-            item.split(key_value_delimiter, 1) for item in value.split(delimiter) if value
+    result: dict = {}
+    for item in value.split(delimiter) if value else []:
+        if key_value_delimiter not in item:
+            raise ma.ValidationError(
+                f"Item {item!r} is missing the key-value delimiter "
+                f"{key_value_delimiter!r}.",
+            )
+        key, val = item.split(key_value_delimiter, 1)
+        result[subcast_keys_instance.deserialize(key.strip())] = (
+            subcast_values_instance.deserialize(val.strip())
         )
-    }
+    return result
 
 
 def _preprocess_json(value: str | typing.Mapping | list, **kwargs) -> typing.Any:
