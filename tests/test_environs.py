@@ -355,6 +355,23 @@ class TestCasting:
         set_env({"TIMEDELTA": "PT0S"})
         assert env.timedelta("TIMEDELTA", format="iso8601") == dt.timedelta()
 
+    @pytest.mark.parametrize(
+        "value", ["P", "PT", "+P", "-PT", " P ", " PT ", "P1DT", "P0DT", "-P1DT"]
+    )
+    def test_timedelta_iso8601_requires_components(
+        self, value, set_env, env: environs.Env
+    ):
+        set_env({"TIMEDELTA": value})
+        with pytest.raises(
+            environs.EnvValidationError, match="Not a valid period of time"
+        ):
+            env.timedelta("TIMEDELTA", format="iso8601")
+
+    @pytest.mark.parametrize("value", ["P0W", "P0D", "PT0H", "PT0M", "PT0S", "P0DT0S"])
+    def test_timedelta_iso8601_zero_components(self, value, set_env, env: environs.Env):
+        set_env({"TIMEDELTA": value})
+        assert env.timedelta("TIMEDELTA", format="iso8601") == dt.timedelta()
+
     def test_time_cast(self, set_env, env: environs.Env):
         set_env({"TIME": "10:30"})
         assert env.time("TIME") == dt.time(hour=10, minute=30, second=0)
