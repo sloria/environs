@@ -533,10 +533,9 @@ class TestEnvFileReading:
         env_path = str(HERE / ".env")
         assert path == env_path
 
-    def test_read_env_return_path_if_env_not_found(self, env: environs.Env, tmp_path):
-        # Move .env file to temp location
+    def test_read_env_return_path_if_env_not_found(self, env: environs.Env):
         env_path = HERE / ".env"
-        temp_env = tmp_path / ".env"
+        temp_env = HERE / ".env.bak"
         try:
             env_path.rename(temp_env)
             path = env.read_env(return_path=True)
