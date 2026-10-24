@@ -1141,6 +1141,36 @@ class TestExpandVars:
         ):
             env.str("UNDEFINED")
 
+    @pytest.mark.parametrize("prefixed", [False, True])
+    @pytest.mark.parametrize("reference", ["${SOURCE}", "${MISSING:-42}"])
+    def test_full_expansion_preserves_prefixed_dump_key(
+        self, set_env, *, prefixed, reference
+    ):
+        set_env({"APP_PORT": reference, "SOURCE": "42"})
+        env = environs.Env(expand_vars=True, prefix=None if prefixed else "APP_")
+        with env.prefixed("APP_" if prefixed else ""):
+            assert env.int("PORT") == 42
+        assert env.dump() == {"APP_PORT": 42}
+
+    @pytest.mark.parametrize("eager", [False, True])
+    @pytest.mark.parametrize("source_value", [None, "invalid"])
+    def test_full_expansion_preserves_prefixed_error_key(
+        self, set_env, *, eager, source_value
+    ):
+        set_env({"APP_PORT": "${SOURCE}"})
+        if source_value is not None:
+            set_env({"SOURCE": source_value})
+        env = environs.Env(expand_vars=True, prefix="APP_", eager=eager)
+        if eager:
+            with pytest.raises(environs.EnvError, match='"SOURCE"'):
+                env.int("PORT")
+        else:
+            assert env.int("PORT") is None
+            with pytest.raises(environs.EnvValidationError) as excinfo:
+                env.seal()
+            assert "APP_PORT" in excinfo.value.error_messages
+            assert "PORT" not in excinfo.value.error_messages
+
     def test_multiple_expands(self, env: environs.Env, set_env):
         set_env(
             {
