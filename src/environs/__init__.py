@@ -564,7 +564,7 @@ class Env:
                 ):  # if we have used default, don't use it recursively
                     default = Ellipsis
                 return (
-                    key,
+                    env_key,
                     self._get_from_environ(proxied_key, default, proxied=True)[1],
                     proxied_key,
                 )
