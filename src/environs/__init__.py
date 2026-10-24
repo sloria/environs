@@ -257,14 +257,19 @@ def _preprocess_dict(
     else:
         subcast_values_instance = ma.fields.Raw()
 
-    return {
-        subcast_keys_instance.deserialize(
-            key.strip(),
-        ): subcast_values_instance.deserialize(val.strip())
-        for key, val in (
-            item.split(key_value_delimiter, 1) for item in value.split(delimiter) if value
+    result = {}
+    for item in value.split(delimiter) if value else ():
+        try:
+            key, val = item.split(key_value_delimiter, 1)
+        except ValueError as error:
+            raise ma.ValidationError(
+                f"Invalid dictionary entry {item!r}: expected a key and value "
+                f"separated by {key_value_delimiter!r}.",
+            ) from error
+        result[subcast_keys_instance.deserialize(key.strip())] = (
+            subcast_values_instance.deserialize(val.strip())
         )
-    }
+    return result
 
 
 def _preprocess_json(value: str | typing.Mapping | list, **kwargs) -> typing.Any:

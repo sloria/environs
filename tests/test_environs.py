@@ -152,6 +152,30 @@ class TestCasting:
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT") == {"key1": "1", "key2": "2"}
 
+    def test_dict_with_invalid_entry_raises_validation_error(
+        self,
+        set_env,
+        env: environs.Env,
+    ):
+        set_env({"DICT": "key1=1,invalid"})
+        with pytest.raises(
+            environs.EnvValidationError,
+            match='Environment variable "DICT" invalid',
+        ):
+            env.dict("DICT")
+
+    def test_dict_with_trailing_delimiter_raises_validation_error(
+        self,
+        set_env,
+        env: environs.Env,
+    ):
+        set_env({"DICT": "key1=1,"})
+        with pytest.raises(
+            environs.EnvValidationError,
+            match='Environment variable "DICT" invalid',
+        ):
+            env.dict("DICT")
+
     def test_dict_with_spaces_as_delimiter(self, set_env, env: environs.Env):
         set_env({"DICT": "key1=1 key2=2"})
         assert env.dict("DICT", delimiter=" ") == {"key1": "1", "key2": "2"}
@@ -992,6 +1016,15 @@ class TestDeferredValidation:
         assert env.list("MYLIST", validate=validate.Length(min=10)) is None
         with pytest.raises(environs.EnvValidationError):
             env.seal()
+
+    def test_invalid_dict_value_is_aggregated(self, env: environs.Env, set_env):
+        set_env({"DICT": "key1=1,invalid", "PORT": "not-an-int"})
+        assert env.dict("DICT") is None
+        assert env.int("PORT") is None
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        assert "DICT" in excinfo.value.error_messages
+        assert "PORT" in excinfo.value.error_messages
 
     def test_deferred_required_validation(self, env: environs.Env):
         env.int("STR")
