@@ -563,10 +563,15 @@ class Env:
                     value == default
                 ):  # if we have used default, don't use it recursively
                     default = Ellipsis
+                _, resolved_value, missing_key = self._get_from_environ(
+                    proxied_key, default, proxied=True
+                )
                 return (
                     env_key,
-                    self._get_from_environ(proxied_key, default, proxied=True)[1],
-                    proxied_key,
+                    resolved_value,
+                    missing_key or proxied_key
+                    if resolved_value is Ellipsis
+                    else proxied_key,
                 )
             expand_search = self.expand_vars and _EXPANDED_VAR_PATTERN.search(value)
             if (
@@ -590,9 +595,11 @@ class Env:
                 env_default = Ellipsis
             else:
                 env_default = env_default[2:]  # trim ':-' from default
-            _, env_value, _ = self._get_from_environ(env_key, env_default, proxied=True)
+            _, env_value, missing_key = self._get_from_environ(
+                env_key, env_default, proxied=True
+            )
             if env_value is Ellipsis:
-                return parsed_key, env_value, env_key
+                return parsed_key, env_value, missing_key or env_key
             ret += value[prev_start : match.start()] + env_value
             prev_start = match.end()
         ret += value[prev_start:]

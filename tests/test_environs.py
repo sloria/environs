@@ -1390,3 +1390,62 @@ class TestFileAwareEnv:
         fa_env = environs.FileAwareEnv()
         fa_env.read_env(env_file)
         assert fa_env.str("MY_KEY") == "secret_value"
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+@pytest.mark.parametrize("source", ["${MISSING}", "prefix ${MISSING}", "${NEXT}"])
+@pytest.mark.parametrize("parser", ["str", "int"])
+def test_nested_expansion_reports_missing_leaf(set_env, expression, source, parser):
+    set_env({"APP_VALUE": expression, "SOURCE": source, "NEXT": "${MISSING}"})
+    env = environs.Env(prefix="APP_", expand_vars=True)
+    with pytest.raises(environs.EnvNotSetError, match='"MISSING" not set'):
+        getattr(env, parser)("VALUE")
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+@pytest.mark.parametrize("eager", [False, True])
+def test_nested_expansion_defaults_keep_outer_metadata(set_env, expression, *, eager):
+    set_env({"APP_VALUE": expression, "SOURCE": "${MISSING}"})
+    env = environs.Env(prefix="APP_", expand_vars=True, eager=eager)
+    assert env.int("VALUE", default=42) == 42
+    assert env.dump() == {"APP_VALUE": 42}
+    env.seal()
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+def test_nested_expansion_deferred_missing_keeps_outer_error_key(set_env, expression):
+    set_env({"APP_VALUE": expression, "SOURCE": "${MISSING}"})
+    env = environs.Env(prefix="APP_", expand_vars=True, eager=False)
+    assert env.str("VALUE") is None
+    with pytest.raises(environs.EnvValidationError) as exc:
+        env.seal()
+    assert exc.value.error_messages == {"APP_VALUE": ["Environment variable not set."]}
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+def test_nested_invalid_leaf_keeps_existing_immediate_source(set_env, expression):
+    set_env({"APP_VALUE": expression, "SOURCE": "${LEAF}", "LEAF": "bad"})
+    env = environs.Env(prefix="APP_", expand_vars=True)
+    with pytest.raises(environs.EnvValidationError, match='"SOURCE" invalid'):
+        env.int("VALUE")
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+def test_nested_escaped_reference_is_not_a_missing_leaf(set_env, expression):
+    set_env({"APP_VALUE": expression, "SOURCE": r"\${MISSING}"})
+    env = environs.Env(prefix="APP_", expand_vars=True)
+    expected = "${MISSING}" if expression == "${SOURCE}" else "prefix ${MISSING}"
+    assert env.str("VALUE") == expected
+    assert env.dump() == {"APP_VALUE": expected}
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+def test_nested_inline_default_converts_and_keeps_metadata(set_env, expression):
+    set_env({"APP_VALUE": expression, "SOURCE": "${MISSING:-42}"})
+    env = environs.Env(prefix="APP_", expand_vars=True)
+    if expression == "${SOURCE}":
+        assert env.int("VALUE") == 42
+        assert env.dump() == {"APP_VALUE": 42}
+    else:
+        assert env.str("VALUE") == "prefix 42"
+        assert env.dump() == {"APP_VALUE": "prefix 42"}
