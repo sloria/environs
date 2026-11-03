@@ -9,11 +9,7 @@ from __future__ import annotations
 
 import enum
 import typing
-
-try:
-    from typing import Unpack
-except ImportError:  # Remove when dropping Python 3.10
-    from typing_extensions import Unpack
+from typing import Unpack
 
 import marshmallow as ma
 

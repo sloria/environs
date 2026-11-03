@@ -1,5 +1,12 @@
 # Changelog
 
+## unreleased
+
+Other changes:
+
+- Drop support for Python 3.10, which is EOL.
+- Test against Python 3.15.
+
 ## 15.2.0 (2026-08-29)
 
 Features:

@@ -6,12 +6,7 @@ import typing
 import urllib.parse
 import uuid
 from decimal import Decimal
-from enum import Enum, auto
-
-try:
-    from enum import StrEnum
-except ImportError:
-    from backports.strenum import StrEnum  # type: ignore[no-redef]
+from enum import Enum, StrEnum, auto
 
 import dj_database_url
 import dj_email_url
@@ -238,7 +233,7 @@ class TestCasting:
         assert env.json("JSON", ["foo", "bar"]) == ["foo", "bar"]
 
     def test_datetime_cast(self, set_env, env: environs.Env):
-        dtime = dt.datetime.now(dt.timezone.utc)
+        dtime = dt.datetime.now(dt.UTC)
         set_env({"DTIME": dtime.isoformat()})
         result = env.datetime("DTIME")
         assert type(result) is dt.datetime
@@ -715,7 +710,7 @@ class TestCustomTypes:
 
 class TestDumping:
     def test_dump(self, set_env, env: environs.Env):
-        dtime = dt.datetime.now(dt.timezone.utc)
+        dtime = dt.datetime.now(dt.UTC)
         set_env(
             {
                 "STR": "foo",
