@@ -1136,6 +1136,36 @@ class TestExpandVars:
         ):
             env.str("UNDEFINED")
 
+    @pytest.mark.parametrize("prefixed", [False, True])
+    @pytest.mark.parametrize("reference", ["${SOURCE}", "${MISSING:-42}"])
+    def test_full_expansion_preserves_prefixed_dump_key(
+        self, set_env, *, prefixed, reference
+    ):
+        set_env({"APP_PORT": reference, "SOURCE": "42"})
+        env = environs.Env(expand_vars=True, prefix=None if prefixed else "APP_")
+        with env.prefixed("APP_" if prefixed else ""):
+            assert env.int("PORT") == 42
+        assert env.dump() == {"APP_PORT": 42}
+
+    @pytest.mark.parametrize("eager", [False, True])
+    @pytest.mark.parametrize("source_value", [None, "invalid"])
+    def test_full_expansion_preserves_prefixed_error_key(
+        self, set_env, *, eager, source_value
+    ):
+        set_env({"APP_PORT": "${SOURCE}"})
+        if source_value is not None:
+            set_env({"SOURCE": source_value})
+        env = environs.Env(expand_vars=True, prefix="APP_", eager=eager)
+        if eager:
+            with pytest.raises(environs.EnvError, match='"SOURCE"'):
+                env.int("PORT")
+        else:
+            assert env.int("PORT") is None
+            with pytest.raises(environs.EnvValidationError) as excinfo:
+                env.seal()
+            assert "APP_PORT" in excinfo.value.error_messages
+            assert "PORT" not in excinfo.value.error_messages
+
     def test_multiple_expands(self, env: environs.Env, set_env):
         set_env(
             {
@@ -1355,3 +1385,62 @@ class TestFileAwareEnv:
         fa_env = environs.FileAwareEnv()
         fa_env.read_env(env_file)
         assert fa_env.str("MY_KEY") == "secret_value"
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+@pytest.mark.parametrize("source", ["${MISSING}", "prefix ${MISSING}", "${NEXT}"])
+@pytest.mark.parametrize("parser", ["str", "int"])
+def test_nested_expansion_reports_missing_leaf(set_env, expression, source, parser):
+    set_env({"APP_VALUE": expression, "SOURCE": source, "NEXT": "${MISSING}"})
+    env = environs.Env(prefix="APP_", expand_vars=True)
+    with pytest.raises(environs.EnvNotSetError, match='"MISSING" not set'):
+        getattr(env, parser)("VALUE")
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+@pytest.mark.parametrize("eager", [False, True])
+def test_nested_expansion_defaults_keep_outer_metadata(set_env, expression, *, eager):
+    set_env({"APP_VALUE": expression, "SOURCE": "${MISSING}"})
+    env = environs.Env(prefix="APP_", expand_vars=True, eager=eager)
+    assert env.int("VALUE", default=42) == 42
+    assert env.dump() == {"APP_VALUE": 42}
+    env.seal()
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+def test_nested_expansion_deferred_missing_keeps_outer_error_key(set_env, expression):
+    set_env({"APP_VALUE": expression, "SOURCE": "${MISSING}"})
+    env = environs.Env(prefix="APP_", expand_vars=True, eager=False)
+    assert env.str("VALUE") is None
+    with pytest.raises(environs.EnvValidationError) as exc:
+        env.seal()
+    assert exc.value.error_messages == {"APP_VALUE": ["Environment variable not set."]}
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+def test_nested_invalid_leaf_keeps_existing_immediate_source(set_env, expression):
+    set_env({"APP_VALUE": expression, "SOURCE": "${LEAF}", "LEAF": "bad"})
+    env = environs.Env(prefix="APP_", expand_vars=True)
+    with pytest.raises(environs.EnvValidationError, match='"SOURCE" invalid'):
+        env.int("VALUE")
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+def test_nested_escaped_reference_is_not_a_missing_leaf(set_env, expression):
+    set_env({"APP_VALUE": expression, "SOURCE": r"\${MISSING}"})
+    env = environs.Env(prefix="APP_", expand_vars=True)
+    expected = "${MISSING}" if expression == "${SOURCE}" else "prefix ${MISSING}"
+    assert env.str("VALUE") == expected
+    assert env.dump() == {"APP_VALUE": expected}
+
+
+@pytest.mark.parametrize("expression", ["${SOURCE}", "prefix ${SOURCE}"])
+def test_nested_inline_default_converts_and_keeps_metadata(set_env, expression):
+    set_env({"APP_VALUE": expression, "SOURCE": "${MISSING:-42}"})
+    env = environs.Env(prefix="APP_", expand_vars=True)
+    if expression == "${SOURCE}":
+        assert env.int("VALUE") == 42
+        assert env.dump() == {"APP_VALUE": 42}
+    else:
+        assert env.str("VALUE") == "prefix 42"
+        assert env.dump() == {"APP_VALUE": "prefix 42"}
