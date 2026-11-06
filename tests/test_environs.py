@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 import os
 import pathlib
+import tempfile
 import typing
 import urllib.parse
 import uuid
@@ -514,8 +515,11 @@ class TestEnvFileReading:
         env_path = str(HERE / ".env")
         assert path == env_path
 
-    def test_read_env_return_path_with_dotenv_in_working_dir(self, env: environs.Env):
-        working_dir = pathlib.Path(os.getcwd())
+    def test_read_env_return_path_with_dotenv_in_working_dir(
+        self, env: environs.Env, tmp_path, monkeypatch
+    ):
+        working_dir = tmp_path
+        monkeypatch.chdir(working_dir)
         temp_env = working_dir / ".env"
         try:
             # Create an empty .env file in working dir
@@ -528,17 +532,24 @@ class TestEnvFileReading:
         env_path = str(HERE / ".env")
         assert path == env_path
 
-    def test_read_env_return_path_if_env_not_found(self, env: environs.Env):
+    def test_read_env_return_path_if_env_not_found(self, env: environs.Env, monkeypatch):
         env_path = HERE / ".env"
-        temp_env = HERE / ".env.bak"
+        monkeypatch.setattr(environs, "_walk_to_root", lambda path: (path,))
+        backup_dir = pathlib.Path(tempfile.mkdtemp(dir=HERE))
+        temp_env = backup_dir / ".env"
         try:
             env_path.rename(temp_env)
             path = env.read_env(return_path=True)
             assert path is None
         finally:
-            # Restore .env file
+            # Keep the saved fixture recoverable if restoration fails.
             if temp_env.exists():
-                temp_env.rename(env_path)
+                try:
+                    temp_env.rename(env_path)
+                except OSError as error:
+                    error.add_note(f"Original .env preserved at {temp_env}")
+                    raise
+            backup_dir.rmdir()
 
     def test_read_env_does_not_mutate_os_environ(self, env: environs.Env):
         if "STRING" in os.environ:
