@@ -2,6 +2,10 @@
 
 ## unreleased
 
+Bug fixes:
+
+- Preserve `None` URL defaults when dumping parsed values.
+
 Other changes:
 
 - Drop support for Python 3.10, which is EOL.

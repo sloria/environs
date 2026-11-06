@@ -709,6 +709,13 @@ class TestCustomTypes:
 
 
 class TestDumping:
+    @pytest.mark.parametrize("eager", [True, False])
+    def test_dump_with_none_url_default(self, monkeypatch, eager):
+        monkeypatch.setattr(os, "environ", {})
+        env = environs.Env(eager=eager)
+        assert env.url("OPTIONAL_URL", default=None) is None
+        assert env.dump() == {"OPTIONAL_URL": None}
+
     def test_dump(self, set_env, env: environs.Env):
         dtime = dt.datetime.now(dt.UTC)
         set_env(

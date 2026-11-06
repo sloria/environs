@@ -138,7 +138,11 @@ class TimeDelta(fields.TimeDelta):
 class Url(fields.Url):
     """Same as `marshmallow.fields.Url` but deserializes to a `urllib.parse.ParseResult`."""
 
-    def _serialize(self, value: ParseResult, *args, **kwargs) -> str:  # type: ignore[override]
+    def _serialize(  # type: ignore[override]
+        self, value: ParseResult | None, *args, **kwargs
+    ) -> str | None:
+        if value is None:
+            return None
         return value.geturl()
 
     # Override deserialize rather than _deserialize because we need
