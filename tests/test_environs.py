@@ -147,6 +147,16 @@ class TestCasting:
         set_env({"DICT": "key1=1,key2=2"})
         assert env.dict("DICT") == {"key1": "1", "key2": "2"}
 
+    def test_invalid_dict(self, set_env, env: environs.Env):
+        set_env({"DICT": "key1=1,invalid"})
+        with pytest.raises(
+            environs.EnvValidationError,
+            match=r'Environment variable "DICT" invalid',
+        ) as excinfo:
+            env.dict("DICT")
+        exc = excinfo.value
+        assert "Not a valid dict item: 'invalid'." in exc.error_messages
+
     def test_dict_with_spaces_as_delimiter(self, set_env, env: environs.Env):
         set_env({"DICT": "key1=1 key2=2"})
         assert env.dict("DICT", delimiter=" ") == {"key1": "1", "key2": "2"}
@@ -973,6 +983,20 @@ class TestDeferredValidation:
         assert "REQUIRED" in exc.error_messages
         assert "INT" in exc.error_messages
         assert "DTIME" in exc.error_messages
+
+    def test_malformed_dict_is_collected(self, env: environs.Env, set_env):
+        # Regression test for https://github.com/sloria/environs/issues/499:
+        # a dict item without a key/value delimiter raised a bare ValueError
+        # instead of being collected as a validation error.
+        set_env({"MAPPING": "a=1,b", "PORT": "notint"})
+        assert env.dict("MAPPING") is None
+        assert env.int("PORT") is None
+        with pytest.raises(environs.EnvValidationError) as excinfo:
+            env.seal()
+        exc = excinfo.value
+        assert "MAPPING" in exc.error_messages
+        assert "PORT" in exc.error_messages
+        assert exc.error_messages["MAPPING"] == ["Not a valid dict item: 'b'."]
 
     def test_invalid_value_returns_none(self, env: environs.Env, set_env):
         set_env(
